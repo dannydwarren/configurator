@@ -1,4 +1,4 @@
-﻿# machine-configs
+﻿# configurator
 
 ```powershell
 $bootstrapStopwatch = [Diagnostics.Stopwatch]::StartNew()
@@ -9,7 +9,7 @@ mkdir ([System.IO.Path]::GetDirectoryName($profile)) -ErrorAction Ignore
 New-Item -Path $profile -ItemType "file" -ErrorAction Ignore
 
 Invoke-Command {
-    $asset = (iwr -useb https://api.github.com/repos/dannydwarren/machine-configs/releases/latest | ConvertFrom-Json).assets | ? { $_.name -like "*.exe" }
+    $asset = (iwr -useb https://api.github.com/repos/dannydwarren/configurator/releases/latest | ConvertFrom-Json).assets | ? { $_.name -like "*.exe" }
     $downloadUrl = $asset | select -exp browser_download_url
     Start-BitsTransfer -Source $downloadUrl -Destination "$HOME\Downloads\Configurator.exe"
 }
@@ -17,7 +17,7 @@ $downloadDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Download duration: $($downloadDuration)"
 
 $bootstrapStopwatch.Restart()
-."$HOME\Downloads\Configurator.exe" --manifest-path "https://raw.githubusercontent.com/dannydwarren/machine-configs/main/manifests/danny.manifest.json" --environments "Personal"
+."$HOME\Downloads\Configurator.exe" --manifest-path "https://raw.githubusercontent.com/dannydwarren/configurator/main/manifests/danny.manifest.json" --environments "Personal"
 Write-Output "Download duration: $($downloadDuration)"
 $bootstrapDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Configurator duration: $($bootstrapDuration)"

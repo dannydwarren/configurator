@@ -4,21 +4,18 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Configurator/**'
+      - 'Configurator*/**'
       - '.github/workflows/ConfiguratorCI.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'Configurator/**'
+      - 'Configurator*/**'
       - '.github/workflows/ConfiguratorCI.yml'
 
 jobs:
   build:
 
     runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: ./Configurator
 
     steps:
     - uses: actions/checkout@v2
