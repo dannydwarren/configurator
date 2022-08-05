@@ -42,6 +42,8 @@ namespace Configurator
                 aliases: new[] { "--single-app-id", "-app" },
                 description: "The single app to install by Id. When present the environments arg is ignored.");
 
+            var settingsCommand = new Command("settings", "Set CLI configuration values.");
+
             var backupCommand = new Command("backup", "Backup app configurations etc. for use on the next machine.");
             
             var rootCommand = new RootCommand("Configurator")
@@ -50,11 +52,14 @@ namespace Configurator
                 environments,
                 downloadsDir,
                 singleApp,
+                settingsCommand,
                 backupCommand
             };
 
             rootCommand.SetHandler<string, List<string>, string, string>(RunConfiguratorAsync,
                 manifestPath, environments, downloadsDir, singleApp);
+
+            settingsCommand.SetHandler(() => consoleLogger.Debug("Support for settings is in progress..."));
 
             backupCommand.SetHandler(() => consoleLogger.Debug("Support for backing up apps is in progress..."));
             

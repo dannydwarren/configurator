@@ -175,6 +175,25 @@ namespace Configurator.UnitTests
         }
         
         [Fact]
+        public async Task When_setting_settings()
+        {
+            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
+                .Returns(machineConfiguratorMock.Object);
+
+            var commandlineArgs = new[] { "settings" };
+
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
+
+            It("activates the settings command",
+                () => GetMock<IConsoleLogger>().Verify(x=> x.Debug("Support for settings is in progress...")));
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+        
+        [Fact]
         public async Task When_backing_up()
         {
             var machineConfiguratorMock = GetMock<IMachineConfigurator>();
