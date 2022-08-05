@@ -12,7 +12,7 @@ namespace Configurator.Installers
     {
         private readonly IAppInstaller appInstaller;
         
-        public static IApp GitWingetApp => new WingetApp
+        public static readonly IApp GitWingetApp = new WingetApp
         {
             AppId = "Git.Git"
         };
