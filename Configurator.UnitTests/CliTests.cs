@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Configurator.Configuration;
 using Configurator.Utilities;
 using Moq;
 using Shouldly;
@@ -177,18 +178,21 @@ namespace Configurator.UnitTests
         [Fact]
         public async Task When_setting_settings()
         {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
+            var settingsMock = GetMock<ISettings>();
 
             var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(ISettings)))
+                .Returns(settingsMock.Object);
+            
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
+                .ReturnsAsync(serviceProviderMock.Object);
 
             var commandlineArgs = new[] { "settings" };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("activates the settings command",
-                () => GetMock<IConsoleLogger>().Verify(x=> x.Debug("Support for settings is in progress...")));
+                () => settingsMock.Verify(x => x.Update()));
 
             It("returns a success result", () => result.ShouldBe(0));
         }

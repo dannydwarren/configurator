@@ -4,6 +4,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
 using System.Threading.Tasks;
+using Configurator.Configuration;
 using Configurator.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -59,7 +60,7 @@ namespace Configurator
             rootCommand.SetHandler<string, List<string>, string, string>(RunConfiguratorAsync,
                 manifestPath, environments, downloadsDir, singleApp);
 
-            settingsCommand.SetHandler(() => consoleLogger.Debug("Support for settings is in progress..."));
+            settingsCommand.SetHandler(RunSettingsAsync);
 
             backupCommand.SetHandler(() => consoleLogger.Debug("Support for backing up apps is in progress..."));
             
@@ -77,6 +78,14 @@ namespace Configurator
             var configurator = services.GetRequiredService<IMachineConfigurator>();
 
             await configurator.ExecuteAsync();
+        }
+
+        private async Task RunSettingsAsync()
+        {
+            var services = await dependencyBootstrapper.InitializeAsync(new Arguments(null, null, null));
+            var settings = services.GetRequiredService<ISettings>();
+            
+            settings.Update();
         }
     }
 }
