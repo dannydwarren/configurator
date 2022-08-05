@@ -26,6 +26,11 @@ namespace Configurator.UnitTests
             {
                 GetMock<IScoopCliInstaller>().Verify(x => x.InstallAsync());
             });
+            
+            It("installs git", () =>
+            {
+                GetMock<IGitInstaller>().Verify(x => x.InstallAsync());
+            });
         }
     }
 }
