@@ -174,16 +174,16 @@ namespace Configurator.UnitTests
 
             It("returns a success result", () => result.ShouldBe(0));
         }
-        
+
         [Fact]
         public async Task When_setting_settings()
         {
-            var settingsMock = GetMock<ISettings>();
+            var settingsMock = GetMock<IUpdateSettingsCommand>();
 
             var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(ISettings)))
+            serviceProviderMock.Setup(x => x.GetService(typeof(IUpdateSettingsCommand)))
                 .Returns(settingsMock.Object);
-            
+
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
                 .ReturnsAsync(serviceProviderMock.Object);
 
@@ -191,12 +191,11 @@ namespace Configurator.UnitTests
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("activates the settings command",
-                () => settingsMock.Verify(x => x.Update()));
+            It("activates the settings command", () => settingsMock.Verify(x => x.ExecuteAsync()));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
-        
+
         [Fact]
         public async Task When_backing_up()
         {
@@ -211,7 +210,7 @@ namespace Configurator.UnitTests
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("activates the backup command",
-                () => GetMock<IConsoleLogger>().Verify(x=> x.Debug("Support for backing up apps is in progress...")));
+                () => GetMock<IConsoleLogger>().Verify(x => x.Debug("Support for backing up apps is in progress...")));
 
             It("returns a success result", () => result.ShouldBe(0));
         }

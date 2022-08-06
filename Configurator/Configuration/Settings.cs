@@ -1,15 +1,7 @@
 ﻿namespace Configurator.Configuration
 {
-    public interface ISettings
+    public class Settings
     {
-        void Update();
-    }
-
-    public class Settings : ISettings
-    {
-        public void Update()
-        {
-            throw new System.NotImplementedException();
-        }
+        
     }
 }

@@ -83,9 +83,9 @@ namespace Configurator
         private async Task RunSettingsAsync()
         {
             var services = await dependencyBootstrapper.InitializeAsync(new Arguments(null, null, null));
-            var settings = services.GetRequiredService<ISettings>();
+            var updateSettingsCommand = services.GetRequiredService<IUpdateSettingsCommand>();
             
-            settings.Update();
+            await updateSettingsCommand.ExecuteAsync();
         }
     }
 }

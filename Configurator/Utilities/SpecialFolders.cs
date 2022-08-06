@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Configurator.Utilities
@@ -7,6 +8,7 @@ namespace Configurator.Utilities
     public interface ISpecialFolders
     {
         List<string> GetDesktopPaths();
+        string GetLocalAppDataPath();
     }
 
     public class SpecialFolders : ISpecialFolders
@@ -20,6 +22,13 @@ namespace Configurator.Utilities
                 }
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToList();
+        }
+
+        public string GetLocalAppDataPath()
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                nameof(Configurator));
         }
     }
 }
