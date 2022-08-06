@@ -184,7 +184,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IUpdateSettingsCommand)))
                 .Returns(settingsMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
                 .ReturnsAsync(serviceProviderMock.Object);
 
             var commandlineArgs = new[] { "settings" };
