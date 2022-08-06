@@ -14,6 +14,7 @@ namespace Configurator.Utilities
         List<string> EnumerateFileSystemEntries(string path);
         Task WriteAllTextAsync(string path, string contents);
         bool Exists(string path);
+        void CreateDirectory(string path);
     }
 
     public class FileSystem : IFileSystem
@@ -63,6 +64,11 @@ namespace Configurator.Utilities
         public bool Exists(string path)
         {
             return File.Exists(path);
+        }
+
+        public void CreateDirectory(string path)
+        {
+            Directory.CreateDirectory(path);
         }
     }
 }

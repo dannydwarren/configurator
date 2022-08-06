@@ -7,7 +7,7 @@ namespace Configurator.Configuration
     public interface ISettingsRepository
     {
         Task<Settings> LoadSettingsAsync();
-        Task UpdateAsync(Settings settings);
+        Task SaveAsync(Settings settings);
     }
 
     public class SettingsRepository : ISettingsRepository
@@ -15,6 +15,7 @@ namespace Configurator.Configuration
         private readonly IFileSystem fileSystem;
         private readonly ISpecialFolders specialFolders;
         private readonly IJsonSerializer jsonSerializer;
+        private readonly string fullyQualifiedSettingsFilePath;
 
         public static readonly string SettingsJson = "settings.json";
         public static readonly Settings EmptySettings = new Settings();
@@ -26,24 +27,39 @@ namespace Configurator.Configuration
             this.fileSystem = fileSystem;
             this.specialFolders = specialFolders;
             this.jsonSerializer = jsonSerializer;
+            
+            fullyQualifiedSettingsFilePath = Path.Combine(specialFolders.GetLocalAppDataPath(), SettingsJson);
         }
 
         public async Task<Settings> LoadSettingsAsync()
         {
-            var fullyQualifiedSettingsFilePath = Path.Combine(specialFolders.GetLocalAppDataPath(), SettingsJson);
+            await EnsureSettingsExistAsync();
 
-            if (!fileSystem.Exists(fullyQualifiedSettingsFilePath))
-                return EmptySettings;
-            
+            return await LoadExistingSettingsAsync();
+        }
+
+        private async Task<Settings> LoadExistingSettingsAsync()
+        {
             var serializedSettings = await fileSystem.ReadAllTextAsync(fullyQualifiedSettingsFilePath);
-
             return jsonSerializer.Deserialize<Settings>(serializedSettings);
         }
 
-        public async Task UpdateAsync(Settings settings)
+        private async Task EnsureSettingsExistAsync()
         {
-            var fullyQualifiedSettingsFilePath = Path.Combine(specialFolders.GetLocalAppDataPath(), SettingsJson);
+            if (!fileSystem.Exists(fullyQualifiedSettingsFilePath))
+            {
+                fileSystem.CreateDirectory(specialFolders.GetLocalAppDataPath());
+                await WriteSettingsAsync(EmptySettings);
+            }
+        }
 
+        public async Task SaveAsync(Settings settings)
+        {
+            await WriteSettingsAsync(settings);
+        }
+
+        private async Task WriteSettingsAsync(Settings settings)
+        {
             var serializedSettings = jsonSerializer.Serialize(settings);
 
             await fileSystem.WriteAllTextAsync(fullyQualifiedSettingsFilePath, serializedSettings);

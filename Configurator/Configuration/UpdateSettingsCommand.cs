@@ -20,7 +20,7 @@ namespace Configurator.Configuration
         {
             var settings = await settingsRepository.LoadSettingsAsync();
 
-            await settingsRepository.UpdateAsync(settings);
+            await settingsRepository.SaveAsync(settings);
         }
     }
 }

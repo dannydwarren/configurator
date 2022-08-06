@@ -16,7 +16,7 @@ namespace Configurator.UnitTests.Configuration
             
             await BecauseAsync(() => ClassUnderTest.ExecuteAsync());
             
-            It("updates settings", () => GetMock<ISettingsRepository>().Verify(x => x.UpdateAsync(settings)));
+            It("updates settings", () => GetMock<ISettingsRepository>().Verify(x => x.SaveAsync(settings)));
         }
     }
 }
