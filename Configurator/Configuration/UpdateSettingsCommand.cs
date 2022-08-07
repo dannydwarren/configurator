@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Configurator.Configuration
 {
     public interface IUpdateSettingsCommand
     {
-        Task ExecuteAsync();
+        Task ExecuteAsync(string settingName, string settingValue);
     }
 
     public class UpdateSettingsCommand : IUpdateSettingsCommand
@@ -15,10 +16,15 @@ namespace Configurator.Configuration
         {
             this.settingsRepository = settingsRepository;
         }
-        
-        public async Task ExecuteAsync()
+
+        public async Task ExecuteAsync(string settingName, string settingValue)
         {
             var settings = await settingsRepository.LoadSettingsAsync();
+
+            if (settingName == "manifest.repo")
+            {
+                settings.Manifest.Repo = new Uri(settingValue);
+            }
 
             await settingsRepository.SaveAsync(settings);
         }

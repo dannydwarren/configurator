@@ -187,11 +187,13 @@ namespace Configurator.UnitTests
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
                 .ReturnsAsync(serviceProviderMock.Object);
 
-            var commandlineArgs = new[] { "settings" };
+            var settingNameArg = RandomString();
+            var settingValueArg = RandomString();
+            var commandlineArgs = new[] { "settings", settingNameArg, settingValueArg };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("activates the settings command", () => settingsMock.Verify(x => x.ExecuteAsync()));
+            It("activates the settings command", () => settingsMock.Verify(x => x.ExecuteAsync(settingNameArg, settingValueArg)));
 
             It("returns a success result", () => result.ShouldBe(0));
         }

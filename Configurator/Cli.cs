@@ -23,6 +23,16 @@ namespace Configurator
 
         public async Task<int> LaunchAsync(params string[] args)
         {
+            var rootCommand = CreateRootCommand();
+
+            rootCommand.Add(CreateSettingsCommand());
+            rootCommand.Add(CreateBackupCommand());
+            
+            return await rootCommand.InvokeAsync(args);
+        }
+
+        private RootCommand CreateRootCommand()
+        {
             var manifestPath = new Option<string>(
                 aliases: new[] { "--manifest-path", "-m" },
                 getDefaultValue: () => Arguments.Default.ManifestPath,
@@ -43,28 +53,18 @@ namespace Configurator
                 aliases: new[] { "--single-app-id", "-app" },
                 description: "The single app to install by Id. When present the environments arg is ignored.");
 
-            var settingsCommand = new Command("settings", "Set CLI configuration values.");
-
-            var backupCommand = new Command("backup", "Backup app configurations etc. for use on the next machine.");
-            
             var rootCommand = new RootCommand("Configurator")
             {
                 manifestPath,
                 environments,
                 downloadsDir,
                 singleApp,
-                settingsCommand,
-                backupCommand
             };
 
             rootCommand.SetHandler<string, List<string>, string, string>(RunConfiguratorAsync,
                 manifestPath, environments, downloadsDir, singleApp);
-
-            settingsCommand.SetHandler(RunSettingsAsync);
-
-            backupCommand.SetHandler(() => consoleLogger.Debug("Support for backing up apps is in progress..."));
             
-            return await rootCommand.InvokeAsync(args);
+            return rootCommand;
         }
 
         private async Task RunConfiguratorAsync(string manifestPath, List<string> environments, string downloadsDir,
@@ -80,12 +80,36 @@ namespace Configurator
             await configurator.ExecuteAsync();
         }
 
-        private async Task RunSettingsAsync()
+        private Command CreateBackupCommand()
+        {
+            var backupCommand = new Command("backup", "Backup app configurations etc. for use on the next machine.");
+            backupCommand.SetHandler(() => consoleLogger.Debug("Support for backing up apps is in progress..."));
+            
+            return backupCommand;
+        }
+
+        private Command CreateSettingsCommand()
+        {
+            var settingName = new Argument<string>("setting-name", "Name of the setting to change.");
+            var settingValue = new Argument<string>("setting-value", "New setting value.");
+            
+            var settingsCommand = new Command("settings", "Set CLI configuration values.")
+            {
+                settingName,
+                settingValue
+            };
+            
+            settingsCommand.SetHandler<string, string>(RunSettingsAsync, settingName, settingValue);
+            
+            return settingsCommand;
+        }
+
+        private async Task RunSettingsAsync(string settingName, string settingValue)
         {
             var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
             var updateSettingsCommand = services.GetRequiredService<IUpdateSettingsCommand>();
             
-            await updateSettingsCommand.ExecuteAsync();
+            await updateSettingsCommand.ExecuteAsync(settingName, settingValue);
         }
     }
 }
