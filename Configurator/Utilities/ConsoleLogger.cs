@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using ConsoleTables;
 
 namespace Configurator.Utilities
 {
@@ -12,6 +14,7 @@ namespace Configurator.Utilities
         void Error(string message, Exception exception);
         void Progress(string message);
         void Result(string message);
+        void Table<T>(List<T> rows);
     }
 
     public class ConsoleLogger : IConsoleLogger
@@ -62,6 +65,13 @@ namespace Configurator.Utilities
             Console.ForegroundColor = ConsoleColor.Green;
             Write("RESLT", message);
             Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public void Table<T>(List<T> rows)
+        {
+            ConsoleTable
+                .From(rows)
+                .Write(Format.Minimal);
         }
 
         private static void Write(string level, string message)

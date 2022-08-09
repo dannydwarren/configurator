@@ -178,11 +178,11 @@ namespace Configurator.UnitTests
         [Fact]
         public async Task When_setting_settings()
         {
-            var settingsMock = GetMock<ISetSettingCommand>();
+            var setSettingCommandMock = GetMock<ISetSettingCommand>();
 
             var serviceProviderMock = GetMock<IServiceProvider>();
             serviceProviderMock.Setup(x => x.GetService(typeof(ISetSettingCommand)))
-                .Returns(settingsMock.Object);
+                .Returns(setSettingCommandMock.Object);
 
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
                 .ReturnsAsync(serviceProviderMock.Object);
@@ -193,7 +193,28 @@ namespace Configurator.UnitTests
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("activates the settings command", () => settingsMock.Verify(x => x.ExecuteAsync(settingNameArg, settingValueArg)));
+            It("executes the set setting command", () => setSettingCommandMock.Verify(x => x.ExecuteAsync(settingNameArg, settingValueArg)));
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+        
+        [Fact]
+        public async Task When_listing_settings()
+        {
+            var listSettingsWorkflowMock = GetMock<IListSettingsCommand>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IListSettingsCommand)))
+                .Returns(listSettingsWorkflowMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+                .ReturnsAsync(serviceProviderMock.Object);
+
+            var commandlineArgs = new[] { "settings", "list"};
+
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
+
+            It("executes the list settings workflow", () => listSettingsWorkflowMock.Verify(x => x.ExecuteAsync()));
 
             It("returns a success result", () => result.ShouldBe(0));
         }

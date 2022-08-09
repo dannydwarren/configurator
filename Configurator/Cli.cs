@@ -27,17 +27,17 @@ namespace Configurator
 
             rootCommand.Add(CreateSettingsCommand());
             rootCommand.Add(CreateBackupCommand());
-            
+
             return await rootCommand.InvokeAsync(args);
         }
 
         private RootCommand CreateRootCommand()
         {
-            var manifestPath = new Option<string>(
+            var manifestPathOption = new Option<string>(
                 aliases: new[] { "--manifest-path", "-m" },
                 getDefaultValue: () => Arguments.Default.ManifestPath,
                 description: "Path (local or URL) to your manifest file.");
-            var environments = new Option<List<string>>(
+            var environmentsOption = new Option<List<string>>(
                 aliases: new[] { "--environments", "-e" },
                 parseArgument: x =>
                     x.Tokens.Select(y => new Token?(y)).FirstOrDefault()?.Value
@@ -45,76 +45,90 @@ namespace Configurator
                     ?? Arguments.Default.Environments,
                 isDefault: true,
                 description: "Pipe separated list of environments to target in the manifest.");
-            var downloadsDir = new Option<string>(
+            var downloadsDirOption = new Option<string>(
                 aliases: new[] { "--downloads-dir", "-dl" },
                 getDefaultValue: () => Arguments.Default.DownloadsDir,
                 description: "Local path to use for downloads.");
-            var singleApp = new Option<string>(
+            var singleAppOption = new Option<string>(
                 aliases: new[] { "--single-app-id", "-app" },
                 description: "The single app to install by Id. When present the environments arg is ignored.");
 
             var rootCommand = new RootCommand("Configurator")
             {
-                manifestPath,
-                environments,
-                downloadsDir,
-                singleApp,
+                manifestPathOption,
+                environmentsOption,
+                downloadsDirOption,
+                singleAppOption,
             };
 
-            rootCommand.SetHandler<string, List<string>, string, string>(RunConfiguratorAsync,
-                manifestPath, environments, downloadsDir, singleApp);
-            
+            rootCommand.SetHandler<string, List<string>, string, string>(async (manifestPath, environments, downloadsDir, singleAppId) =>
+                {
+                    var singleAppIdCoalesced = string.IsNullOrWhiteSpace(singleAppId) ? null : singleAppId;
+
+                    var arguments = new Arguments(manifestPath, environments, downloadsDir, singleAppIdCoalesced);
+
+                    var services = await dependencyBootstrapper.InitializeAsync(arguments);
+
+                    await services.GetRequiredService<IMachineConfigurator>().ExecuteAsync();
+                },
+                manifestPathOption, environmentsOption, downloadsDirOption, singleAppOption);
+
             return rootCommand;
-        }
-
-        private async Task RunConfiguratorAsync(string manifestPath, List<string> environments, string downloadsDir,
-            string? singleAppId)
-        {
-            var singleAppIdCoalesced = string.IsNullOrWhiteSpace(singleAppId) ? null : singleAppId;
-
-            var arguments = new Arguments(manifestPath, environments, downloadsDir, singleAppIdCoalesced);
-
-            var services = await dependencyBootstrapper.InitializeAsync(arguments);
-            var configurator = services.GetRequiredService<IMachineConfigurator>();
-
-            await configurator.ExecuteAsync();
         }
 
         private Command CreateBackupCommand()
         {
             var backupCommand = new Command("backup", "Backup app configurations etc. for use on the next machine.");
             backupCommand.SetHandler(() => consoleLogger.Debug("Support for backing up apps is in progress..."));
-            
+
             return backupCommand;
         }
 
         private Command CreateSettingsCommand()
         {
-            var settingName = new Argument<string>("setting-name", "Name of the setting to change.");
-            var settingValue = new Argument<string>("setting-value", "New setting value.");
-            
-            var setSettingCommand = new Command("set", "Set single named setting.")
-            {
-                settingName,
-                settingValue
-            };
-            
             var settingsCommand = new Command("settings", "Manage settings.")
             {
-                setSettingCommand
+                CreateListSettingsCommand(),
+                CreateSetSettingCommand()
             };
-            
-            setSettingCommand.SetHandler<string, string>(RunSettingsAsync, settingName, settingValue);
-            
+
+
             return settingsCommand;
         }
 
-        private async Task RunSettingsAsync(string settingName, string settingValue)
+        private Command CreateListSettingsCommand()
         {
-            var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-            var updateSettingsCommand = services.GetRequiredService<ISetSettingCommand>();
-            
-            await updateSettingsCommand.ExecuteAsync(settingName, settingValue);
+            var listSettingsCommand = new Command("list", "List all settings with values.");
+
+            listSettingsCommand.SetHandler(async () =>
+            {
+                var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
+
+                await services.GetRequiredService<IListSettingsCommand>().ExecuteAsync();
+            });
+
+            return listSettingsCommand;
+        }
+
+        private Command CreateSetSettingCommand()
+        {
+            var settingNameArg = new Argument<string>("setting-name", "Name of the setting to change.");
+            var settingValueArg = new Argument<string>("setting-value", "New setting value.");
+
+            var setSettingCommand = new Command("set", "Set single named setting.")
+            {
+                settingNameArg,
+                settingValueArg
+            };
+
+            setSettingCommand.SetHandler<string, string>(async (settingName, settingValue) =>
+            {
+                var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
+
+                await services.GetRequiredService<ISetSettingCommand>().ExecuteAsync(settingName, settingValue);
+            }, settingNameArg, settingValueArg);
+
+            return setSettingCommand;
         }
     }
 }
