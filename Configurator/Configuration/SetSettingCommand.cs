@@ -3,16 +3,16 @@ using System.Threading.Tasks;
 
 namespace Configurator.Configuration
 {
-    public interface IUpdateSettingsCommand
+    public interface ISetSettingCommand
     {
         Task ExecuteAsync(string settingName, string settingValue);
     }
 
-    public class UpdateSettingsCommand : IUpdateSettingsCommand
+    public class SetSettingCommand : ISetSettingCommand
     {
         private readonly ISettingsRepository settingsRepository;
 
-        public UpdateSettingsCommand(ISettingsRepository settingsRepository)
+        public SetSettingCommand(ISettingsRepository settingsRepository)
         {
             this.settingsRepository = settingsRepository;
         }

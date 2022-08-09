@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Configurator.UnitTests.Configuration
 {
-    public class UpdateSettingsCommandTests : UnitTestBase<UpdateSettingsCommand>
+    public class SetSettingCommandTests : UnitTestBase<SetSettingCommand>
     {
         [Fact]
         public async Task When_updating_settings()

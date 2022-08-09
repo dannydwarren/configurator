@@ -178,10 +178,10 @@ namespace Configurator.UnitTests
         [Fact]
         public async Task When_setting_settings()
         {
-            var settingsMock = GetMock<IUpdateSettingsCommand>();
+            var settingsMock = GetMock<ISetSettingCommand>();
 
             var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IUpdateSettingsCommand)))
+            serviceProviderMock.Setup(x => x.GetService(typeof(ISetSettingCommand)))
                 .Returns(settingsMock.Object);
 
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
@@ -189,7 +189,7 @@ namespace Configurator.UnitTests
 
             var settingNameArg = RandomString();
             var settingValueArg = RandomString();
-            var commandlineArgs = new[] { "settings", settingNameArg, settingValueArg };
+            var commandlineArgs = new[] { "settings", "set", settingNameArg, settingValueArg };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 

@@ -93,13 +93,18 @@ namespace Configurator
             var settingName = new Argument<string>("setting-name", "Name of the setting to change.");
             var settingValue = new Argument<string>("setting-value", "New setting value.");
             
-            var settingsCommand = new Command("settings", "Set CLI configuration values.")
+            var setSettingCommand = new Command("set", "Set single named setting.")
             {
                 settingName,
                 settingValue
             };
             
-            settingsCommand.SetHandler<string, string>(RunSettingsAsync, settingName, settingValue);
+            var settingsCommand = new Command("settings", "Manage settings.")
+            {
+                setSettingCommand
+            };
+            
+            setSettingCommand.SetHandler<string, string>(RunSettingsAsync, settingName, settingValue);
             
             return settingsCommand;
         }
@@ -107,7 +112,7 @@ namespace Configurator
         private async Task RunSettingsAsync(string settingName, string settingValue)
         {
             var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-            var updateSettingsCommand = services.GetRequiredService<IUpdateSettingsCommand>();
+            var updateSettingsCommand = services.GetRequiredService<ISetSettingCommand>();
             
             await updateSettingsCommand.ExecuteAsync(settingName, settingValue);
         }
