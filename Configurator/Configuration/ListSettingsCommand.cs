@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Configurator.Utilities;
 
@@ -31,16 +34,46 @@ namespace Configurator.Configuration
 
         private static List<SettingRow> Map(Settings settings)
         {
-            var settingRows = new List<SettingRow>
-            {
-                new SettingRow
-                {
-                    Name = $"{nameof(settings.Manifest).ToLower()}.{nameof(settings.Manifest.Repo).ToLower()}",
-                    Value = settings.Manifest.Repo?.ToString() ?? "",
-                    Type = settings.Manifest.Repo?.GetType().ToString() ?? ""
-                }
-            };
+            var settingRows = new List<SettingRow>();
+
+            settingRows.AddRange(MapReflection(settings));
+
             return settingRows;
+        }
+
+        private static List<SettingRow> MapReflection(object setting, string parentPrefix = "")
+        {
+            var settingsType = setting.GetType();
+            var settingsProperties = settingsType.GetProperties();
+            var settingsPropertiesPrimitive = settingsProperties.Where(x => x.PropertyType.IsPrimitive || x.PropertyType == typeof(Uri)).ToList();
+            var settingsPropertiesComplex = settingsProperties.Where(x => !x.PropertyType.IsPrimitive && x.PropertyType != typeof(Uri)).ToList();
+
+            var settingRows = settingsPropertiesPrimitive.Select(x => new SettingRow
+            {
+                Name = BuildPropertyPath(parentPrefix, x),
+                Value = x.GetValue(setting)?.ToString() ?? "",
+                Type = x.PropertyType.ToString()
+            }).ToList();
+            
+            settingRows.AddRange(settingsPropertiesComplex.SelectMany(x =>
+            {
+                object? value = x.GetValue(setting);
+                if (value == null)
+                    throw new Exception("We didn't expect this to happen");
+
+                var newParentPrefix = BuildPropertyPath(parentPrefix, x);
+                
+                return MapReflection(value, newParentPrefix);
+            }).ToList());
+
+            return settingRows;
+        }
+
+        private static string BuildPropertyPath(string parentPrefix, PropertyInfo x)
+        {
+            return parentPrefix == ""
+                ? x.Name.ToLower()
+                : $"{parentPrefix}.{x.Name.ToLower()}";
         }
 
         public class SettingRow
