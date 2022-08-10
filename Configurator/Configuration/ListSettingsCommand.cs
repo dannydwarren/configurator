@@ -52,7 +52,7 @@ namespace Configurator.Configuration
             {
                 Name = BuildPropertyPath(parentPrefix, x),
                 Value = x.GetValue(parentNode)?.ToString() ?? "",
-                Type = x.PropertyType.ToString()
+                Type = x.PropertyType.Name
             }).ToList();
             
             settingRows.AddRange(nodeProperties.SelectMany(x =>
@@ -71,7 +71,9 @@ namespace Configurator.Configuration
 
         private static bool IsLeafProperty(PropertyInfo x)
         {
-            return x.PropertyType.IsPrimitive || x.PropertyType == typeof(Uri);
+            return x.PropertyType.IsPrimitive
+                   || x.PropertyType == typeof(Uri)
+                   || x.PropertyType == typeof(string);
         }
 
         private static string BuildPropertyPath(string parentPrefix, PropertyInfo property)

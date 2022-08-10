@@ -19,7 +19,12 @@ namespace Configurator.UnitTests.Configuration
             {
                 Manifest = new ManifestSettings
                 {
-                    Repo = new Uri($"https://{RandomString()}")
+                    Repo = new Uri($"https://{RandomString()}"),
+                    FileName = RandomString()
+                },
+                Git = new GitSettings
+                {
+                    CloneDirectory = new Uri($@"D:\{RandomString()}")
                 }
             };
 
@@ -39,7 +44,21 @@ namespace Configurator.UnitTests.Configuration
                     .ShouldSatisfyAllConditions(x =>
                     {
                         x.Value.ShouldBe(settings.Manifest.Repo.ToString());
-                        x.Type.ShouldBe(settings.Manifest.Repo.GetType().ToString());
+                        x.Type.ShouldBe(settings.Manifest.Repo.GetType().Name);
+                    });
+                
+                capturedRows.SingleOrDefault(x => x.Name == "manifest.filename").ShouldNotBeNull()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Value.ShouldBe(settings.Manifest.FileName);
+                        x.Type.ShouldBe(settings.Manifest.FileName.GetType().Name);
+                    });
+                
+                capturedRows.SingleOrDefault(x => x.Name == "git.clonedirectory").ShouldNotBeNull()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Value.ShouldBe(settings.Git.CloneDirectory.ToString());
+                        x.Type.ShouldBe(settings.Git.CloneDirectory.GetType().Name);
                     });
             });
         }
