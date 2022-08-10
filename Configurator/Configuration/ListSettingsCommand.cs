@@ -41,23 +41,23 @@ namespace Configurator.Configuration
             return settingRows;
         }
 
-        private static List<SettingRow> MapReflection(object setting, string parentPrefix = "")
+        private static List<SettingRow> MapReflection(object parentNode, string parentPrefix = "")
         {
-            var settingsType = setting.GetType();
-            var settingsProperties = settingsType.GetProperties();
-            var settingsPropertiesPrimitive = settingsProperties.Where(x => x.PropertyType.IsPrimitive || x.PropertyType == typeof(Uri)).ToList();
-            var settingsPropertiesComplex = settingsProperties.Where(x => !x.PropertyType.IsPrimitive && x.PropertyType != typeof(Uri)).ToList();
+            var parentType = parentNode.GetType();
+            var parentProperties = parentType.GetProperties();
+            var leafProperties = parentProperties.Where(IsLeafProperty).ToList();
+            var nodeProperties = parentProperties.Except(leafProperties).ToList();
 
-            var settingRows = settingsPropertiesPrimitive.Select(x => new SettingRow
+            var settingRows = leafProperties.Select(x => new SettingRow
             {
                 Name = BuildPropertyPath(parentPrefix, x),
-                Value = x.GetValue(setting)?.ToString() ?? "",
+                Value = x.GetValue(parentNode)?.ToString() ?? "",
                 Type = x.PropertyType.ToString()
             }).ToList();
             
-            settingRows.AddRange(settingsPropertiesComplex.SelectMany(x =>
+            settingRows.AddRange(nodeProperties.SelectMany(x =>
             {
-                object? value = x.GetValue(setting);
+                object? value = x.GetValue(parentNode);
                 if (value == null)
                     throw new Exception("We didn't expect this to happen");
 
@@ -69,11 +69,16 @@ namespace Configurator.Configuration
             return settingRows;
         }
 
-        private static string BuildPropertyPath(string parentPrefix, PropertyInfo x)
+        private static bool IsLeafProperty(PropertyInfo x)
+        {
+            return x.PropertyType.IsPrimitive || x.PropertyType == typeof(Uri);
+        }
+
+        private static string BuildPropertyPath(string parentPrefix, PropertyInfo property)
         {
             return parentPrefix == ""
-                ? x.Name.ToLower()
-                : $"{parentPrefix}.{x.Name.ToLower()}";
+                ? property.Name.ToLower()
+                : $"{parentPrefix}.{property.Name.ToLower()}";
         }
 
         public class SettingRow
