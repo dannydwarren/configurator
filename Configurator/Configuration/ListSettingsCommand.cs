@@ -57,13 +57,13 @@ namespace Configurator.Configuration
             
             settingRows.AddRange(nodeProperties.SelectMany(x =>
             {
-                object? value = x.GetValue(parentNode);
-                if (value == null)
+                object? node = x.GetValue(parentNode);
+                if (node == null)
                     throw new Exception("We didn't expect this to happen");
 
                 var newParentPrefix = BuildPropertyPath(parentPrefix, x);
                 
-                return MapReflection(value, newParentPrefix);
+                return MapReflection(node, newParentPrefix);
             }).ToList());
 
             return settingRows;

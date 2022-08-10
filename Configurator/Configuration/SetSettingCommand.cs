@@ -48,13 +48,13 @@ namespace Configurator.Configuration
 
             foreach (var nodeProperty in nodeProperties)
             {
-                object? nodeValue = nodeProperty.GetValue(parentNode);
-                if (nodeValue == null)
+                object? node = nodeProperty.GetValue(parentNode);
+                if (node == null)
                     throw new Exception("We didn't expect this to happen");
 
                 var newParentPrefix = BuildPropertyPath(parentPrefix, nodeProperty);
 
-                if (FindAndSet(settingPath, settingValue, nodeValue, newParentPrefix))
+                if (FindAndSet(settingPath, settingValue, node, newParentPrefix))
                 {
                     return true;
                 }
