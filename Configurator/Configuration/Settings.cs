@@ -10,8 +10,9 @@ namespace Configurator.Configuration
 
     public class ManifestSettings
     {
-        public Uri? Repo { get; set; } = null;
+        public Uri? Repo { get; set; }
         public string FileName { get; set; } = "manifest.json";
+        public string? Directory { get; set; }
     }
 
     public class GitSettings
