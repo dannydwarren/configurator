@@ -99,5 +99,7 @@ namespace Configurator.UnitTests
         protected Guid NewGuid() => Guid.NewGuid();
 
         protected string RandomString() => Guid.NewGuid().ToString();
+
+        protected Uri RandomUri() => new Uri($@"D:\{Guid.NewGuid()}");
     }
 }

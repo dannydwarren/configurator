@@ -176,6 +176,27 @@ namespace Configurator.UnitTests
         }
 
         [Fact]
+        public async Task When_initializing()
+        {
+            var initializeCommandMock = GetMock<IInitializeCommand>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IInitializeCommand)))
+                .Returns(initializeCommandMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+                .ReturnsAsync(serviceProviderMock.Object);
+
+            var commandlineArgs = new[] { "initialize" };
+
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
+
+            It("executes the initialize command", () => initializeCommandMock.Verify(x => x.ExecuteAsync()));
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+        
+        [Fact]
         public async Task When_setting_settings()
         {
             var setSettingCommandMock = GetMock<ISetSettingCommand>();

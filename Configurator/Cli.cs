@@ -24,10 +24,6 @@ namespace Configurator
         public async Task<int> LaunchAsync(params string[] args)
         {
             var rootCommand = CreateRootCommand();
-
-            rootCommand.Add(CreateSettingsCommand());
-            rootCommand.Add(CreateBackupCommand());
-
             return await rootCommand.InvokeAsync(args);
         }
 
@@ -59,6 +55,9 @@ namespace Configurator
                 environmentsOption,
                 downloadsDirOption,
                 singleAppOption,
+                CreateInitializeCommand(),
+                CreateSettingsCommand(),
+                CreateBackupCommand()
             };
 
             rootCommand.SetHandler<string, List<string>, string, string>(async (manifestPath, environments, downloadsDir, singleAppId) =>
@@ -92,7 +91,6 @@ namespace Configurator
                 CreateSetSettingCommand()
             };
 
-
             return settingsCommand;
         }
 
@@ -124,11 +122,23 @@ namespace Configurator
             setSettingCommand.SetHandler<string, string>(async (settingName, settingValue) =>
             {
                 var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-
                 await services.GetRequiredService<ISetSettingCommand>().ExecuteAsync(settingName, settingValue);
             }, settingNameArg, settingValueArg);
 
             return setSettingCommand;
+        }
+
+        private Command CreateInitializeCommand()
+        {
+            var initializeCommand = new Command("initialize", "Runs system initialization and clones the manifest repo in settings.");
+            
+            initializeCommand.SetHandler(async () =>
+            {
+                var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
+                await services.GetRequiredService<IInitializeCommand>().ExecuteAsync();
+            });
+
+            return initializeCommand;
         }
     }
 }
