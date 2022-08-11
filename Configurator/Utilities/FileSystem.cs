@@ -63,7 +63,7 @@ namespace Configurator.Utilities
 
         public bool Exists(string path)
         {
-            return File.Exists(path);
+            return File.Exists(path) || Directory.Exists(path);
         }
 
         public void CreateDirectory(string path)
