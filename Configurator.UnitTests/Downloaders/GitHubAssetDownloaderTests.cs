@@ -33,7 +33,7 @@ namespace Configurator.UnitTests.Downloaders
             var expectedDownloadedFilePath = RandomString();
 
             GetMock<IJsonSerializer>().Setup(x => x.Deserialize<GitHubAssetDownloaderArgs>(argsJson)).Returns(args);
-            GetMock<IPowerShell>().Setup(x => x.ExecuteAsync(Moq.It.Is<string>(y =>
+            GetMock<IPowerShell_Obsolete>().Setup(x => x.ExecuteAsync(Moq.It.Is<string>(y =>
                     y.Contains(args.User) && y.Contains(args.Repo) && y.Contains(args.Extension))))
                 .ReturnsAsync(powerShellResult);
             GetMock<IJsonSerializer>().Setup(x => x.Deserialize<GitHubAssetInfo>(powerShellResult.AsString))

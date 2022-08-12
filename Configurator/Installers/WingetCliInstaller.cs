@@ -16,7 +16,7 @@ namespace Configurator.Installers
     public class WingetCliInstaller : IWingetCliInstaller
     {
         private readonly IDownloadAppInstaller downloadAppInstaller;
-        private readonly IPowerShell powerShell;
+        private readonly IPowerShell_Obsolete powerShell;
 
         public static readonly PowerShellAppPackage WingetCliApp = new PowerShellAppPackage
         {
@@ -29,7 +29,7 @@ namespace Configurator.Installers
 }"))).RootElement
         };
 
-        public WingetCliInstaller(IDownloadAppInstaller downloadAppInstaller, IPowerShell powerShell)
+        public WingetCliInstaller(IDownloadAppInstaller downloadAppInstaller, IPowerShell_Obsolete powerShell)
         {
             this.downloadAppInstaller = downloadAppInstaller;
             this.powerShell = powerShell;

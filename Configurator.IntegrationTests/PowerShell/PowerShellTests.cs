@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Configurator.IntegrationTests.PowerShell
 {
-    public class PowerShellTests : IntegrationTestBase<Configurator.PowerShell.PowerShell>
+    public class PowerShellTests : IntegrationTestBase<Configurator.PowerShell.PowerShell_Obsolete>
     {
         private readonly Mock<IConsoleLogger> mockConsoleLogger;
 

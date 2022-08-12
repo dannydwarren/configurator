@@ -14,11 +14,11 @@ namespace Configurator.Installers
     public class DownloadAppInstaller : IDownloadAppInstaller
     {
         private readonly IConsoleLogger consoleLogger;
-        private readonly IPowerShell powerShell;
+        private readonly IPowerShell_Obsolete powerShell;
         private readonly IDownloaderFactory downloaderFactory;
 
         public DownloadAppInstaller(IConsoleLogger consoleLogger,
-            IPowerShell powerShell,
+            IPowerShell_Obsolete powerShell,
             IDownloaderFactory downloaderFactory)
         {
             this.consoleLogger = consoleLogger;

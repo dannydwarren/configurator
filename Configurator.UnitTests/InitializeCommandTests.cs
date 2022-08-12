@@ -47,7 +47,7 @@ namespace Configurator.UnitTests
 
             It("clones the manifest repo", () =>
             {
-                GetMock<IPowerShell>().Verify(x => x.ExecuteAsync($@"
+                GetMock<IPowerShell_Obsolete>().Verify(x => x.ExecuteAsync($@"
 Push-Location {settings.Git.CloneDirectory.AbsolutePath}
 git clone {settings.Manifest.Repo.AbsoluteUri}
 Pop-Location"));
@@ -88,7 +88,7 @@ Pop-Location"));
             It("creates, commits, and pushes the manifest file", () =>
             {
                 GetMock<IFileSystem>().Verify(x => x.WriteAllTextAsync(fullyQualifiedManifestFilePath, "{ }"));
-                GetMock<IPowerShell>().Verify(x => x.ExecuteAsync($@"
+                GetMock<IPowerShell_Obsolete>().Verify(x => x.ExecuteAsync($@"
 Push-Location {manifestDirectory}
 git add .
 git commit -m '[Configurator] Create manifest file'
@@ -141,7 +141,7 @@ Pop-Location"));
                 {
                     GetMock<ISettingsRepository>().VerifyNever(x => x.SaveAsync(IsAny<Settings>()));
                     GetMock<IFileSystem>().VerifyNever(x => x.WriteAllTextAsync(IsAny<string>(), IsAny<string>()));
-                    GetMock<IPowerShell>().VerifyNever(x => x.ExecuteAsync(IsAny<string>()));
+                    GetMock<IPowerShell_Obsolete>().VerifyNever(x => x.ExecuteAsync(IsAny<string>()));
                 });
         }
 

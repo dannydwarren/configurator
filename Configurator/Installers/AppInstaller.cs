@@ -13,11 +13,11 @@ namespace Configurator.Installers
 
     public class AppInstaller : IAppInstaller
     {
-        private readonly IPowerShell powerShell;
+        private readonly IPowerShell_Obsolete powerShell;
         private readonly IConsoleLogger consoleLogger;
         private readonly IDesktopRepository desktopRepository;
 
-        public AppInstaller(IPowerShell powerShell, IConsoleLogger consoleLogger, IDesktopRepository desktopRepository)
+        public AppInstaller(IPowerShell_Obsolete powerShell, IConsoleLogger consoleLogger, IDesktopRepository desktopRepository)
         {
             this.powerShell = powerShell;
             this.consoleLogger = consoleLogger;

@@ -8,11 +8,11 @@ namespace Configurator.Downloaders
     public class GitHubAssetDownloader : IDownloader
     {
         private readonly IJsonSerializer jsonSerializer;
-        private readonly IPowerShell powerShell;
+        private readonly IPowerShell_Obsolete powerShell;
         private readonly IResourceDownloader resourceDownloader;
 
         public GitHubAssetDownloader(IJsonSerializer jsonSerializer,
-            IPowerShell powerShell,
+            IPowerShell_Obsolete powerShell,
             IResourceDownloader resourceDownloader)
         {
             this.jsonSerializer = jsonSerializer;

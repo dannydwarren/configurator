@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Configurator.PowerShell
 {
-    public interface IPowerShell
+    public interface IPowerShell_Obsolete
     {
         Task<PowerShellResult> ExecuteAsync(string script);
         Task<PowerShellResult> ExecuteAsync(string script, string completeCheckScript);
@@ -16,14 +16,14 @@ namespace Configurator.PowerShell
     /// <summary>
     /// Documentation: https://docs.microsoft.com/en-us/dotnet/api/system.management.automation.powershell?view=powershellsdk-7.0.0
     /// </summary>
-    public class PowerShell : IPowerShell, IDisposable
+    public class PowerShell_Obsolete : IPowerShell_Obsolete, IDisposable
     {
         private readonly IConsoleLogger consoleLogger;
         private readonly Runspace runspace;
         private readonly System.Management.Automation.PowerShell powershell;
         private bool disposedValue;
 
-        public PowerShell(IConsoleLogger consoleLogger)
+        public PowerShell_Obsolete(IConsoleLogger consoleLogger)
         {
             this.consoleLogger = consoleLogger;
 

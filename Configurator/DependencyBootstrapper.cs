@@ -61,7 +61,7 @@ namespace Configurator
                 .InformationalVersion;
             logger.Debug($"{nameof(Configurator)} version: {version}");
 
-            var powerShell = services.GetRequiredService<IPowerShell>();
+            var powerShell = services.GetRequiredService<IPowerShell_Obsolete>();
             var result = await powerShell.ExecuteAsync("$PSVersionTable.PSVersion.ToString()");
             logger.Debug($"PowerShell Version: {result.AsString}");
 

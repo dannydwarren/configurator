@@ -17,7 +17,7 @@ namespace Configurator.UnitTests.PowerShell
                 AsString = RandomString()
             };
 
-            GetMock<IPowerShell>().Setup(x => x.ExecuteAsync(Is<string>(y => y.Contains(executionPolicy)))).ReturnsAsync(powerShellResult);
+            GetMock<IPowerShell_Obsolete>().Setup(x => x.ExecuteAsync(Is<string>(y => y.Contains(executionPolicy)))).ReturnsAsync(powerShellResult);
 
             await BecauseAsync(() => ClassUnderTest.SetExecutionPolicyAsync());
 

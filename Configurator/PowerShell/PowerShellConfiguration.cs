@@ -10,11 +10,11 @@ namespace Configurator.PowerShell
 
     public class PowerShellConfiguration : IPowerShellConfiguration
     {
-        private readonly IPowerShell powerShell;
+        private readonly IPowerShell_Obsolete powerShell;
         private readonly IWindowsPowerShell windowsPowerShell;
         private readonly IConsoleLogger consoleLogger;
 
-        public PowerShellConfiguration(IPowerShell powerShell, IWindowsPowerShell windowsPowerShell, IConsoleLogger consoleLogger)
+        public PowerShellConfiguration(IPowerShell_Obsolete powerShell, IWindowsPowerShell windowsPowerShell, IConsoleLogger consoleLogger)
         {
             this.powerShell = powerShell;
             this.windowsPowerShell = windowsPowerShell;
