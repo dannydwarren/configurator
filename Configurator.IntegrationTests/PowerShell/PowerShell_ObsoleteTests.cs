@@ -8,11 +8,11 @@ using Xunit;
 
 namespace Configurator.IntegrationTests.PowerShell
 {
-    public class PowerShellTests : IntegrationTestBase<Configurator.PowerShell.PowerShell_Obsolete>
+    public class PowerShell_ObsoleteTests : IntegrationTestBase<Configurator.PowerShell.PowerShell_Obsolete>
     {
         private readonly Mock<IConsoleLogger> mockConsoleLogger;
 
-        public PowerShellTests()
+        public PowerShell_ObsoleteTests()
         {
             AutoMoqer mocker = new AutoMoqer();
             mockConsoleLogger = mocker.GetMock<IConsoleLogger>();
