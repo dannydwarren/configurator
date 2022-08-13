@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Configurator.PowerShell;
+using Configurator.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -39,6 +41,29 @@ namespace Configurator.UnitTests.PowerShell
             var exception = await BecauseThrowsAsync<Exception>(() => ClassUnderTest.ExecuteAsync(script));
 
             It("throws", () => exception.ShouldNotBeNull());
+        }
+
+        [Fact]
+        public async Task When_executing_with_errors()
+        {
+            var script = RandomString();
+            var powerShellResult = new PowerShellResult
+            {
+                ExitCode = 0,
+                Errors = new List<string>
+                {
+                    RandomString(),
+                    RandomString(),
+                    RandomString()
+                }
+            };
+
+            GetMock<IPowerShellRunner>().Setup(x => x.ExecuteAsync(script)).ReturnsAsync(powerShellResult);
+
+            await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script));
+
+            It("logs the errors to the console",
+                () => { GetMock<IConsoleLogger>().Verify(x => x.Error(IsAny<string>()), Times.Exactly(3)); });
         }
 
         [Fact]

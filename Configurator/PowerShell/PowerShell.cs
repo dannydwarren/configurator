@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Configurator.Utilities;
 
 namespace Configurator.PowerShell
 {
@@ -12,10 +13,12 @@ namespace Configurator.PowerShell
     public class PowerShell : IPowerShell
     {
         private readonly IPowerShellRunner powerShellRunner;
+        private readonly IConsoleLogger consoleLogger;
 
-        public PowerShell(IPowerShellRunner powerShellRunner)
+        public PowerShell(IPowerShellRunner powerShellRunner, IConsoleLogger consoleLogger)
         {
             this.powerShellRunner = powerShellRunner;
+            this.consoleLogger = consoleLogger;
         }
 
         public async Task ExecuteAsync(string script)
@@ -36,6 +39,8 @@ namespace Configurator.PowerShell
 
             if (result.ExitCode != 0)
                 throw new Exception($"Script failed to complete with exit code {result.ExitCode}");
+            
+            result.Errors.ForEach(consoleLogger.Error);
 
             return result;
         }
