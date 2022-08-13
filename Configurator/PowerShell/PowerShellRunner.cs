@@ -5,37 +5,18 @@ using System.Threading.Tasks;
 
 namespace Configurator.PowerShell
 {
-    public interface IPowerShell
+    public interface IPowerShellRunner
     {
         Task<PowerShellResult> ExecuteAsync(string script);
     }
 
-    public class PowerShell : IPowerShell
+    public class PowerShellRunner : IPowerShellRunner
     {
         public async Task<PowerShellResult> ExecuteAsync(string script)
         {
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    Verb = "runas",
-                    FileName = @"pwsh.exe",
-                    Arguments = @$"-Command ""{script}"""
-                },
-                EnableRaisingEvents = true
-            };
-            
+            var process = BuildProcess(script);
             var result = new PowerShellResult();
-
-            var cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.Token.Register(() =>
-            {
-                result.ExitCode = process.ExitCode;
-                process.Dispose();
-            });
+            var cancellationTokenSource = BuildCancellationTokenSource(result, process);
 
             process.Start();
 
@@ -50,6 +31,34 @@ namespace Configurator.PowerShell
             await Task.WhenAll(outputLoop, errorLoop);
 
             return result;
+        }
+
+        private static Process BuildProcess(string script)
+        {
+            return new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    Verb = "runas",
+                    FileName = @"pwsh.exe",
+                    Arguments = @$"-Command ""{script}"""
+                },
+                EnableRaisingEvents = true
+            };
+        }
+
+        private static CancellationTokenSource BuildCancellationTokenSource(PowerShellResult result, Process process)
+        {
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Token.Register(() =>
+            {
+                result.ExitCode = process.ExitCode;
+                process.Dispose();
+            });
+            return cancellationTokenSource;
         }
 
         private static Task RunExitLoop(Process process, CancellationTokenSource cancellationTokenSource)
