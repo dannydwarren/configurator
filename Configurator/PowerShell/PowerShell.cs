@@ -12,12 +12,12 @@ namespace Configurator.PowerShell
 
     public class PowerShell : IPowerShell
     {
-        private readonly IPowerShellRunner powerShellRunner;
+        private readonly IProcessRunner processRunner;
         private readonly IConsoleLogger consoleLogger;
 
-        public PowerShell(IPowerShellRunner powerShellRunner, IConsoleLogger consoleLogger)
+        public PowerShell(IProcessRunner processRunner, IConsoleLogger consoleLogger)
         {
-            this.powerShellRunner = powerShellRunner;
+            this.processRunner = processRunner;
             this.consoleLogger = consoleLogger;
         }
 
@@ -33,29 +33,37 @@ namespace Configurator.PowerShell
             return Map<TResult>(result.LastOutput);
         }
 
-        private async Task<PowerShellResult> InternalExecuteAsync(string script)
+        private async Task<ProcessResult> InternalExecuteAsync(string script)
         {
-            var result = await powerShellRunner.ExecuteAsync(script);
+            var processInstructions = new ProcessInstructions
+            {
+                RunAsAdmin = false,
+                Executable = "pwsh.exe",
+                Arguments = $@"-Command ""{script}"""
+            };
+
+            var result = await processRunner.ExecuteAsync(processInstructions);
 
             if (result.ExitCode != 0)
                 throw new Exception($"Script failed to complete with exit code {result.ExitCode}");
-            
+
             result.Errors.ForEach(consoleLogger.Error);
 
             return result;
         }
 
-        private TResult Map<TResult>(string? output)
+        private static TResult Map<TResult>(string? output)
         {
             if (output == null)
-                return default;
+                return default!;
 
             var resultType = typeof(TResult);
             object objResult = resultType switch
             {
-                {} when resultType == typeof(string) => output,
-                {} when resultType == typeof(bool) => bool.Parse(output),
-                _ => throw new NotSupportedException($"PowerShell result type of '{typeof(TResult).FullName}' is not yet supported")
+                { } when resultType == typeof(string) => output,
+                { } when resultType == typeof(bool) => bool.Parse(output),
+                _ => throw new NotSupportedException(
+                    $"PowerShell result type of '{typeof(TResult).FullName}' is not yet supported")
             };
 
             return (TResult)objResult;

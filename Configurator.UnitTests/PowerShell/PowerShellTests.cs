@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Configurator.PowerShell;
 using Configurator.Utilities;
 using Moq;
 using Shouldly;
@@ -15,28 +14,41 @@ namespace Configurator.UnitTests.PowerShell
         public async Task When_executing()
         {
             var script = RandomString();
-            var powerShellResult = new PowerShellResult
+
+            var powerShellResult = new ProcessResult
             {
                 ExitCode = 0
             };
 
-            GetMock<IPowerShellRunner>().Setup(x => x.ExecuteAsync(script)).ReturnsAsync(powerShellResult);
+            ProcessInstructions? capturedInstructions = null;
+            GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
+                .ReturnsAsync(powerShellResult);
 
             await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script));
 
-            It("runs the script", () => { GetMock<IPowerShellRunner>().Verify(x => x.ExecuteAsync(script)); });
+            It("runs the script", () =>
+            {
+                capturedInstructions.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.RunAsAdmin.ShouldBeFalse();
+                        x.Executable.ShouldBe("pwsh.exe");
+                        x.Arguments.ShouldBe($@"-Command ""{script}""");
+                    });
+            });
         }
 
         [Fact]
         public async Task When_executing_with_unsuccessful_exit_code()
         {
             var script = RandomString();
-            var powerShellResult = new PowerShellResult
+            var powerShellResult = new ProcessResult
             {
                 ExitCode = 1
             };
 
-            GetMock<IPowerShellRunner>().Setup(x => x.ExecuteAsync(script)).ReturnsAsync(powerShellResult);
+            GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .ReturnsAsync(powerShellResult);
 
             var exception = await BecauseThrowsAsync<Exception>(() => ClassUnderTest.ExecuteAsync(script));
 
@@ -47,7 +59,7 @@ namespace Configurator.UnitTests.PowerShell
         public async Task When_executing_with_errors()
         {
             var script = RandomString();
-            var powerShellResult = new PowerShellResult
+            var powerShellResult = new ProcessResult
             {
                 ExitCode = 0,
                 Errors = new List<string>
@@ -58,7 +70,8 @@ namespace Configurator.UnitTests.PowerShell
                 }
             };
 
-            GetMock<IPowerShellRunner>().Setup(x => x.ExecuteAsync(script)).ReturnsAsync(powerShellResult);
+            GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .ReturnsAsync(powerShellResult);
 
             await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script));
 
@@ -70,13 +83,14 @@ namespace Configurator.UnitTests.PowerShell
         public async Task When_executing_and_expecting_a_result_type_of_string()
         {
             var script = RandomString();
-            var powerShellResult = new PowerShellResult
+            var powerShellResult = new ProcessResult
             {
                 ExitCode = 0,
                 LastOutput = RandomString()
             };
 
-            GetMock<IPowerShellRunner>().Setup(x => x.ExecuteAsync(script)).ReturnsAsync(powerShellResult);
+            GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .ReturnsAsync(powerShellResult);
 
             var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync<string>(script));
 
@@ -93,13 +107,14 @@ namespace Configurator.UnitTests.PowerShell
         public async Task When_executing_and_expecting_a_result_type_of_bool(string lastOutput, bool expectedResult)
         {
             var script = RandomString();
-            var powerShellResult = new PowerShellResult
+            var powerShellResult = new ProcessResult
             {
                 ExitCode = 0,
                 LastOutput = lastOutput
             };
 
-            GetMock<IPowerShellRunner>().Setup(x => x.ExecuteAsync(script)).ReturnsAsync(powerShellResult);
+            GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .ReturnsAsync(powerShellResult);
 
             var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync<bool>(script));
 

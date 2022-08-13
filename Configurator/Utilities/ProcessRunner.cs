@@ -3,19 +3,19 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Configurator.PowerShell
+namespace Configurator.Utilities
 {
-    public interface IPowerShellRunner
+    public interface IProcessRunner
     {
-        Task<PowerShellResult> ExecuteAsync(string script);
+        Task<ProcessResult> ExecuteAsync(ProcessInstructions instructions);
     }
 
-    public class PowerShellRunner : IPowerShellRunner
+    public class ProcessRunner : IProcessRunner
     {
-        public async Task<PowerShellResult> ExecuteAsync(string script)
+        public async Task<ProcessResult> ExecuteAsync(ProcessInstructions instructions)
         {
-            var process = BuildProcess(script);
-            var result = new PowerShellResult();
+            var process = BuildProcess(instructions);
+            var result = new ProcessResult();
             var cancellationTokenSource = BuildCancellationTokenSource(result, process);
 
             process.Start();
@@ -29,11 +29,10 @@ namespace Configurator.PowerShell
             cancellationTokenSource.Cancel();
 
             await Task.WhenAll(outputLoop, errorLoop);
-
             return result;
         }
 
-        private static Process BuildProcess(string script)
+        private static Process BuildProcess(ProcessInstructions instructions)
         {
             return new Process
             {
@@ -42,15 +41,15 @@ namespace Configurator.PowerShell
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    Verb = "runas",
-                    FileName = @"pwsh.exe",
-                    Arguments = @$"-Command ""{script}"""
+                    Verb = instructions.RunAsAdmin ? "runas" : "open",
+                    FileName = instructions.Executable,
+                    Arguments = instructions.Arguments
                 },
                 EnableRaisingEvents = true
             };
         }
 
-        private static CancellationTokenSource BuildCancellationTokenSource(PowerShellResult result, Process process)
+        private static CancellationTokenSource BuildCancellationTokenSource(ProcessResult result, Process process)
         {
             var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.Token.Register(() =>
@@ -66,7 +65,7 @@ namespace Configurator.PowerShell
             return Task.Run(process.WaitForExit, cancellationTokenSource.Token);
         }
 
-        private static Task RunOutputLoop(Process process, PowerShellResult result, CancellationTokenSource cancellationTokenSource)
+        private static Task RunOutputLoop(Process process, ProcessResult result, CancellationTokenSource cancellationTokenSource)
         {
             return Task.Run(() =>
             {
@@ -84,7 +83,7 @@ namespace Configurator.PowerShell
             }, cancellationTokenSource.Token);
         }
 
-        private static Task RunErrorLoop(Process process, PowerShellResult result, CancellationTokenSource cancellationTokenSource)
+        private static Task RunErrorLoop(Process process, ProcessResult result, CancellationTokenSource cancellationTokenSource)
         {
             return Task.Run(() =>
             {
@@ -110,7 +109,14 @@ namespace Configurator.PowerShell
         }
     }
 
-    public class PowerShellResult
+    public class ProcessInstructions
+    {
+        public bool RunAsAdmin { get; set; }
+        public string Executable { get; set; }
+        public string Arguments { get; set; }
+    }
+
+    public class ProcessResult
     {
         public int ExitCode { get; set; } = -1;
         public string? LastOutput { get; set; }
