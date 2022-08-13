@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +20,7 @@ namespace Configurator.PowerShell
                 {
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     Verb = "runas",
                     FileName = @"pwsh.exe",
                     Arguments = @$"-Command ""{script}"""
@@ -37,32 +39,73 @@ namespace Configurator.PowerShell
 
             process.Start();
 
-            var outputLoop = Task.Run(() =>
-            {
-                while (!process.StandardOutput.EndOfStream && !process.HasExited)
-                {
-                    result.Output = process.StandardOutput.ReadLine();
-                }
-            }, cancellationTokenSource.Token);
-
-            var exitLoop = Task.Run(() =>
-            {
-                process.WaitForExit();
-            }, cancellationTokenSource.Token);
+            var outputLoop = RunOutputLoop(process, result, cancellationTokenSource);
+            var errorLoop = RunErrorLoop(process, result, cancellationTokenSource);
+            var exitLoop = RunExitLoop(process, cancellationTokenSource);
 
             await exitLoop;
             
             cancellationTokenSource.Cancel();
 
-            await outputLoop;
+            await Task.WhenAll(outputLoop, errorLoop);
 
             return result;
+        }
+
+        private static Task RunExitLoop(Process process, CancellationTokenSource cancellationTokenSource)
+        {
+            return Task.Run(process.WaitForExit, cancellationTokenSource.Token);
+        }
+
+        private static Task RunOutputLoop(Process process, PowerShellResult result, CancellationTokenSource cancellationTokenSource)
+        {
+            return Task.Run(() =>
+            {
+                while (!process.StandardOutput.EndOfStream && !process.HasExited)
+                {
+                    var output = process.StandardOutput.ReadLine();
+                    
+                    result.LastOutput = output;
+                    
+                    if (output != null)
+                    {
+                        result.AllOutput.Add(output);
+                    }
+                }
+            }, cancellationTokenSource.Token);
+        }
+
+        private static Task RunErrorLoop(Process process, PowerShellResult result, CancellationTokenSource cancellationTokenSource)
+        {
+            return Task.Run(() =>
+            {
+                while (!process.StandardError.EndOfStream && !process.HasExited)
+                {
+                    var dirtyError = process.StandardError.ReadLine();
+                    
+                    if (dirtyError != null)
+                    {
+                        result.Errors.Add(CleanError(dirtyError));
+                    }
+                }
+            }, cancellationTokenSource.Token);
+        }
+
+        private static string CleanError(string dirtyError)
+        {
+            var strangeCharacterSequenceBeginningAndMiddleOfLine = $"{(char)27}[91m";
+            var stringCharacterSequenceEndOfLine = $"{(char)27}[0m";
+            return dirtyError
+                .Replace(strangeCharacterSequenceBeginningAndMiddleOfLine, "")
+                .Replace(stringCharacterSequenceEndOfLine, "");
         }
     }
 
     public class PowerShellResult
     {
         public int ExitCode { get; set; } = -1;
-        public string? Output { get; set; }
+        public string? LastOutput { get; set; }
+        public List<string> AllOutput { get; set; } = new List<string>();
+        public List<string> Errors { get; set; } = new List<string>();
     }
 }
