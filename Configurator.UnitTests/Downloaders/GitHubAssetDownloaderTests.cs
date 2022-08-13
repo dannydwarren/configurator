@@ -21,7 +21,7 @@ namespace Configurator.UnitTests.Downloaders
                 Repo = RandomString(),
                 Extension = RandomString()
             };
-            var powerShellResult = new PowerShellResult
+            var powerShellResult = new PowerShellResult_Obsolete
             {
                 AsString = RandomString()
             };

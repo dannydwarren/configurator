@@ -12,7 +12,7 @@ namespace Configurator.UnitTests.PowerShell
         public async Task When_setting_execution_policy()
         {
             var executionPolicy = "RemoteSigned";
-            var powerShellResult = new PowerShellResult
+            var powerShellResult = new PowerShellResult_Obsolete
             {
                 AsString = RandomString()
             };

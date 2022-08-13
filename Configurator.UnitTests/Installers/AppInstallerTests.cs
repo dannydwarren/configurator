@@ -21,7 +21,7 @@ namespace Configurator.UnitTests.Installers
             mockApp.SetupGet(x => x.VerificationScript).Returns(RandomString());
             var app = mockApp.Object;
 
-            var verificationResultPreInstall = new PowerShellResult
+            var verificationResultPreInstall = new PowerShellResult_Obsolete
             {
                 AsString = "False"
             };
@@ -127,7 +127,7 @@ namespace Configurator.UnitTests.Installers
             mockApp.SetupGet(x => x.UpgradeScript).Returns(RandomString());
             var app = mockApp.Object;
 
-            var verificationResultPreInstall = new PowerShellResult
+            var verificationResultPreInstall = new PowerShellResult_Obsolete
             {
                 AsString = "True"
             };
@@ -185,7 +185,7 @@ namespace Configurator.UnitTests.Installers
             mockApp.SetupGet(x => x.PreventUpgrade).Returns(true);
             var app = mockApp.Object;
 
-            var verificationResultPreInstall = new PowerShellResult
+            var verificationResultPreInstall = new PowerShellResult_Obsolete
             {
                 AsString = "True"
             };
@@ -213,7 +213,7 @@ namespace Configurator.UnitTests.Installers
             mockApp.SetupGet(x => x.UpgradeScript).Returns((string)null!);
             var app = mockApp.Object;
           
-            var verificationResultPreInstall = new PowerShellResult
+            var verificationResultPreInstall = new PowerShellResult_Obsolete
             {
                 AsString = "True"
             };

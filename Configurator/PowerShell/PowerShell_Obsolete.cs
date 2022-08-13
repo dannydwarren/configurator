@@ -9,8 +9,8 @@ namespace Configurator.PowerShell
 {
     public interface IPowerShell_Obsolete
     {
-        Task<PowerShellResult> ExecuteAsync(string script);
-        Task<PowerShellResult> ExecuteAsync(string script, string completeCheckScript);
+        Task<PowerShellResult_Obsolete> ExecuteAsync(string script);
+        Task<PowerShellResult_Obsolete> ExecuteAsync(string script, string completeCheckScript);
     }
 
     /// <summary>
@@ -39,12 +39,12 @@ namespace Configurator.PowerShell
             powershell.Streams.Progress.DataAdded += ProgressDataAdded;
         }
 
-        public async Task<PowerShellResult> ExecuteAsync(string script)
+        public async Task<PowerShellResult_Obsolete> ExecuteAsync(string script)
         {
             return await ExecuteScriptAsync(script);
         }
 
-        public async Task<PowerShellResult> ExecuteAsync(string script, string completeCheckScript)
+        public async Task<PowerShellResult_Obsolete> ExecuteAsync(string script, string completeCheckScript)
         {
             var preCheckResult = await ExecuteScriptAsync(completeCheckScript);
 
@@ -58,7 +58,7 @@ namespace Configurator.PowerShell
             return await ExecuteScriptAsync(completeCheckScript);
         }
 
-        private async Task<PowerShellResult> ExecuteScriptAsync(string script)
+        private async Task<PowerShellResult_Obsolete> ExecuteScriptAsync(string script)
         {
             consoleLogger.Debug(script);
 
@@ -82,7 +82,7 @@ if ($profile -eq $null -or $profile -eq '') {{
 
             Clear();
 
-            return new PowerShellResult
+            return new PowerShellResult_Obsolete
             {
                 AsString = result?.ToString() ?? ""
             };
@@ -168,7 +168,7 @@ if ($profile -eq $null -or $profile -eq '') {{
         }
     }
 
-    public class PowerShellResult
+    public class PowerShellResult_Obsolete
     {
         public string AsString { get; set; }
         public bool? AsBool => bool.TryParse(AsString, out var result) ? result : (bool?)null;
