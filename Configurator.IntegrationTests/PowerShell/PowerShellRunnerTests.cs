@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Configurator.IntegrationTests.PowerShell
 {
-    public class PowerShellTests : IntegrationTestBase<Configurator.PowerShell.PowerShellRunner>
+    public class PowerShellRunnerTests : IntegrationTestBase<Configurator.PowerShell.PowerShellRunner>
     {
         [Fact]
         public async Task When_executing()
