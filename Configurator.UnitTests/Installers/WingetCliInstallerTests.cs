@@ -25,7 +25,7 @@ namespace Configurator.UnitTests.Installers
 
             It("accepts all source agreements", () =>
             {
-                GetMock<IPowerShell_Obsolete>().Verify(x => x.ExecuteAsync("winget list winget --accept-source-agreements"));
+                GetMock<IPowerShell>().Verify(x => x.ExecuteAsync("winget list winget --accept-source-agreements"));
             });
         }
     }
