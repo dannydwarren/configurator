@@ -19,6 +19,24 @@ namespace Configurator.IntegrationTests.Utilities
 
             It("runs with a successful exit code", () => { result.ExitCode.ShouldBe(0); });
         }
+        
+        [Fact]
+        public async Task When_executing_as_admin()
+        {
+            var script = @"$result = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')
+Write-Output $result";
+            var processInstructions = BuildPwshInstructions(script, runAsAdmin: true);
+
+            var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync(processInstructions));
+
+            It("only exit code can, therefore should, be populated indicating success", () =>
+            {
+                result.ExitCode.ShouldBe(0);
+                result.LastOutput.ShouldBeNull();
+                result.AllOutput.ShouldBeEmpty();
+                result.Errors.ShouldBeEmpty();
+            });
+        }
 
         [Fact]
         public async Task When_executing_and_expecting_output()
@@ -66,11 +84,11 @@ Write-Error '{errors[2]}'";
             It("returns the script errors", () => { result.Errors.ShouldBe(expectedErrors); });
         }
         
-        private static ProcessInstructions BuildPwshInstructions(string script)
+        private static ProcessInstructions BuildPwshInstructions(string script, bool runAsAdmin = false)
         {
             var processInstructions = new ProcessInstructions
             {
-                RunAsAdmin = false,
+                RunAsAdmin = runAsAdmin,
                 Executable = "pwsh.exe",
                 Arguments = @$"-Command ""{script}""",
             };

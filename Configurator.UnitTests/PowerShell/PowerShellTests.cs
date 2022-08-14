@@ -39,6 +39,29 @@ namespace Configurator.UnitTests.PowerShell
         }
 
         [Fact]
+        public async Task When_executing_as_admin()
+        {
+            var script = RandomString();
+
+            var powerShellResult = new ProcessResult
+            {
+                ExitCode = 0
+            };
+
+            ProcessInstructions? capturedInstructions = null;
+            GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
+                .ReturnsAsync(powerShellResult);
+
+            await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script, runAsAdmin: true));
+
+            It("runs the script", () =>
+            {
+                capturedInstructions.ShouldNotBeNull().RunAsAdmin.ShouldBeTrue();
+            });
+        }
+        
+        [Fact]
         public async Task When_executing_with_unsuccessful_exit_code()
         {
             var script = RandomString();

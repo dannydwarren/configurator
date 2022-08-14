@@ -25,7 +25,7 @@ namespace Configurator.Utilities
             var exitLoop = RunExitLoop(process, cancellationTokenSource);
 
             await exitLoop;
-            
+
             cancellationTokenSource.Cancel();
 
             await Task.WhenAll(outputLoop, errorLoop);
@@ -38,14 +38,13 @@ namespace Configurator.Utilities
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
+                    UseShellExecute = instructions.RunAsAdmin,
+                    RedirectStandardOutput = !instructions.RunAsAdmin,
+                    RedirectStandardError = !instructions.RunAsAdmin,
                     Verb = instructions.RunAsAdmin ? "runas" : "open",
                     FileName = instructions.Executable,
                     Arguments = instructions.Arguments
-                },
-                EnableRaisingEvents = true
+                }
             };
         }
 
@@ -65,16 +64,20 @@ namespace Configurator.Utilities
             return Task.Run(process.WaitForExit, cancellationTokenSource.Token);
         }
 
-        private static Task RunOutputLoop(Process process, ProcessResult result, CancellationTokenSource cancellationTokenSource)
+        private static Task RunOutputLoop(Process process, ProcessResult result,
+            CancellationTokenSource cancellationTokenSource)
         {
             return Task.Run(() =>
             {
+                if (!process.StartInfo.RedirectStandardOutput)
+                    return;
+
                 while (!process.StandardOutput.EndOfStream && !process.HasExited)
                 {
                     var output = process.StandardOutput.ReadLine();
-                    
+
                     result.LastOutput = output;
-                    
+
                     if (output != null)
                     {
                         result.AllOutput.Add(output);
@@ -83,14 +86,18 @@ namespace Configurator.Utilities
             }, cancellationTokenSource.Token);
         }
 
-        private static Task RunErrorLoop(Process process, ProcessResult result, CancellationTokenSource cancellationTokenSource)
+        private static Task RunErrorLoop(Process process, ProcessResult result,
+            CancellationTokenSource cancellationTokenSource)
         {
             return Task.Run(() =>
             {
+                if (!process.StartInfo.RedirectStandardError)
+                    return;
+                
                 while (!process.StandardError.EndOfStream && !process.HasExited)
                 {
                     var dirtyError = process.StandardError.ReadLine();
-                    
+
                     if (dirtyError != null)
                     {
                         result.Errors.Add(CleanError(dirtyError));

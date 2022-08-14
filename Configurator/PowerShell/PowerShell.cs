@@ -6,7 +6,7 @@ namespace Configurator.PowerShell
 {
     public interface IPowerShell
     {
-        Task ExecuteAsync(string script);
+        Task ExecuteAsync(string script, bool runAsAdmin = false);
         Task<TResult> ExecuteAsync<TResult>(string script);
     }
 
@@ -21,23 +21,23 @@ namespace Configurator.PowerShell
             this.consoleLogger = consoleLogger;
         }
 
-        public async Task ExecuteAsync(string script)
+        public async Task ExecuteAsync(string script, bool runAsAdmin = false)
         {
-            await InternalExecuteAsync(script);
+            await InternalExecuteAsync(script, runAsAdmin);
         }
 
         public async Task<TResult> ExecuteAsync<TResult>(string script)
         {
-            var result = await InternalExecuteAsync(script);
+            var result = await InternalExecuteAsync(script, false);
 
             return Map<TResult>(result.LastOutput);
         }
 
-        private async Task<ProcessResult> InternalExecuteAsync(string script)
+        private async Task<ProcessResult> InternalExecuteAsync(string script, bool runAsAdmin)
         {
             var processInstructions = new ProcessInstructions
             {
-                RunAsAdmin = false,
+                RunAsAdmin = runAsAdmin,
                 Executable = "pwsh.exe",
                 Arguments = $@"-Command ""{script}"""
             };
