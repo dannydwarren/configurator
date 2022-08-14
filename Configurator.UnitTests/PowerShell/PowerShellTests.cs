@@ -11,7 +11,7 @@ namespace Configurator.UnitTests.PowerShell
     public class PowerShellTests : UnitTestBase<Configurator.PowerShell.PowerShell>
     {
         [Fact]
-        public async Task When_executing()
+        public async Task When_executing_core()
         {
             var script = RandomString();
 
@@ -39,7 +39,7 @@ namespace Configurator.UnitTests.PowerShell
         }
 
         [Fact]
-        public async Task When_executing_as_admin()
+        public async Task When_executing_windows()
         {
             var script = RandomString();
 
@@ -53,7 +53,40 @@ namespace Configurator.UnitTests.PowerShell
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
-            await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script, runAsAdmin: true));
+            await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAsync(script));
+
+            It("runs the script", () =>
+            {
+                capturedInstructions.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.RunAsAdmin.ShouldBeFalse();
+                        x.Executable.ShouldBe("powershell.exe");
+                        x.Arguments.ShouldBe($@"""{script}""");
+                    });
+            });
+        }
+
+        [Theory]
+        [InlineData(PowerShellVersion.Core)]
+        [InlineData(PowerShellVersion.Windows)]
+        public async Task When_executing_as_admin(PowerShellVersion versionUnderTest)
+        {
+            var script = RandomString();
+
+            var powerShellResult = new ProcessResult
+            {
+                ExitCode = 0
+            };
+
+            ProcessInstructions? capturedInstructions = null;
+            GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
+                .ReturnsAsync(powerShellResult);
+
+            if (versionUnderTest == PowerShellVersion.Core)
+                await BecauseAsync(() => ClassUnderTest.ExecuteAdminAsync(script));
+            else if (versionUnderTest == PowerShellVersion.Windows)
+                await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAdminAsync(script));
 
             It("runs the script", () =>
             {
@@ -102,8 +135,11 @@ namespace Configurator.UnitTests.PowerShell
                 () => { GetMock<IConsoleLogger>().Verify(x => x.Error(IsAny<string>()), Times.Exactly(3)); });
         }
 
-        [Fact]
-        public async Task When_executing_and_expecting_a_result_type_of_string()
+
+        [Theory]
+        [InlineData(PowerShellVersion.Core)]
+        [InlineData(PowerShellVersion.Windows)]
+        public async Task When_executing_and_expecting_a_result_type(PowerShellVersion versionUnderTest)
         {
             var script = RandomString();
             var powerShellResult = new ProcessResult
@@ -115,8 +151,13 @@ namespace Configurator.UnitTests.PowerShell
             GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
                 .ReturnsAsync(powerShellResult);
 
-            var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync<string>(script));
-
+            var result = versionUnderTest switch
+            {
+                PowerShellVersion.Core => await BecauseAsync(() => ClassUnderTest.ExecuteAsync<string>(script)),
+                PowerShellVersion.Windows => await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAsync<string>(script)),
+                _ => throw new ArgumentOutOfRangeException(nameof(versionUnderTest), versionUnderTest, null)
+            };
+            
             It("returns a typed result", () => { result.ShouldBe(powerShellResult.LastOutput); });
         }
 
@@ -142,6 +183,12 @@ namespace Configurator.UnitTests.PowerShell
             var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync<bool>(script));
 
             It("returns a typed result", () => { result.ShouldBe(expectedResult); });
+        }
+
+        public enum PowerShellVersion
+        {
+            Core,
+            Windows
         }
     }
 }

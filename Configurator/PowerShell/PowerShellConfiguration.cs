@@ -11,29 +11,35 @@ namespace Configurator.PowerShell
     public class PowerShellConfiguration : IPowerShellConfiguration
     {
         private readonly IPowerShell powerShell;
-        private readonly IWindowsPowerShell windowsPowerShell;
         private readonly IConsoleLogger consoleLogger;
 
-        public PowerShellConfiguration(IPowerShell powerShell, IWindowsPowerShell windowsPowerShell, IConsoleLogger consoleLogger)
+        public PowerShellConfiguration(IPowerShell powerShell, IConsoleLogger consoleLogger)
         {
             this.powerShell = powerShell;
-            this.windowsPowerShell = windowsPowerShell;
             this.consoleLogger = consoleLogger;
         }
 
         public async Task SetExecutionPolicyAsync()
         {
-            var executionPolicy = "RemoteSigned";
-            var setScript = @$"Set-ExecutionPolicy {executionPolicy} -Force";
+            var setScript = "Set-ExecutionPolicy RemoteSigned -Force";
             var getScript = "Get-ExecutionPolicy";
 
-            await powerShell.ExecuteAsync(setScript, runAsAdmin: true);
-            var getScriptResult = await powerShell.ExecuteAsync<string>(getScript);
-            consoleLogger.Result($"PowerShell - Execution Policy: {getScriptResult}");
+            await SetPowerShellCoreExecutionPolicy(setScript, getScript);
+            await SetWindowsPowerShellExecutionPolicy(setScript, getScript);
+        }
 
-            await windowsPowerShell.ExecuteAsync(setScript, runAsAdmin: true);
-            var getScriptWindowsResult = await powerShell.ExecuteAsync<string>(getScript);
-            consoleLogger.Result($"Windows PowerShell - Execution Policy: {getScriptWindowsResult}");
+        private async Task SetPowerShellCoreExecutionPolicy(string setScript, string getScript)
+        {
+            await powerShell.ExecuteAdminAsync(setScript);
+            var result = await powerShell.ExecuteAsync<string>(getScript);
+            consoleLogger.Result($"PowerShell - Execution Policy: {result}");
+        }
+
+        private async Task SetWindowsPowerShellExecutionPolicy(string setScript, string getScript)
+        {
+            await powerShell.ExecuteWindowsAdminAsync(setScript);
+            var result = await powerShell.ExecuteWindowsAsync<string>(getScript);
+            consoleLogger.Result($"Windows PowerShell - Execution Policy: {result}");
         }
     }
 }

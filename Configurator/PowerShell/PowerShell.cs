@@ -6,8 +6,12 @@ namespace Configurator.PowerShell
 {
     public interface IPowerShell
     {
-        Task ExecuteAsync(string script, bool runAsAdmin = false);
+        Task ExecuteAsync(string script);
+        Task ExecuteAdminAsync(string script);
         Task<TResult> ExecuteAsync<TResult>(string script);
+        Task ExecuteWindowsAsync(string script);
+        Task ExecuteWindowsAdminAsync(string script);
+        Task<TResult> ExecuteWindowsAsync<TResult>(string script);
     }
 
     public class PowerShell : IPowerShell
@@ -21,19 +25,47 @@ namespace Configurator.PowerShell
             this.consoleLogger = consoleLogger;
         }
 
-        public async Task ExecuteAsync(string script, bool runAsAdmin = false)
+        public async Task ExecuteAsync(string script)
         {
-            await InternalExecuteAsync(script, runAsAdmin);
+            var processInstructions = BuildCoreProcessInstructions(script, runAsAdmin: false);
+            await ExecuteInstructionsAsync(processInstructions);
+        }
+
+        public async Task ExecuteAdminAsync(string script)
+        {
+            var processInstructions = BuildCoreProcessInstructions(script, runAsAdmin: true);
+            await ExecuteInstructionsAsync(processInstructions);
         }
 
         public async Task<TResult> ExecuteAsync<TResult>(string script)
         {
-            var result = await InternalExecuteAsync(script, false);
+            var processInstructions = BuildCoreProcessInstructions(script, false);
+            var result = await ExecuteInstructionsAsync(processInstructions);
 
             return Map<TResult>(result.LastOutput);
         }
+        
+        public async Task ExecuteWindowsAsync(string script)
+        {
+            var processInstructions = BuildWindowsProcessInstructions(script, runAsAdmin: false);
+            await ExecuteInstructionsAsync(processInstructions);
+        }
 
-        private async Task<ProcessResult> InternalExecuteAsync(string script, bool runAsAdmin)
+        public async Task ExecuteWindowsAdminAsync(string script)
+        {
+            var processInstructions = BuildWindowsProcessInstructions(script, runAsAdmin: true);
+            await ExecuteInstructionsAsync(processInstructions);
+        }
+      
+        public async Task<TResult> ExecuteWindowsAsync<TResult>(string script)
+        {
+            var processInstructions = BuildCoreProcessInstructions(script, false);
+            var result = await ExecuteInstructionsAsync(processInstructions);
+
+            return Map<TResult>(result.LastOutput);
+        }
+  
+        private static ProcessInstructions BuildCoreProcessInstructions(string script, bool runAsAdmin)
         {
             var processInstructions = new ProcessInstructions
             {
@@ -41,8 +73,23 @@ namespace Configurator.PowerShell
                 Executable = "pwsh.exe",
                 Arguments = $@"-Command ""{script}"""
             };
+            return processInstructions;
+        }
 
-            var result = await processRunner.ExecuteAsync(processInstructions);
+        private static ProcessInstructions BuildWindowsProcessInstructions(string script, bool runAsAdmin)
+        {
+            var processInstructions = new ProcessInstructions
+            {
+                RunAsAdmin = runAsAdmin,
+                Executable = "powershell.exe",
+                Arguments = $@"""{script}"""
+            };
+            return processInstructions;
+        }
+        
+        private async Task<ProcessResult> ExecuteInstructionsAsync(ProcessInstructions instructions)
+        {
+            var result = await processRunner.ExecuteAsync(instructions);
 
             if (result.ExitCode != 0)
                 throw new Exception($"Script failed to complete with exit code {result.ExitCode}");
