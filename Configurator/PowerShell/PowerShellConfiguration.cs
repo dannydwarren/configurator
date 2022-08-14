@@ -31,8 +31,9 @@ namespace Configurator.PowerShell
             var getScriptResult = await powerShell.ExecuteAsync<string>(getScript);
             consoleLogger.Result($"PowerShell - Execution Policy: {getScriptResult}");
 
-            windowsPowerShell.Execute(setScript);
-            consoleLogger.Result($"Windows PowerShell - Execution Policy: {executionPolicy}");
+            await windowsPowerShell.ExecuteAsync(setScript, runAsAdmin: true);
+            var getScriptWindowsResult = await powerShell.ExecuteAsync<string>(getScript);
+            consoleLogger.Result($"Windows PowerShell - Execution Policy: {getScriptWindowsResult}");
         }
     }
 }

@@ -17,6 +17,9 @@ namespace Configurator.UnitTests.PowerShell
             GetMock<IPowerShell>()
                 .Setup(x => x.ExecuteAsync<string>("Get-ExecutionPolicy"))
                 .ReturnsAsync(getExecutionPolicyResult);
+            GetMock<IWindowsPowerShell>()
+                .Setup(x => x.ExecuteAsync<string>("Get-ExecutionPolicy"))
+                .ReturnsAsync(getExecutionPolicyResult);
 
             await BecauseAsync(() => ClassUnderTest.SetExecutionPolicyAsync());
 
@@ -30,9 +33,9 @@ namespace Configurator.UnitTests.PowerShell
 
             It("sets and reports the set policy for Windows PowerShell", () =>
             {
-                GetMock<IWindowsPowerShell>().Verify(x => x.Execute(Is<string>(y => y.Contains(executionPolicy))));
-                GetMock<IConsoleLogger>()
-                    .Verify(x => x.Result($"Windows PowerShell - Execution Policy: {executionPolicy}"));
+                GetMock<IWindowsPowerShell>().Verify(x => x.ExecuteAsync(Is<string>(y => y.Contains(executionPolicy)), true));
+                GetMock<IConsoleLogger>().Verify(x =>
+                    x.Result($"Windows PowerShell - Execution Policy: {getExecutionPolicyResult}"));
             });
         }
     }

@@ -1,31 +1,72 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Threading.Tasks;
+using Configurator.Utilities;
 
 namespace Configurator.PowerShell
 {
     public interface IWindowsPowerShell
     {
-        void Execute(string script);
+        Task ExecuteAsync(string script, bool runAsAdmin = false);
+        Task<TResult> ExecuteAsync<TResult>(string script);
     }
 
     public class WindowsPowerShell : IWindowsPowerShell
     {
-        public void Execute(string script)
+        private readonly IProcessRunner processRunner;
+        private readonly IConsoleLogger consoleLogger;
+
+        public WindowsPowerShell(IProcessRunner processRunner, IConsoleLogger consoleLogger)
         {
-            using var process = new Process
+            this.processRunner = processRunner;
+            this.consoleLogger = consoleLogger;
+        }
+
+        public async Task ExecuteAsync(string script, bool runAsAdmin = false)
+        {
+            await InternalExecuteAsync(script, runAsAdmin);
+        }
+
+        public async Task<TResult> ExecuteAsync<TResult>(string script)
+        {
+            var result = await InternalExecuteAsync(script, false);
+
+            return Map<TResult>(result.LastOutput);
+        }
+
+        private async Task<ProcessResult> InternalExecuteAsync(string script, bool runAsAdmin)
+        {
+            var processInstructions = new ProcessInstructions
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    UseShellExecute = true,
-                    RedirectStandardOutput = false,
-                    Verb = "runas",
-                    FileName = @"C:\windows\system32\windowspowershell\v1.0\powershell.exe",
-                    Arguments = @$"""{script}"""
-                },
-                EnableRaisingEvents = true
+                RunAsAdmin = runAsAdmin,
+                Executable = "powershell.exe",
+                Arguments = $@"""{script}"""
             };
 
-            process.Start();
-            process.WaitForExit();
+            var result = await processRunner.ExecuteAsync(processInstructions);
+
+            if (result.ExitCode != 0)
+                throw new Exception($"Script failed to complete with exit code {result.ExitCode}");
+
+            result.Errors.ForEach(consoleLogger.Error);
+
+            return result;
+        }
+
+        private static TResult Map<TResult>(string? output)
+        {
+            if (output == null)
+                return default!;
+
+            var resultType = typeof(TResult);
+            object objResult = resultType switch
+            {
+                { } when resultType == typeof(string) => output,
+                { } when resultType == typeof(bool) => bool.Parse(output),
+                _ => throw new NotSupportedException(
+                    $"PowerShell result type of '{typeof(TResult).FullName}' is not yet supported")
+            };
+
+            return (TResult)objResult;
         }
     }
 }
