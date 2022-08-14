@@ -83,7 +83,7 @@ namespace Configurator.UnitTests.Installers
 
             It("installs", () =>
             {
-                GetMock<IPowerShell_Obsolete>().Verify(x => x.ExecuteAsync($"{app.InstallScript}"));
+                GetMock<IPowerShell>().Verify(x => x.ExecuteAsync($"{app.InstallScript}"));
             });
         }
     }
