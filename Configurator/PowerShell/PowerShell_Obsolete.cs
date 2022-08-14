@@ -9,7 +9,6 @@ namespace Configurator.PowerShell
 {
     public interface IPowerShell_Obsolete
     {
-        Task<PowerShellResult_Obsolete> ExecuteAsync(string script);
         Task<PowerShellResult_Obsolete> ExecuteAsync(string script, string completeCheckScript);
     }
 
@@ -37,11 +36,6 @@ namespace Configurator.PowerShell
             powershell.Streams.Warning.DataAdded += WarningDataAdded;
             powershell.Streams.Error.DataAdded += ErrorDataAdded;
             powershell.Streams.Progress.DataAdded += ProgressDataAdded;
-        }
-
-        public async Task<PowerShellResult_Obsolete> ExecuteAsync(string script)
-        {
-            return await ExecuteScriptAsync(script);
         }
 
         public async Task<PowerShellResult_Obsolete> ExecuteAsync(string script, string completeCheckScript)
