@@ -17,12 +17,12 @@ namespace Configurator
     {
         private readonly ISystemInitializer systemInitializer;
         private readonly ISettingsRepository settingsRepository;
-        private readonly IPowerShell_Obsolete powerShell;
+        private readonly IPowerShell powerShell;
         private readonly IFileSystem fileSystem;
 
         public InitializeCommand(ISystemInitializer systemInitializer,
             ISettingsRepository settingsRepository,
-            IPowerShell_Obsolete powerShell,
+            IPowerShell powerShell,
             IFileSystem fileSystem)
         {
             this.systemInitializer = systemInitializer;
