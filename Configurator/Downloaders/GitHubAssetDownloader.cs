@@ -8,11 +8,11 @@ namespace Configurator.Downloaders
     public class GitHubAssetDownloader : IDownloader
     {
         private readonly IJsonSerializer jsonSerializer;
-        private readonly IPowerShell_Obsolete powerShell;
+        private readonly IPowerShell powerShell;
         private readonly IResourceDownloader resourceDownloader;
 
         public GitHubAssetDownloader(IJsonSerializer jsonSerializer,
-            IPowerShell_Obsolete powerShell,
+            IPowerShell powerShell,
             IResourceDownloader resourceDownloader)
         {
             this.jsonSerializer = jsonSerializer;
@@ -30,8 +30,8 @@ $downloadUrl = $asset | select -exp browser_download_url
 $fileName = $asset | select -exp name
 Write-Output ""{{ `""FileName`"": `""$fileName`"", `""Url`"": `""$downloadUrl`"" }}""";
 
-            var result = await powerShell.ExecuteAsync(getAssetInfoScript);
-            var assetInfo = jsonSerializer.Deserialize<GitHubAssetInfo>(result.AsString)!;
+            var result = await powerShell.ExecuteAsync<string>(getAssetInfoScript);
+            var assetInfo = jsonSerializer.Deserialize<GitHubAssetInfo>(result)!;
 
             return await resourceDownloader.DownloadAsync(assetInfo.Url, assetInfo.Filename);
         }

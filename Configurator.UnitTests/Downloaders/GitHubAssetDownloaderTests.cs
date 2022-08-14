@@ -21,10 +21,7 @@ namespace Configurator.UnitTests.Downloaders
                 Repo = RandomString(),
                 Extension = RandomString()
             };
-            var powerShellResult = new PowerShellResult_Obsolete
-            {
-                AsString = RandomString()
-            };
+            var powerShellResult = RandomString();
             var assetInfo = new GitHubAssetInfo
             {
                 Filename = RandomString(),
@@ -33,10 +30,10 @@ namespace Configurator.UnitTests.Downloaders
             var expectedDownloadedFilePath = RandomString();
 
             GetMock<IJsonSerializer>().Setup(x => x.Deserialize<GitHubAssetDownloaderArgs>(argsJson)).Returns(args);
-            GetMock<IPowerShell_Obsolete>().Setup(x => x.ExecuteAsync(Moq.It.Is<string>(y =>
+            GetMock<IPowerShell>().Setup(x => x.ExecuteAsync<string>(Moq.It.Is<string>(y =>
                     y.Contains(args.User) && y.Contains(args.Repo) && y.Contains(args.Extension))))
                 .ReturnsAsync(powerShellResult);
-            GetMock<IJsonSerializer>().Setup(x => x.Deserialize<GitHubAssetInfo>(powerShellResult.AsString))
+            GetMock<IJsonSerializer>().Setup(x => x.Deserialize<GitHubAssetInfo>(powerShellResult))
                 .Returns(assetInfo);
             GetMock<IResourceDownloader>().Setup(x => x.DownloadAsync(assetInfo.Url, assetInfo.Filename))
                 .ReturnsAsync(expectedDownloadedFilePath);
