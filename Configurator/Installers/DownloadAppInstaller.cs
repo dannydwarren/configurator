@@ -14,17 +14,14 @@ namespace Configurator.Installers
     public class DownloadAppInstaller : IDownloadAppInstaller
     {
         private readonly IConsoleLogger consoleLogger;
-        private readonly IPowerShell_Obsolete powerShell_Obsolete;
         private readonly IPowerShell powerShell;
         private readonly IDownloaderFactory downloaderFactory;
 
         public DownloadAppInstaller(IConsoleLogger consoleLogger,
-            IPowerShell_Obsolete powerShell_Obsolete,
             IPowerShell powerShell,
             IDownloaderFactory downloaderFactory)
         {
             this.consoleLogger = consoleLogger;
-            this.powerShell_Obsolete = powerShell_Obsolete;
             this.powerShell = powerShell;
             this.downloaderFactory = downloaderFactory;
         }
@@ -43,7 +40,11 @@ namespace Configurator.Installers
             }
             else
             {
-                await powerShell_Obsolete.ExecuteAsync(app.InstallScript, app.VerificationScript);
+                var isAppInstalled = await powerShell.ExecuteAsync<bool>(app.VerificationScript);
+                if (!isAppInstalled)
+                {
+                    await powerShell.ExecuteAsync(app.InstallScript);
+                }
             }
 
             consoleLogger.Result($"Installed '{app.AppId}'");

@@ -36,6 +36,7 @@ namespace Configurator.UnitTests.Installers
             var downloader = downloaderMock.Object;
 
             GetMock<IDownloaderFactory>().Setup(x => x.GetDownloader(app.Downloader)).Returns(downloader);
+            GetMock<IPowerShell>().Setup(x => x.ExecuteAsync<bool>(app.VerificationScript!)).ReturnsAsync(false);
 
             await BecauseAsync(() => ClassUnderTest.InstallAsync(app));
 
@@ -52,7 +53,50 @@ namespace Configurator.UnitTests.Installers
 
             It("installs and verifies", () =>
             {
-                GetMock<IPowerShell_Obsolete>().Verify(x => x.ExecuteAsync($"{app.InstallScript}", app.VerificationScript!));
+                GetMock<IPowerShell>().Verify(x => x.ExecuteAsync(app.InstallScript));
+            });
+        }
+        
+        [Fact]
+        public async Task When_installing_and_app_is_already_installed()
+        {
+            var buffer = Encoding.UTF8.GetBytes("{ \"prop1\": 1 }");
+            var memoryStream = new MemoryStream(buffer);
+            var downloaderArgsDoc = await JsonDocument.ParseAsync(memoryStream);
+
+            var mockApp = GetMock<IDownloadApp>();
+            mockApp.SetupGet(x => x.AppId).Returns(RandomString());
+            mockApp.SetupGet(x => x.InstallScript).Returns(RandomString());
+            mockApp.SetupGet(x => x.VerificationScript).Returns(RandomString());
+            mockApp.SetupGet(x => x.Downloader).Returns(RandomString());
+            mockApp.SetupGet(x => x.DownloaderArgs).Returns(downloaderArgsDoc.RootElement);
+            var app = mockApp.Object;
+
+            var downloadedFilePath = RandomString();
+
+            var downloaderMock = GetMock<IDownloader>();
+            downloaderMock.Setup(x => x.DownloadAsync(app.DownloaderArgs.ToString()!)).ReturnsAsync(downloadedFilePath);
+            var downloader = downloaderMock.Object;
+
+            GetMock<IDownloaderFactory>().Setup(x => x.GetDownloader(app.Downloader)).Returns(downloader);
+            GetMock<IPowerShell>().Setup(x => x.ExecuteAsync<bool>(app.VerificationScript!)).ReturnsAsync(true);
+
+            await BecauseAsync(() => ClassUnderTest.InstallAsync(app));
+
+            It("logs", () =>
+            {
+                GetMock<IConsoleLogger>().Verify(x => x.Info($"Installing '{app.AppId}'"));
+                GetMock<IConsoleLogger>().Verify(x => x.Result($"Installed '{app.AppId}'"));
+            });
+
+            It($"sets {nameof(IDownloadApp)}.{nameof(IDownloadApp.DownloadedFilePath)}", () =>
+            {
+                mockApp.VerifySet(x => x.DownloadedFilePath = downloadedFilePath);
+            });
+
+            It("installs and verifies", () =>
+            {
+                GetMock<IPowerShell>().VerifyNever(x => x.ExecuteAsync(app.InstallScript));
             });
         }
 
