@@ -33,7 +33,7 @@ namespace Configurator.UnitTests.PowerShell
                     {
                         x.RunAsAdmin.ShouldBeFalse();
                         x.Executable.ShouldBe("pwsh.exe");
-                        x.Arguments.ShouldBe($@"-Command ""{script}""");
+                        x.Arguments.ShouldBe($"-Command {script}");
                     });
             });
         }

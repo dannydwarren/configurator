@@ -71,7 +71,7 @@ namespace Configurator.PowerShell
             {
                 RunAsAdmin = runAsAdmin,
                 Executable = "pwsh.exe",
-                Arguments = $@"-Command ""{script}"""
+                Arguments = $@"-Command {script}"
             };
             return processInstructions;
         }

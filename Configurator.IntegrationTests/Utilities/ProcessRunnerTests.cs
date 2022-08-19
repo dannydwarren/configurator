@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Configurator.Configuration;
 using Configurator.Utilities;
 using Shouldly;
 using Xunit;
@@ -18,6 +20,38 @@ namespace Configurator.IntegrationTests.Utilities
             var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync(processInstructions));
 
             It("runs with a successful exit code", () => { result.ExitCode.ShouldBe(0); });
+        }
+      
+        [Fact]
+        public async Task When_executing_returns_json()
+        {
+            var var1 = RandomString();
+            var var2 = new Random().Next();
+
+            var script = $@"
+$var1Val = '{var1}'
+$var2Val = {var2}
+Write-Output """"""{{ """"""""Var1"""""""": """"""""$var1Val"""""""", """"""""Var2"""""""": $var2Val }}""""""";
+            var processInstructions = BuildPwshInstructions(script);
+
+            var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync(processInstructions));
+
+            It("runs with a successful exit code", () => { result.ExitCode.ShouldBe(0); });
+            
+            It("should be valid JSON", () =>
+            {
+                result.LastOutput.ShouldNotBeNull();
+                var deserializedResult = new JsonSerializer().Deserialize<JsonTestResult>(result.LastOutput!);
+                deserializedResult.ShouldNotBeNull();
+                deserializedResult.Var1.ShouldBe(var1);
+                deserializedResult.Var2.ShouldBe(var2);
+            });
+        }
+
+        public class JsonTestResult
+        {
+            public string Var1 { get; set; }
+            public int Var2 { get; set; }
         }
         
         [Fact]
@@ -90,7 +124,7 @@ Write-Error '{errors[2]}'";
             {
                 RunAsAdmin = runAsAdmin,
                 Executable = "pwsh.exe",
-                Arguments = @$"-Command ""{script}""",
+                Arguments = $"-Command {script}"
             };
             return processInstructions;
         }
