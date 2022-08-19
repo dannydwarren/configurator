@@ -14,6 +14,7 @@ namespace Configurator.UnitTests.PowerShell
         public async Task When_executing_core()
         {
             var script = RandomString();
+            var scriptFilePath = RandomString();
 
             var powerShellResult = new ProcessResult
             {
@@ -25,6 +26,8 @@ namespace Configurator.UnitTests.PowerShell
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
+            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
+            
             await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script));
 
             It("runs the script", () =>
@@ -33,7 +36,7 @@ namespace Configurator.UnitTests.PowerShell
                     {
                         x.RunAsAdmin.ShouldBeFalse();
                         x.Executable.ShouldBe("pwsh.exe");
-                        x.Arguments.ShouldBe($"-Command {script}");
+                        x.Arguments.ShouldBe($"-File {scriptFilePath}");
                     });
             });
         }
@@ -67,12 +70,14 @@ namespace Configurator.UnitTests.PowerShell
         }
 
         [Theory]
-        [InlineData(PowerShellVersion.Core)]
-        [InlineData(PowerShellVersion.Windows)]
-        public async Task When_executing_as_admin(PowerShellVersion versionUnderTest)
+        [InlineData(PowerShellVersion.Core, "pwsh.exe")]
+        [InlineData(PowerShellVersion.Windows, "powershell.exe")]
+        public async Task When_executing_as_admin(PowerShellVersion versionUnderTest, string expectedExecutable)
         {
             var script = RandomString();
-
+            var scriptFilePath = RandomString();
+            var expectedArguments = "";
+            
             var powerShellResult = new ProcessResult
             {
                 ExitCode = 0
@@ -83,14 +88,27 @@ namespace Configurator.UnitTests.PowerShell
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
+            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
+
             if (versionUnderTest == PowerShellVersion.Core)
+            {
+                expectedArguments = $@"-File {scriptFilePath}";
                 await BecauseAsync(() => ClassUnderTest.ExecuteAdminAsync(script));
+            }
             else if (versionUnderTest == PowerShellVersion.Windows)
+            {
+                expectedArguments = $@"""{script}""";
                 await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAdminAsync(script));
+            }
 
             It("runs the script", () =>
             {
-                capturedInstructions.ShouldNotBeNull().RunAsAdmin.ShouldBeTrue();
+                capturedInstructions.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
+                {
+                    x.RunAsAdmin.ShouldBeTrue();
+                    x.Executable.ShouldBe(expectedExecutable);
+                    x.Arguments.ShouldBe(expectedArguments);
+                });
             });
         }
         
@@ -137,26 +155,48 @@ namespace Configurator.UnitTests.PowerShell
 
 
         [Theory]
-        [InlineData(PowerShellVersion.Core)]
-        [InlineData(PowerShellVersion.Windows)]
-        public async Task When_executing_and_expecting_a_result_type(PowerShellVersion versionUnderTest)
+        [InlineData(PowerShellVersion.Core, "pwsh.exe")]
+        [InlineData(PowerShellVersion.Windows, "powershell.exe")]
+        public async Task When_executing_and_expecting_a_result_type(PowerShellVersion versionUnderTest, string expectedExecutable)
         {
             var script = RandomString();
+            var scriptFilePath = RandomString();
             var powerShellResult = new ProcessResult
             {
                 ExitCode = 0,
                 LastOutput = RandomString()
             };
 
+            ProcessInstructions? capturedInstructions = null;
             GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
+                .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
-            var result = versionUnderTest switch
+            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
+
+            string? result = null;
+            string expectedArguments = "";
+            
+            if (versionUnderTest == PowerShellVersion.Core)
             {
-                PowerShellVersion.Core => await BecauseAsync(() => ClassUnderTest.ExecuteAsync<string>(script)),
-                PowerShellVersion.Windows => await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAsync<string>(script)),
-                _ => throw new ArgumentOutOfRangeException(nameof(versionUnderTest), versionUnderTest, null)
-            };
+                expectedArguments = $@"-File {scriptFilePath}";
+                result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync<string>(script));
+            }
+            else if (versionUnderTest == PowerShellVersion.Windows)
+            {
+                expectedArguments = $@"""{script}""";
+                result = await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAsync<string>(script));
+            }
+
+            It("runs the script", () =>
+            {
+                capturedInstructions.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
+                {
+                    x.RunAsAdmin.ShouldBeFalse();
+                    x.Executable.ShouldBe(expectedExecutable);
+                    x.Arguments.ShouldBe(expectedArguments);
+                });
+            });
             
             It("returns a typed result", () => { result.ShouldBe(powerShellResult.LastOutput); });
         }
