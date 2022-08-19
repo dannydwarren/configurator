@@ -51,19 +51,19 @@ namespace Configurator.PowerShell
         
         public async Task ExecuteWindowsAsync(string script)
         {
-            var processInstructions = BuildWindowsProcessInstructions(script, runAsAdmin: false);
+            var processInstructions = await BuildWindowsProcessInstructionsAsync(script, runAsAdmin: false);
             await ExecuteInstructionsAsync(processInstructions);
         }
 
         public async Task ExecuteWindowsAdminAsync(string script)
         {
-            var processInstructions = BuildWindowsProcessInstructions(script, runAsAdmin: true);
+            var processInstructions = await BuildWindowsProcessInstructionsAsync(script, runAsAdmin: true);
             await ExecuteInstructionsAsync(processInstructions);
         }
       
         public async Task<TResult> ExecuteWindowsAsync<TResult>(string script)
         {
-            var processInstructions = BuildWindowsProcessInstructions(script, runAsAdmin: false);
+            var processInstructions = await BuildWindowsProcessInstructionsAsync(script, runAsAdmin: false);
             var result = await ExecuteInstructionsAsync(processInstructions);
 
             return Map<TResult>(result.LastOutput);
@@ -82,13 +82,15 @@ namespace Configurator.PowerShell
             return processInstructions;
         }
 
-        private static ProcessInstructions BuildWindowsProcessInstructions(string script, bool runAsAdmin)
+        private async Task<ProcessInstructions> BuildWindowsProcessInstructionsAsync(string script, bool runAsAdmin)
         {
+            var scriptFile = await scriptToFileConverter.ToPowerShellAsync(script);
+
             var processInstructions = new ProcessInstructions
             {
                 RunAsAdmin = runAsAdmin,
                 Executable = "powershell.exe",
-                Arguments = $@"""{script}"""
+                Arguments = $@"-File {scriptFile}"
             };
             return processInstructions;
         }

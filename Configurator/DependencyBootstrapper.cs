@@ -62,8 +62,11 @@ namespace Configurator
             logger.Debug($"{nameof(Configurator)} version: {version}");
 
             var powerShell = services.GetRequiredService<IPowerShell>();
-            var result = await powerShell.ExecuteAsync<string>("$PSVersionTable.PSVersion.ToString()");
-            logger.Debug($"PowerShell Version: {result}");
+            var coreResult = await powerShell.ExecuteAsync<string>("$PSVersionTable.PSVersion.ToString()");
+            logger.Debug($"PowerShell Version: {coreResult}");
+
+            var windowsResult = await powerShell.ExecuteWindowsAsync<string>("$PSVersionTable.PSVersion.ToString()");
+            logger.Debug($"Windows PowerShell Version: {windowsResult}");
 
             var args = services.GetRequiredService<IArguments>();
             logger.Debug($@"{nameof(IArguments)}:
