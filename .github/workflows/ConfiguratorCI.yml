@@ -5,11 +5,13 @@ on:
     branches: [ main ]
     paths:
       - 'Configurator*/**'
+      - 'NonNuGetDependencies/**'
       - '.github/workflows/ConfiguratorCI.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'Configurator*/**'
+      - 'NonNuGetDependencies/**'
       - '.github/workflows/ConfiguratorCI.yml'
 
 jobs:
