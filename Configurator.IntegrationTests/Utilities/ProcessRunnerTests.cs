@@ -50,8 +50,8 @@ Write-Output """"""{{ """"""""Var1"""""""": """"""""$var1Val"""""""", """"""""Va
 
         public class JsonTestResult
         {
-            public string Var1 { get; set; }
-            public int Var2 { get; set; }
+            public string Var1 { get; set; } = "";
+            public int Var2 { get; set; } = 0;
         }
         
         [Fact]
