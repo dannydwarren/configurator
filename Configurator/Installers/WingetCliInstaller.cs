@@ -18,7 +18,7 @@ namespace Configurator.Installers
         private readonly IDownloadAppInstaller downloadAppInstaller;
         private readonly IPowerShell powerShell;
 
-        public static readonly PowerShellAppPackage WingetCliApp = new PowerShellAppPackage
+        public static readonly IDownloadApp WingetCliApp = new PowerShellAppPackage
         {
             AppId = "Microsoft.Winget.Source",
             Downloader = nameof(GitHubAssetDownloader),
