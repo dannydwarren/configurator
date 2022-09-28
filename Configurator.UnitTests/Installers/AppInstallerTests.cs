@@ -71,6 +71,31 @@ namespace Configurator.UnitTests.Installers
                 GetMock<IDesktopRepository>().Verify(x => x.DeletePaths(desktopSystemEntriesAddedDuringInstall));
             });
         }
+        
+        [Fact]
+        public async Task When_installing_and_forcing_windows_powershell()
+        {
+            var mockApp = GetMock<IApp>();
+            mockApp.SetupGet(x => x.AppId).Returns(RandomString());
+            mockApp.SetupGet(x => x.InstallScript).Returns(RandomString());
+            mockApp.SetupGet(x => x.VerificationScript).Returns(RandomString());
+            var app = mockApp.Object;
+
+            var verificationResultPreInstall = false;
+
+            GetMock<IPowerShell>().Setup(x => x.ExecuteWindowsAsync<bool>(app.VerificationScript!))
+                .ReturnsAsync(verificationResultPreInstall);
+
+            GetMock<IDesktopRepository>().Setup(x => x.LoadSystemEntries()).Returns(new List<string>());
+            
+            await BecauseAsync(() => ((IAppInstallerForceWindowsPowerShell)ClassUnderTest).InstallOrUpgradeAsync(app));
+
+            It("runs the install script", () =>
+            {
+                GetMock<IPowerShell>().Verify(x => x.ExecuteWindowsAsync<bool>(app.VerificationScript!), Times.Exactly(2));
+                GetMock<IPowerShell>().Verify(x => x.ExecuteWindowsAsync(app.InstallScript));
+            });
+        }
 
         [Fact]
         public async Task When_installing_and_no_verification_script_was_provided()

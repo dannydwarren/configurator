@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Configurator.Installers;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: InternalsVisibleTo("Configurator.UnitTests")]
@@ -19,6 +20,8 @@ namespace Configurator.Configuration
                         .WithTransientLifetime();
                 }
             );
+
+            services.AddTransient<IAppInstallerForceWindowsPowerShell, AppInstaller>();
 
             Emmersion.Http.DependencyInjectionConfig.ConfigureServices(services);
         }

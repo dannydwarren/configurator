@@ -10,8 +10,13 @@ namespace Configurator.Installers
     {
         Task InstallOrUpgradeAsync(IApp app);
     }
-
-    public class AppInstaller : IAppInstaller
+    
+    public interface IAppInstallerForceWindowsPowerShell
+    {
+        Task InstallOrUpgradeAsync(IApp app);
+    }
+    
+    public class AppInstaller : IAppInstaller, IAppInstallerForceWindowsPowerShell
     {
         private readonly IPowerShell powerShell;
         private readonly IConsoleLogger consoleLogger;
@@ -26,21 +31,38 @@ namespace Configurator.Installers
 
         public async Task InstallOrUpgradeAsync(IApp app)
         {
+            await RunAsync(app, forceWindowsPowerShell: false);
+        }
+        
+        async Task IAppInstallerForceWindowsPowerShell.InstallOrUpgradeAsync(IApp app)
+        {
+            await RunAsync(app, forceWindowsPowerShell: true);
+        }
+
+        private async Task RunAsync(IApp app, bool forceWindowsPowerShell)
+        {
             consoleLogger.Info($"Installing '{app.AppId}'");
             var preInstallDesktopSystemEntries = desktopRepository.LoadSystemEntries();
 
-            var preInstallVerificationResult = await VerifyAppAsync(app);
+            var preInstallVerificationResult = await VerifyAppAsync(app, forceWindowsPowerShell);
 
             var actionScript = GetActionScript(app, preInstallVerificationResult);
 
             if (!string.IsNullOrWhiteSpace(actionScript))
             {
-                await powerShell.ExecuteAsync(actionScript);
-                var postInstallVerificationResult = await VerifyAppAsync(app);
+                if (forceWindowsPowerShell)
+                {
+                    await powerShell.ExecuteWindowsAsync(actionScript);
+                }
+                else
+                {
+                    await powerShell.ExecuteAsync(actionScript);
+                }
+                var postInstallVerificationResult = await VerifyAppAsync(app, forceWindowsPowerShell);
                 if (!postInstallVerificationResult)
                 {
                     consoleLogger.Debug($"Failed to install '{app.AppId}'");
-                }                
+                }
             }
 
             var postInstallDesktopSystemEntries = desktopRepository.LoadSystemEntries();
@@ -69,12 +91,14 @@ namespace Configurator.Installers
             return actionScript;
         }
 
-        private async Task<bool> VerifyAppAsync(IApp app)
+        private async Task<bool> VerifyAppAsync(IApp app, bool forceWindowsPowerShell)
         {
             if (app.VerificationScript == null)
                 return false;
 
-            var verificationResult = await powerShell.ExecuteAsync<bool>(app.VerificationScript);
+            var verificationResult = forceWindowsPowerShell 
+                ? await powerShell.ExecuteWindowsAsync<bool>(app.VerificationScript)
+                : await powerShell.ExecuteAsync<bool>(app.VerificationScript);
             return verificationResult;
         }
     }
