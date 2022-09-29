@@ -3,12 +3,12 @@ using Configurator.Apps;
 
 namespace Configurator.Installers;
 
-public interface IPowerShellInstaller
+public interface IPowerShellCoreInstaller
 {
     Task InstallAsync();
 }
 
-public class PowerShellInstaller : IPowerShellInstaller
+public class PowerShellCoreInstaller : IPowerShellCoreInstaller
 {
     private readonly IAppInstallerForceWindowsPowerShell appInstallerForceWindowsPowerShell;
 
@@ -17,7 +17,7 @@ public class PowerShellInstaller : IPowerShellInstaller
         AppId = "Microsoft.PowerShell",
     };  
 
-    public PowerShellInstaller(IAppInstallerForceWindowsPowerShell appInstallerForceWindowsPowerShell)
+    public PowerShellCoreInstaller(IAppInstallerForceWindowsPowerShell appInstallerForceWindowsPowerShell)
     {
         this.appInstallerForceWindowsPowerShell = appInstallerForceWindowsPowerShell;
     }

@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Configurator.UnitTests.Installers;
 
-public class PowerShellInstallerTests : UnitTestBase<PowerShellInstaller>
+public class PowerShellCoreInstallerTests : UnitTestBase<PowerShellCoreInstaller>
 {
     [Fact]
     public async Task When_installing()
@@ -17,6 +17,6 @@ public class PowerShellInstallerTests : UnitTestBase<PowerShellInstaller>
         
         await BecauseAsync(() => ClassUnderTest.InstallAsync());
         
-        It("captures app", () => capturedApp.ShouldBe(PowerShellInstaller.PowerShellApp));
+        It("captures app", () => capturedApp.ShouldBe(PowerShellCoreInstaller.PowerShellApp));
     }
 }

@@ -19,7 +19,7 @@ namespace Configurator.UnitTests
 
             It("installs PowerShell Core", () =>
             {
-                GetMock<IPowerShellInstaller>().Verify(x => x.InstallAsync());
+                GetMock<IPowerShellCoreInstaller>().Verify(x => x.InstallAsync());
             });
 
             It("sets the PowerShell Core execution policy", () =>
