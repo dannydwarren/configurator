@@ -66,12 +66,12 @@ namespace Configurator.UnitTests
         {
             var exception = new Exception(RandomString());
 
-            GetMock<IPowerShellConfiguration>().Setup(x => x.SetExecutionPolicyAsync()).Throws(exception);
+            GetMock<ISystemInitializer>().Setup(x => x.InitializeAsync()).Throws(exception);
 
             await BecauseAsync(() => ClassUnderTest.ExecuteAsync());
 
             It("logs the exception as an error",
-                () => { GetMock<IConsoleLogger>().Setup(x => x.Error(exception.ToString())); });
+                () => { GetMock<IConsoleLogger>().Verify(x => x.Error(exception.ToString())); });
         }
     }
 }
