@@ -14,7 +14,7 @@ public class PowerShellCoreInstaller : IPowerShellCoreInstaller
 
     public static readonly IApp PowerShellApp = new WingetApp
     {
-        AppId = "Microsoft.PowerShell",
+        AppId = "Microsoft.PowerShell"
     };  
 
     public PowerShellCoreInstaller(IAppInstallerForceWindowsPowerShell appInstallerForceWindowsPowerShell)
