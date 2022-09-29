@@ -12,9 +12,19 @@ namespace Configurator.UnitTests
         {
             await BecauseAsync(() => ClassUnderTest.InitializeAsync());
 
-            It("sets the PowerShell execution policy", () =>
+            It("sets the Windows PowerShell execution policy", () =>
             {
-                GetMock<IPowerShellConfiguration>().Verify(x => x.SetExecutionPolicyAsync());
+                GetMock<IPowerShellConfiguration>().Verify(x => x.SetWindowsPowerShellExecutionPolicyAsync());
+            });
+
+            It("installs PowerShell Core", () =>
+            {
+                GetMock<IPowerShellInstaller>().Verify(x => x.InstallAsync());
+            });
+
+            It("sets the PowerShell Core execution policy", () =>
+            {
+                GetMock<IPowerShellConfiguration>().Verify(x => x.SetPowerShellCoreExecutionPolicyAsync());
             });
 
             It("installs winget-cli", () =>
