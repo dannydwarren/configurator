@@ -33,9 +33,9 @@ namespace Configurator
         public async Task InitializeAsync()
         {
             await powerShellConfiguration.SetWindowsPowerShellExecutionPolicyAsync();
+            await wingetCliInstaller.InstallAsync();
             await powerShellCoreInstaller.InstallAsync();
             await powerShellConfiguration.SetPowerShellCoreExecutionPolicyAsync();
-            await wingetCliInstaller.InstallAsync();
             await scoopCliInstaller.InstallAsync();
             await gitInstaller.InstallAsync();
         }
