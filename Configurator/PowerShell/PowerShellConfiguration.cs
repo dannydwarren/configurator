@@ -11,8 +11,9 @@ namespace Configurator.PowerShell
 
     public class PowerShellConfiguration : IPowerShellConfiguration
     {
-        private const string SetScript = "Set-ExecutionPolicy RemoteSigned -Force";
-        private const string GetScript = "Get-ExecutionPolicy";
+        public const string SetPolicyScript = "Set-ExecutionPolicy RemoteSigned -Force";
+        public const string GetPolicyScript = "Get-ExecutionPolicy";
+        public const string GetVersionScript = "$PSVersionTable.PSVersion.ToString()";
         private readonly IPowerShell powerShell;
         private readonly IConsoleLogger consoleLogger;
         
@@ -24,16 +25,22 @@ namespace Configurator.PowerShell
 
         public async Task SetPowerShellCoreExecutionPolicyAsync()
         {
-            await powerShell.ExecuteAdminAsync(SetScript);
-            var result = await powerShell.ExecuteAsync<string>(GetScript);
-            consoleLogger.Result($"PowerShell Core - Execution Policy: {result}");
+            await powerShell.ExecuteAdminAsync(SetPolicyScript);
+            var policyResult = await powerShell.ExecuteAsync<string>(GetPolicyScript);
+            consoleLogger.Result($"PowerShell Core - Execution Policy: {policyResult}");
+            
+            var versionResult = await powerShell.ExecuteAsync<string>(GetVersionScript);
+            consoleLogger.Debug($"PowerShell Core - Version: {versionResult}");
         }
       
         public async Task SetWindowsPowerShellExecutionPolicyAsync()
         {
-            await powerShell.ExecuteWindowsAdminAsync(SetScript);
-            var result = await powerShell.ExecuteWindowsAsync<string>(GetScript);
-            consoleLogger.Result($"Windows PowerShell - Execution Policy: {result}");
+            await powerShell.ExecuteWindowsAdminAsync(SetPolicyScript);
+            var policyResult = await powerShell.ExecuteWindowsAsync<string>(GetPolicyScript);
+            consoleLogger.Result($"Windows PowerShell - Execution Policy: {policyResult}");
+            
+            var versionResult = await powerShell.ExecuteWindowsAsync<string>(GetVersionScript);
+            consoleLogger.Debug($"Windows PowerShell - Version: {versionResult}");
         }
     }
 }
