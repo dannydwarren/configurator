@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Configurator.Utilities;
+using Configurator.Windows;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -13,6 +14,7 @@ namespace Configurator.UnitTests.PowerShell
         [Fact]
         public async Task When_executing_core()
         {
+            var powerShellCoreInstallLocation = RandomString();
             var script = RandomString();
             var scriptFilePath = RandomString();
 
@@ -26,18 +28,23 @@ namespace Configurator.UnitTests.PowerShell
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
+            GetMock<IRegistryRepository>().Setup(x => x.GetValue(
+                    @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\31ab5147-9a97-4452-8443-d9709f0516e1",
+                    "InstallLocation"))
+                .Returns(powerShellCoreInstallLocation);
+
             GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
-            
+
             await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script));
 
             It("runs the script", () =>
             {
                 capturedInstructions.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
-                    {
-                        x.RunAsAdmin.ShouldBeFalse();
-                        x.Executable.ShouldBe("pwsh.exe");
-                        x.Arguments.ShouldBe($"-File {scriptFilePath}");
-                    });
+                {
+                    x.RunAsAdmin.ShouldBeFalse();
+                    x.Executable.ShouldBe($"{powerShellCoreInstallLocation}pwsh.exe");
+                    x.Arguments.ShouldBe($"-File {scriptFilePath}");
+                });
             });
         }
 
@@ -64,11 +71,11 @@ namespace Configurator.UnitTests.PowerShell
             It("runs the script", () =>
             {
                 capturedInstructions.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
-                    {
-                        x.RunAsAdmin.ShouldBeFalse();
-                        x.Executable.ShouldBe("powershell.exe");
-                        x.Arguments.ShouldBe($@"-File {scriptFilePath}");
-                    });
+                {
+                    x.RunAsAdmin.ShouldBeFalse();
+                    x.Executable.ShouldBe("powershell.exe");
+                    x.Arguments.ShouldBe($@"-File {scriptFilePath}");
+                });
             });
         }
 
@@ -79,7 +86,7 @@ namespace Configurator.UnitTests.PowerShell
         {
             var script = RandomString();
             var scriptFilePath = RandomString();
-            
+
             var powerShellResult = new ProcessResult
             {
                 ExitCode = 0
@@ -107,7 +114,7 @@ namespace Configurator.UnitTests.PowerShell
                 });
             });
         }
-        
+
         [Fact]
         public async Task When_executing_with_unsuccessful_exit_code()
         {
@@ -153,7 +160,8 @@ namespace Configurator.UnitTests.PowerShell
         [Theory]
         [InlineData(PowerShellVersion.Core, "pwsh.exe")]
         [InlineData(PowerShellVersion.Windows, "powershell.exe")]
-        public async Task When_executing_and_expecting_a_result_type(PowerShellVersion versionUnderTest, string expectedExecutable)
+        public async Task When_executing_and_expecting_a_result_type(PowerShellVersion versionUnderTest,
+            string expectedExecutable)
         {
             var script = RandomString();
             var scriptFilePath = RandomString();
@@ -173,7 +181,8 @@ namespace Configurator.UnitTests.PowerShell
             var result = versionUnderTest switch
             {
                 PowerShellVersion.Core => await BecauseAsync(() => ClassUnderTest.ExecuteAsync<string>(script)),
-                PowerShellVersion.Windows => await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAsync<string>(script)),
+                PowerShellVersion.Windows => await BecauseAsync(
+                    () => ClassUnderTest.ExecuteWindowsAsync<string>(script)),
                 _ => throw new ArgumentOutOfRangeException(nameof(versionUnderTest), versionUnderTest, null)
             };
 
@@ -186,7 +195,7 @@ namespace Configurator.UnitTests.PowerShell
                     x.Arguments.ShouldBe($@"-File {scriptFilePath}");
                 });
             });
-            
+
             It("returns a typed result", () => { result.ShouldBe(powerShellResult.LastOutput); });
         }
 

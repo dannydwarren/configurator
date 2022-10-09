@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Configurator.Utilities;
+using Configurator.Windows;
 
 namespace Configurator.PowerShell
 {
@@ -18,14 +19,17 @@ namespace Configurator.PowerShell
     {
         private readonly IProcessRunner processRunner;
         private readonly IScriptToFileConverter scriptToFileConverter;
+        private readonly IRegistryRepository registryRepository;
         private readonly IConsoleLogger consoleLogger;
 
         public PowerShell(IProcessRunner processRunner,
             IScriptToFileConverter scriptToFileConverter,
+            IRegistryRepository registryRepository,
             IConsoleLogger consoleLogger)
         {
             this.processRunner = processRunner;
             this.scriptToFileConverter = scriptToFileConverter;
+            this.registryRepository = registryRepository;
             this.consoleLogger = consoleLogger;
         }
 
@@ -72,11 +76,15 @@ namespace Configurator.PowerShell
         private async Task<ProcessInstructions> BuildCoreProcessInstructionsAsync(string script, bool runAsAdmin)
         {
             var scriptFile = await scriptToFileConverter.ToPowerShellAsync(script);
+
+            var powerShellCoreInstallLocation = registryRepository.GetValue(
+                @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\31ab5147-9a97-4452-8443-d9709f0516e1",
+                "InstallLocation");
             
             var processInstructions = new ProcessInstructions
             {
                 RunAsAdmin = runAsAdmin,
-                Executable = "pwsh.exe",
+                Executable = $"{powerShellCoreInstallLocation}pwsh.exe",
                 Arguments = $@"-File {scriptFile}"
             };
             return processInstructions;
