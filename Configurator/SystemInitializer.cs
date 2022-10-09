@@ -13,19 +13,19 @@ namespace Configurator
     {
         private readonly IPowerShellConfiguration powerShellConfiguration;
         private readonly IPowerShellCoreInstaller powerShellCoreInstaller;
-        private readonly IWingetCliInstaller wingetCliInstaller;
+        private readonly IWingetConfiguration wingetConfiguration;
         private readonly IScoopCliInstaller scoopCliInstaller;
         private readonly IGitInstaller gitInstaller;
 
         public SystemInitializer(IPowerShellConfiguration powerShellConfiguration,
             IPowerShellCoreInstaller powerShellCoreInstaller,
-            IWingetCliInstaller wingetCliInstaller,
+            IWingetConfiguration wingetConfiguration,
             IScoopCliInstaller scoopCliInstaller,
             IGitInstaller gitInstaller)
         {
             this.powerShellConfiguration = powerShellConfiguration;
             this.powerShellCoreInstaller = powerShellCoreInstaller;
-            this.wingetCliInstaller = wingetCliInstaller;
+            this.wingetConfiguration = wingetConfiguration;
             this.scoopCliInstaller = scoopCliInstaller;
             this.gitInstaller = gitInstaller;
         }
@@ -33,7 +33,7 @@ namespace Configurator
         public async Task InitializeAsync()
         {
             await powerShellConfiguration.SetWindowsPowerShellExecutionPolicyAsync();
-            await wingetCliInstaller.InstallAsync();
+            await wingetConfiguration.AcceptSourceAgreementsAsync();
             await powerShellCoreInstaller.InstallAsync();
             await powerShellConfiguration.SetPowerShellCoreExecutionPolicyAsync();
             await scoopCliInstaller.InstallAsync();

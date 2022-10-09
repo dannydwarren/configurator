@@ -17,6 +17,11 @@ namespace Configurator.UnitTests
                 GetMock<IPowerShellConfiguration>().Verify(x => x.SetWindowsPowerShellExecutionPolicyAsync());
             });
 
+            It("configures winget", () =>
+            {
+                GetMock<IWingetConfiguration>().Verify(x => x.AcceptSourceAgreementsAsync());
+            });
+            
             It("installs PowerShell Core", () =>
             {
                 GetMock<IPowerShellCoreInstaller>().Verify(x => x.InstallAsync());
@@ -25,11 +30,6 @@ namespace Configurator.UnitTests
             It("sets the PowerShell Core execution policy", () =>
             {
                 GetMock<IPowerShellConfiguration>().Verify(x => x.SetPowerShellCoreExecutionPolicyAsync());
-            });
-
-            It("installs winget-cli", () =>
-            {
-                GetMock<IWingetCliInstaller>().Verify(x => x.InstallAsync());
             });
 
             It("installs scoop-cli", () =>
