@@ -109,10 +109,14 @@ namespace Configurator.Utilities
         private static string CleanError(string dirtyError)
         {
             var strangeCharacterSequenceBeginningAndMiddleOfLine = $"{(char)27}[91m";
+            var strangeCharacterSequenceBeginningAndMiddleOfLine2 = $"{(char)27}[31;1m";
             var stringCharacterSequenceEndOfLine = $"{(char)27}[0m";
-            return dirtyError
+            var cleanError = dirtyError
                 .Replace(strangeCharacterSequenceBeginningAndMiddleOfLine, "")
+                .Replace(strangeCharacterSequenceBeginningAndMiddleOfLine2, "")
                 .Replace(stringCharacterSequenceEndOfLine, "");
+
+            return cleanError;
         }
     }
 
