@@ -28,10 +28,10 @@ namespace Configurator
 
         public async Task<int> LaunchAsync(params string[] args)
         {
-            if (privilegesRepository.UserHasElevatedPrivileges())
+            if (!privilegesRepository.UserHasElevatedPrivileges())
             {
-                consoleLogger.Error($"{nameof(Configurator)} {nameof(Cli)} must be run without elevated privileges.");
-                return ErrorCode.TooManyPrivileges;
+                consoleLogger.Error($"{nameof(Configurator)} {nameof(Cli)} must be run with elevated privileges.");
+                return ErrorCode.NotEnoughPrivileges;
             }
             
             var rootCommand = CreateRootCommand();

@@ -12,6 +12,11 @@ namespace Configurator.UnitTests
 {
     public class CliTests : UnitTestBase<Cli>
     {
+        public CliTests()
+        {
+            GetMock<IPrivilegesRepository>().Setup(x => x.UserHasElevatedPrivileges()).Returns(true);
+        }
+        
         [Fact]
         public async Task When_launching_and_the_configurator_throws()
         {
@@ -33,18 +38,18 @@ namespace Configurator.UnitTests
         }
         
         [Fact]
-        public async Task When_launching_with_elevated_privileges()
+        public async Task When_launching_without_elevated_privileges()
         {
-            GetMock<IPrivilegesRepository>().Setup(x => x.UserHasElevatedPrivileges()).Returns(true);
+            GetMock<IPrivilegesRepository>().Setup(x => x.UserHasElevatedPrivileges()).Returns(false);
             
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync());
 
-            It($"returns the {nameof(ErrorCode.TooManyPrivileges)} error code",
-                () => result.ShouldBe(ErrorCode.TooManyPrivileges));
+            It($"returns the {nameof(ErrorCode.NotEnoughPrivileges)} error code",
+                () => result.ShouldBe(ErrorCode.NotEnoughPrivileges));
 
             It("logs an error to the user",
                 () => GetMock<IConsoleLogger>().Verify(x =>
-                    x.Error($"{nameof(Configurator)} {nameof(Cli)} must be run without elevated privileges.")));
+                    x.Error($"{nameof(Configurator)} {nameof(Cli)} must be run with elevated privileges.")));
         }
         
         [Fact]
