@@ -15,8 +15,10 @@ namespace Configurator.UnitTests.Utilities
             var script = RandomString();
             var localAppDataPath = RandomString();
             var localTempDir = Path.Combine(localAppDataPath, "temp");
+            var myDocumentsPath = RandomString();
 
             GetMock<ISpecialFolders>().Setup(x => x.GetLocalAppDataPath()).Returns(localAppDataPath);
+            GetMock<ISpecialFolders>().Setup(x => x.GetMyDocumentsPath()).Returns(myDocumentsPath);
 
             string? capturedFilePath = null;
             string? capturedContents = null;
@@ -27,12 +29,23 @@ namespace Configurator.UnitTests.Utilities
                     capturedContents = contents;
                 });
 
+            var currentUserCurrentHostProfile = Path.Combine(myDocumentsPath, "WindowsPowerShell\\Microsoft.PowerShell_profile.ps1");
+
+            var environmentReadyScript = $@"
+$env:Path = [System.Environment]::GetEnvironmentVariable(""Path"",""Machine"") + "";"" + [System.Environment]::GetEnvironmentVariable(""Path"",""User"")
+
+if ($profile -eq $null -or $profile -eq '') {{
+  $global:profile = ""{currentUserCurrentHostProfile}""
+}}
+
+{script}";
+            
             var scriptFilePath = await BecauseAsync(() => ClassUnderTest.ToPowerShellAsync(script));
 
             It("writes the script file", () =>
             {
                 GetMock<IFileSystem>().Verify(x => x.CreateDirectory(localTempDir));
-                capturedContents.ShouldBe(script);
+                capturedContents.ShouldBe(environmentReadyScript);
             });
 
             It("returns the file path", () =>

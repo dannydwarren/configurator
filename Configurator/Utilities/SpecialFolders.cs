@@ -9,6 +9,7 @@ namespace Configurator.Utilities
     {
         List<string> GetDesktopPaths();
         string GetLocalAppDataPath();
+        string GetMyDocumentsPath();
     }
 
     public class SpecialFolders : ISpecialFolders
@@ -29,6 +30,11 @@ namespace Configurator.Utilities
             return Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 nameof(Configurator));
+        }
+
+        public string GetMyDocumentsPath()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
     }
 }

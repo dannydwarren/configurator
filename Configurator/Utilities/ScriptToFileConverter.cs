@@ -29,7 +29,20 @@ namespace Configurator.Utilities
             
             var fileName = $"{DateTimeOffset.Now:yyyy-MM-dd_HH-mm-ss-fffff}.ps1";
             var filePath = Path.Combine(localTempDir, fileName);
-            await fileSystem.WriteAllTextAsync(filePath, script);
+
+            var myDocumentsPath = specialFolders.GetMyDocumentsPath();
+            var currentUserCurrentHostProfile = Path.Combine(myDocumentsPath, "WindowsPowerShell\\Microsoft.PowerShell_profile.ps1");
+
+            var environmentReadyScript = $@"
+$env:Path = [System.Environment]::GetEnvironmentVariable(""Path"",""Machine"") + "";"" + [System.Environment]::GetEnvironmentVariable(""Path"",""User"")
+
+if ($profile -eq $null -or $profile -eq '') {{
+  $global:profile = ""{currentUserCurrentHostProfile}""
+}}
+
+{script}";
+            
+            await fileSystem.WriteAllTextAsync(filePath, environmentReadyScript);
             
             return filePath;
         }
