@@ -13,7 +13,8 @@ namespace Configurator.Installers
         public static IApp ScoopCliScriptApp = new ScriptApp
         {
             AppId = "ScoopCli",
-            InstallScript = @"powershell -Command ""iwr -useb get.scoop.sh | iex""",
+            InstallScript = @"iwr get.scoop.sh -OutFile $env:tmp\scoop-install.ps1
+& $env:tmp\scoop-install.ps1 -RunAsAdmin",
             VerificationScript = @"function Test-CommandExists
 {
     param ($command)
