@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Configurator.Configuration;
 using Configurator.Utilities;
+using Configurator.Windows;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -11,6 +12,41 @@ namespace Configurator.UnitTests
 {
     public class CliTests : UnitTestBase<Cli>
     {
+        [Fact]
+        public async Task When_launching_and_the_configurator_throws()
+        {
+            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
+                .Returns(machineConfiguratorMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
+                .ReturnsAsync(serviceProviderMock.Object);
+
+            machineConfiguratorMock.Setup(x => x.ExecuteAsync()).Throws<Exception>();
+            
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync());
+
+            It($"returns the {nameof(ErrorCode.GenericFailure)} error code",
+                () => result.ShouldBe(ErrorCode.GenericFailure));
+        }
+        
+        [Fact]
+        public async Task When_launching_with_elevated_privileges()
+        {
+            GetMock<IPrivilegesRepository>().Setup(x => x.UserHasElevatedPrivileges()).Returns(true);
+            
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync());
+
+            It($"returns the {nameof(ErrorCode.TooManyPrivileges)} error code",
+                () => result.ShouldBe(ErrorCode.TooManyPrivileges));
+
+            It("logs an error to the user",
+                () => GetMock<IConsoleLogger>().Verify(x =>
+                    x.Error($"{nameof(Configurator)} {nameof(Cli)} must be run without elevated privileges.")));
+        }
+        
         [Fact]
         public async Task When_launching_with_no_commandline_args()
         {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Configurator.Utilities;
+using Configurator.Windows;
 
 namespace Configurator
 {
@@ -10,7 +11,7 @@ namespace Configurator
         {
             var serviceCollection = new ServiceCollection();
             var dependencyBootstrapper = new DependencyBootstrapper(serviceCollection);
-            var cli = new Cli(dependencyBootstrapper, new ConsoleLogger());
+            var cli = new Cli(dependencyBootstrapper, new PrivilegesRepository(), new ConsoleLogger());
 
             return await cli.LaunchAsync(args);
         }

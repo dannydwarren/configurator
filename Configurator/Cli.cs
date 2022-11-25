@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Configurator.Configuration;
 using Configurator.Utilities;
+using Configurator.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Configurator
@@ -13,16 +14,26 @@ namespace Configurator
     public class Cli
     {
         private readonly IDependencyBootstrapper dependencyBootstrapper;
+        private readonly IPrivilegesRepository privilegesRepository;
         private readonly IConsoleLogger consoleLogger;
 
-        public Cli(IDependencyBootstrapper dependencyBootstrapper, IConsoleLogger consoleLogger)
+        public Cli(IDependencyBootstrapper dependencyBootstrapper,
+            IPrivilegesRepository privilegesRepository,
+            IConsoleLogger consoleLogger)
         {
             this.dependencyBootstrapper = dependencyBootstrapper;
+            this.privilegesRepository = privilegesRepository;
             this.consoleLogger = consoleLogger;
         }
 
         public async Task<int> LaunchAsync(params string[] args)
         {
+            if (privilegesRepository.UserHasElevatedPrivileges())
+            {
+                consoleLogger.Error($"{nameof(Configurator)} {nameof(Cli)} must be run without elevated privileges.");
+                return ErrorCode.TooManyPrivileges;
+            }
+            
             var rootCommand = CreateRootCommand();
             return await rootCommand.InvokeAsync(args);
         }
