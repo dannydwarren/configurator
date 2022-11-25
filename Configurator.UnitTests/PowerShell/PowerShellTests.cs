@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Configurator.Utilities;
 using Configurator.Windows;
@@ -11,18 +12,35 @@ namespace Configurator.UnitTests.PowerShell
 {
     public class PowerShellTests : UnitTestBase<Configurator.PowerShell.PowerShell>
     {
+        private readonly string myDocumentsPath;
+
+        public PowerShellTests()
+        {
+            myDocumentsPath = RandomString();
+            GetMock<ISpecialFolders>().Setup(x => x.GetMyDocumentsPath()).Returns(myDocumentsPath);
+        }
+        
         [Fact]
         public async Task When_executing_core()
         {
             var powerShellCoreInstallLocation = RandomString();
             var script = RandomString();
+            var currentUserCurrentHostProfile = Path.Combine(myDocumentsPath, "PowerShell\\Microsoft.PowerShell_profile.ps1");
+            var environmentReadyScript = $@"
+$env:Path = [System.Environment]::GetEnvironmentVariable(""Path"",""Machine"") + "";"" + [System.Environment]::GetEnvironmentVariable(""Path"",""User"")
+
+if ($profile -eq $null -or $profile -eq '') {{
+  $global:profile = ""{currentUserCurrentHostProfile}""
+}}
+
+{script}";
             var scriptFilePath = RandomString();
 
             var powerShellResult = new ProcessResult
             {
                 ExitCode = 0
             };
-
+            
             ProcessInstructions? capturedInstructions = null;
             GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
@@ -33,7 +51,7 @@ namespace Configurator.UnitTests.PowerShell
                     "InstallLocation"))
                 .Returns(powerShellCoreInstallLocation);
 
-            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
+            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(environmentReadyScript)).ReturnsAsync(scriptFilePath);
 
             await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script));
 
@@ -52,7 +70,15 @@ namespace Configurator.UnitTests.PowerShell
         public async Task When_executing_windows()
         {
             var script = RandomString();
-            var scriptFilePath = RandomString();
+            var currentUserCurrentHostProfile = Path.Combine(myDocumentsPath, "WindowsPowerShell\\Microsoft.PowerShell_profile.ps1");
+            var environmentReadyScript = $@"
+$env:Path = [System.Environment]::GetEnvironmentVariable(""Path"",""Machine"") + "";"" + [System.Environment]::GetEnvironmentVariable(""Path"",""User"")
+
+if ($profile -eq $null -or $profile -eq '') {{
+  $global:profile = ""{currentUserCurrentHostProfile}""
+}}
+
+{script}";  var scriptFilePath = RandomString();
 
             var powerShellResult = new ProcessResult
             {
@@ -64,7 +90,7 @@ namespace Configurator.UnitTests.PowerShell
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
-            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
+            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(environmentReadyScript)).ReturnsAsync(scriptFilePath);
 
             await BecauseAsync(() => ClassUnderTest.ExecuteWindowsAsync(script));
 
@@ -97,7 +123,7 @@ namespace Configurator.UnitTests.PowerShell
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
-            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
+            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(IsAny<string>())).ReturnsAsync(scriptFilePath);
 
             if (versionUnderTest == PowerShellVersion.Core)
                 await BecauseAsync(() => ClassUnderTest.ExecuteAdminAsync(script));
@@ -176,7 +202,7 @@ namespace Configurator.UnitTests.PowerShell
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
-            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(script)).ReturnsAsync(scriptFilePath);
+            GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(IsAny<string>())).ReturnsAsync(scriptFilePath);
 
             var result = versionUnderTest switch
             {

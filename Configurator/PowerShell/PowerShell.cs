@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Configurator.Utilities;
 using Configurator.Windows;
@@ -20,16 +21,19 @@ namespace Configurator.PowerShell
         private readonly IProcessRunner processRunner;
         private readonly IScriptToFileConverter scriptToFileConverter;
         private readonly IRegistryRepository registryRepository;
+        private readonly ISpecialFolders specialFolders;
         private readonly IConsoleLogger consoleLogger;
 
         public PowerShell(IProcessRunner processRunner,
             IScriptToFileConverter scriptToFileConverter,
             IRegistryRepository registryRepository,
+            ISpecialFolders specialFolders,
             IConsoleLogger consoleLogger)
         {
             this.processRunner = processRunner;
             this.scriptToFileConverter = scriptToFileConverter;
             this.registryRepository = registryRepository;
+            this.specialFolders = specialFolders;
             this.consoleLogger = consoleLogger;
         }
 
@@ -75,7 +79,9 @@ namespace Configurator.PowerShell
   
         private async Task<ProcessInstructions> BuildCoreProcessInstructionsAsync(string script, bool runAsAdmin)
         {
-            var scriptFile = await scriptToFileConverter.ToPowerShellAsync(script);
+            var environmentReadyScript = BuildEnvironmentReadyScript("PowerShell", script);
+            
+            var scriptFile = await scriptToFileConverter.ToPowerShellAsync(environmentReadyScript);
 
             var powerShellCoreInstallLocation = registryRepository.GetValue(
                 @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\31ab5147-9a97-4452-8443-d9709f0516e1",
@@ -92,7 +98,9 @@ namespace Configurator.PowerShell
 
         private async Task<ProcessInstructions> BuildWindowsProcessInstructionsAsync(string script, bool runAsAdmin)
         {
-            var scriptFile = await scriptToFileConverter.ToPowerShellAsync(script);
+            var environmentReadyScript = BuildEnvironmentReadyScript("WindowsPowerShell", script);
+
+            var scriptFile = await scriptToFileConverter.ToPowerShellAsync(environmentReadyScript);
 
             var processInstructions = new ProcessInstructions
             {
@@ -102,7 +110,24 @@ namespace Configurator.PowerShell
             };
             return processInstructions;
         }
-        
+
+        private string BuildEnvironmentReadyScript(string myDocumentsFolderName, string script)
+        {
+            var myDocumentsPath = specialFolders.GetMyDocumentsPath();
+            var currentUserCurrentHostProfile =
+                Path.Combine(myDocumentsPath, $"{myDocumentsFolderName}\\Microsoft.PowerShell_profile.ps1");
+
+            var environmentReadyScript = $@"
+$env:Path = [System.Environment]::GetEnvironmentVariable(""Path"",""Machine"") + "";"" + [System.Environment]::GetEnvironmentVariable(""Path"",""User"")
+
+if ($profile -eq $null -or $profile -eq '') {{
+  $global:profile = ""{currentUserCurrentHostProfile}""
+}}
+
+{script}";
+            return environmentReadyScript;
+        }
+
         private async Task<ProcessResult> ExecuteInstructionsAsync(ProcessInstructions instructions)
         {
             var result = await processRunner.ExecuteAsync(instructions);
