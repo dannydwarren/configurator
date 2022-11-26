@@ -16,32 +16,21 @@ namespace Configurator.UnitTests
         {
             GetMock<IPrivilegesRepository>().Setup(x => x.UserHasElevatedPrivileges()).Returns(true);
         }
-        
+
         [Fact]
-        public async Task When_launching_and_the_configurator_throws()
+        public async Task When_launching_with_invalid_commandline_arg()
         {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
-                .ReturnsAsync(serviceProviderMock.Object);
-
-            machineConfiguratorMock.Setup(x => x.ExecuteAsync()).Throws<Exception>();
-            
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync());
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync("invalid-arg"));
 
             It($"returns the {nameof(ErrorCode.GenericFailure)} error code",
                 () => result.ShouldBe(ErrorCode.GenericFailure));
         }
-        
+
         [Fact]
         public async Task When_launching_without_elevated_privileges()
         {
             GetMock<IPrivilegesRepository>().Setup(x => x.UserHasElevatedPrivileges()).Returns(false);
-            
+
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync());
 
             It($"returns the {nameof(ErrorCode.NotEnoughPrivileges)} error code",
@@ -51,9 +40,17 @@ namespace Configurator.UnitTests
                 () => GetMock<IConsoleLogger>().Verify(x =>
                     x.Error($"{nameof(Configurator)} {nameof(Cli)} must be run with elevated privileges.")));
         }
-        
+
         [Fact]
-        public async Task When_launching_with_no_commandline_args()
+        public async Task When_launching_no_commandline_args()
+        {
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync());
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+
+        [Fact]
+        public async Task When_launching_single_file_command_with_default_args()
         {
             var machineConfiguratorMock = GetMock<IMachineConfigurator>();
 
@@ -66,7 +63,7 @@ namespace Configurator.UnitTests
                 .Callback<IArguments>(arguments => capturedArguments = arguments)
                 .ReturnsAsync(serviceProviderMock.Object);
 
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync());
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync("single-file"));
 
             It("populates arguments correctly", () =>
             {
@@ -96,7 +93,8 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
                 .Returns(machineConfiguratorMock.Object);
 
-            var commandlineArgs = new[] { alias, RandomString() };
+            var manifestPathArg = RandomString();
+            var commandlineArgs = new[] { "single-file", alias, manifestPathArg };
 
             IArguments? capturedArguments = null;
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
@@ -106,7 +104,7 @@ namespace Configurator.UnitTests
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().ManifestPath.ShouldBe(commandlineArgs[1]));
+                () => capturedArguments.ShouldNotBeNull().ManifestPath.ShouldBe(manifestPathArg));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
@@ -122,7 +120,8 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
                 .Returns(machineConfiguratorMock.Object);
 
-            var commandlineArgs = new[] { alias, RandomString() };
+            var environmentArg = RandomString();
+            var commandlineArgs = new[] { "single-file", alias, environmentArg };
 
             IArguments? capturedArguments = null;
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
@@ -132,8 +131,7 @@ namespace Configurator.UnitTests
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().Environments
-                    .ShouldBe(new List<string> { commandlineArgs[1] }));
+                () => capturedArguments.ShouldNotBeNull().Environments.ShouldBe(new List<string> { environmentArg }));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
@@ -149,7 +147,7 @@ namespace Configurator.UnitTests
 
             var env1 = RandomString();
             var env2 = RandomString();
-            var commandlineArgs = new[] { "--environments", $"{env1}|{env2}" };
+            var commandlineArgs = new[] { "single-file", "--environments", $"{env1}|{env2}" };
 
             IArguments? capturedArguments = null;
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
@@ -175,7 +173,8 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
                 .Returns(machineConfiguratorMock.Object);
 
-            var commandlineArgs = new[] { alias, RandomString() };
+            var downloadDirArg = RandomString();
+            var commandlineArgs = new[] { "single-file", alias, downloadDirArg };
 
             IArguments? capturedArguments = null;
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
@@ -185,7 +184,7 @@ namespace Configurator.UnitTests
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().DownloadsDir.ShouldBe(commandlineArgs[1]));
+                () => capturedArguments.ShouldNotBeNull().DownloadsDir.ShouldBe(downloadDirArg));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
@@ -201,7 +200,8 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
                 .Returns(machineConfiguratorMock.Object);
 
-            var commandlineArgs = new[] { alias, RandomString() };
+            var singleAppIdArg = RandomString();
+            var commandlineArgs = new[] { "single-file", alias, singleAppIdArg };
 
             IArguments? capturedArguments = null;
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
@@ -211,7 +211,7 @@ namespace Configurator.UnitTests
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().SingleAppId.ShouldBe(commandlineArgs[1]));
+                () => capturedArguments.ShouldNotBeNull().SingleAppId.ShouldBe(singleAppIdArg));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
@@ -236,7 +236,7 @@ namespace Configurator.UnitTests
 
             It("returns a success result", () => result.ShouldBe(0));
         }
-        
+
         [Fact]
         public async Task When_setting_settings()
         {
@@ -255,11 +255,12 @@ namespace Configurator.UnitTests
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("executes the set setting command", () => setSettingCommandMock.Verify(x => x.ExecuteAsync(settingNameArg, settingValueArg)));
+            It("executes the set setting command",
+                () => setSettingCommandMock.Verify(x => x.ExecuteAsync(settingNameArg, settingValueArg)));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
-        
+
         [Fact]
         public async Task When_listing_settings()
         {
@@ -272,7 +273,7 @@ namespace Configurator.UnitTests
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
                 .ReturnsAsync(serviceProviderMock.Object);
 
-            var commandlineArgs = new[] { "settings", "list"};
+            var commandlineArgs = new[] { "settings", "list" };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
