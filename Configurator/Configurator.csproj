@@ -17,7 +17,7 @@
             Configurator is a command-line tool used to install and configure apps and settings on a new Windows install.
         </Description>
 
-        <PublishSingleFile>true</PublishSingleFile>
+        <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
         <SelfContained>true</SelfContained>
         <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
         <PublishTrimmed>true</PublishTrimmed>
