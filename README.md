@@ -2,11 +2,6 @@
 
 ```powershell
 $bootstrapStopwatch = [Diagnostics.Stopwatch]::StartNew()
-Set-ExecutionPolicy RemoteSigned -Force
-
-Write-Output "Initializing profile at: $profile"
-mkdir ([System.IO.Path]::GetDirectoryName($profile)) -ErrorAction Ignore
-New-Item -Path $profile -ItemType "file" -ErrorAction Ignore
 
 Invoke-Command {
     $asset = (iwr -useb https://api.github.com/repos/dannydwarren/configurator/releases/latest | ConvertFrom-Json).assets | ? { $_.name -like "*.exe" }
@@ -17,7 +12,7 @@ $downloadDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Download duration: $($downloadDuration)"
 
 $bootstrapStopwatch.Restart()
-."$HOME\Downloads\Configurator.exe" --manifest-path "https://raw.githubusercontent.com/dannydwarren/machine-configs/main/manifests/danny.manifest.json" --environments "Personal"
+."$HOME\Downloads\Configurator.exe" single-file --manifest-path "https://raw.githubusercontent.com/dannydwarren/machine-configs/main/manifests/danny.manifest.json" --environments "Personal"
 Write-Output "Download duration: $($downloadDuration)"
 $bootstrapDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Configurator duration: $($bootstrapDuration)"
