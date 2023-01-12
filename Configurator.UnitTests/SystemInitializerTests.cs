@@ -41,6 +41,11 @@ namespace Configurator.UnitTests
             {
                 GetMock<IGitInstaller>().Verify(x => x.InstallAsync());
             });
+            
+            It("installs manifest git repo", () =>
+            {
+                GetMock<IManifestRepoInstaller>().Verify(x => x.InstallAsync());
+            });
         }
     }
 }
