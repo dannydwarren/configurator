@@ -12,6 +12,7 @@ $downloadDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Download duration: $($downloadDuration)"
 
 $bootstrapStopwatch.Restart()
+."$HOME\Downloads\Configurator.exe" settings set manifest.repo "https://github.com/dannydwarren/configurator.git"
 ."$HOME\Downloads\Configurator.exe" single-file --manifest-path "https://raw.githubusercontent.com/dannydwarren/machine-configs/main/manifests/danny.manifest.json" --environments "Personal"
 Write-Output "Download duration: $($downloadDuration)"
 $bootstrapDuration = $bootstrapStopwatch.Elapsed
