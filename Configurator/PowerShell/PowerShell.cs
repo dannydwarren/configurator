@@ -36,7 +36,7 @@ namespace Configurator.PowerShell
             this.specialFolders = specialFolders;
             this.consoleLogger = consoleLogger;
         }
-
+//https://devblogs.microsoft.com/powershell/depending-on-the-right-powershell-nuget-package-in-your-net-project/
         public async Task ExecuteAsync(string script)
         {
             var processInstructions = await BuildCoreProcessInstructionsAsync(script, runAsAdmin: false);
