@@ -22,6 +22,14 @@ Write-Output "Total duration: $($totalDuration)"
 $bootstrapStopwatch.Stop()
 ```
 
+# Local Development
+Run `.\Scripts\00_setup.ps1` to add supporting commands to your $profile.
+- Configures a fixed path for local deployment
+- Adds fixed path for deployment to the running window's PATH
+
+Calling the function `configurator-publish` publishes to the fixed path.
+
+You can now run `Configurator.exe` from any path.
 
 # Non-NuGet Dependencies
 
