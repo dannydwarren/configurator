@@ -19,19 +19,26 @@ public class ManifestRepoInstallerTests : UnitTestBase<ManifestRepoInstaller>
             Manifest = new ManifestSettings
             {
                 Repo = new Uri($"https://{RandomString()}.git")
+            },
+            Git = new GitSettings
+            {
+                CloneDirectory = new Uri($@"c:\{RandomString()}\")
             }
         };
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
 
-        IApp? capturedApp = null;
+        GitRepoApp? capturedApp = null;
         GetMock<IAppInstaller>().Setup(x => x.InstallOrUpgradeAsync(IsAny<IApp>()))
-            .Callback<IApp>(app => capturedApp = app);
+            .Callback<IApp>(app => capturedApp = (GitRepoApp)app);
 
         await BecauseAsync(() => ClassUnderTest.InstallAsync());
 
         It("installs", () =>
-            capturedApp.ShouldNotBeNull().AppId.ShouldBe(settings.Manifest.Repo.ToString())
-        );
+            capturedApp.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
+            {
+                x.AppId.ShouldBe(settings.Manifest.Repo.ToString());
+                x.CloneRootDirectory.ShouldBe(settings.Git.CloneDirectory.AbsolutePath);
+            }));
     }
 
     [Fact]

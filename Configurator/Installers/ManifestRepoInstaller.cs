@@ -33,7 +33,8 @@ public class ManifestRepoInstaller : IManifestRepoInstaller
 
         await appInstaller.InstallOrUpgradeAsync(new GitRepoApp
         {
-            AppId = repoUri.ToString()
+            AppId = repoUri.ToString(),
+            CloneRootDirectory = settings.Git.CloneDirectory.AbsolutePath
         });
     }
 }
