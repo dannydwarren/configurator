@@ -10,7 +10,7 @@ public class GitRepoApp : IApp
 
     private string RepoName => AppId.Replace(".git", "").Split('\\', '/').Last();
     public string InstallScript => $@"pushd c:\src;git clone {AppId};popd";
-    public string UpgradeScript => $@"pushd c:\src{RepoName};git pull;popd";
+    public string UpgradeScript => $@"pushd c:\src\{RepoName};git pull;popd";
     public string VerificationScript => $@"Test-Path c:\src\{RepoName}";
 
     public AppConfiguration? Configuration => null;
