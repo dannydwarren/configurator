@@ -164,7 +164,7 @@ if ($profile -eq $null -or $profile -eq '') {{
             var script = RandomString();
             var powerShellResult = new ProcessResult
             {
-                ExitCode = 0,
+                ExitCode = -1,
                 Errors = new List<string>
                 {
                     RandomString(),
@@ -176,8 +176,12 @@ if ($profile -eq $null -or $profile -eq '') {{
             GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
                 .ReturnsAsync(powerShellResult);
 
-            await BecauseAsync(() => ClassUnderTest.ExecuteAsync(script));
+            var exception = await BecauseThrowsAsync<Exception>(() => ClassUnderTest.ExecuteAsync(script));
 
+            It("throws to indicate failed execution", () =>
+                exception.ShouldNotBeNull()
+                    .Message.ShouldBe($"Script failed to complete with exit code {powerShellResult.ExitCode}"));
+            
             It("logs the errors to the console",
                 () => { GetMock<IConsoleLogger>().Verify(x => x.Error(IsAny<string>()), Times.Exactly(3)); });
         }

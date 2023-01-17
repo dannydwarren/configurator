@@ -132,10 +132,10 @@ if ($profile -eq $null -or $profile -eq '') {{
         {
             var result = await processRunner.ExecuteAsync(instructions);
 
+            result.Errors.ForEach(consoleLogger.Error);
+
             if (result.ExitCode != 0)
                 throw new Exception($"Script failed to complete with exit code {result.ExitCode}");
-
-            result.Errors.ForEach(consoleLogger.Error);
 
             return result;
         }
