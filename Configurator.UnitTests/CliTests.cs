@@ -312,11 +312,21 @@ namespace Configurator.UnitTests
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
                 .ReturnsAsync(serviceProviderMock.Object);
 
-            var commandlineArgs = new[] { args };
+            var appId = RandomString();
+            var appType = AppType.Winget;
+            var env1 = RandomString();
+            var env2 = RandomString();
+            var environments = $"{env1}|{env2}";
+            var expectedEnvironments = new List<string> { env1, env2 };
+
+            var commandlineArgs = new[]
+                { args, "--app-id", appId, "--app-type", appType.ToString(), "--environments", environments };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("activates the command", () => GetMock<IConfigureAppCommand>().Verify(x => x.ExecuteAsync()));
+            It("activates the command",
+                () => GetMock<IConfigureAppCommand>().Verify(x =>
+                   x.ExecuteAsync(appId, appType, IsSequenceEqual(expectedEnvironments))));
 
             It("returns a success result", () => result.ShouldBe(0));
         }

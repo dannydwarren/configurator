@@ -60,17 +60,31 @@ namespace Configurator
 
         private Command CreateConfigureAppCommand()
         {
-            var configureAppCommand = new Command("configure-app", "Configure app for use on the next machine.");
+            var appIdOption = new Option<string>("--app-id", "Id of the app. Used during installation in many installers.");
+            var appTypeOption = new Option<AppType>("--app-type", "Specifies the installer to use.");
+            var environmentsOption = new Option<List<string>>(name: "--environments", 
+                parseArgument: x =>
+                    x.Tokens.Select(y => new Token?(y)).FirstOrDefault()?.Value
+                        .Split("|", StringSplitOptions.RemoveEmptyEntries).ToList()
+                    ?? new List<string>(),
+                description: "Specifies which environments this app should install for.");
+
+            var configureAppCommand = new Command("configure-app", "Configure app for use on the next machine.")
+            {
+                appIdOption,
+                appTypeOption,
+                environmentsOption
+            };
             
             configureAppCommand.AddAlias("configure");
             configureAppCommand.AddAlias("add-app");
             configureAppCommand.AddAlias("add");
 
-            configureAppCommand.SetHandler(async () =>
+            configureAppCommand.SetHandler<string, AppType, List<string>>(async (appId, appType, environments) =>
             {
                 var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-                await services.GetRequiredService<IConfigureAppCommand>().ExecuteAsync();
-            });
+                await services.GetRequiredService<IConfigureAppCommand>().ExecuteAsync(appId, appType, environments);
+            }, appIdOption, appTypeOption, environmentsOption);
 
             return configureAppCommand;
         }
