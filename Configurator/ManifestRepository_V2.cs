@@ -39,7 +39,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
 
     private string CreateInstallableDirectoryAsync(Installable installable, Settings settings)
     {
-        var installableDirectory = Path.Join(settings.Manifest.Directory, installable.AppId);
+        var installableDirectory = Path.Join(settings.Manifest.Directory, "apps", installable.AppId);
 
         fileSystem.CreateDirectory(installableDirectory);
         return installableDirectory;
