@@ -15,7 +15,6 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     private readonly ISettingsRepository settingsRepository;
     private readonly IJsonSerializer jsonSerializer;
     private readonly IFileSystem fileSystem;
-    private readonly Manifest_V2 manifest = new();
 
     public ManifestRepository_V2(ISettingsRepository settingsRepository,
         IJsonSerializer jsonSerializer,
@@ -29,14 +28,23 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     public async Task SaveInstallableAsync(Installable installable)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
+        var manifest = await LoadManifestAsync(settings);
+        
         var installableDirectory = CreateInstallableDirectoryAsync(installable, settings);
         await WriteInstallableFileAsync(installable, installableDirectory);
 
         manifest.Apps.Add(installable.AppId);
         
-        await WriteManifestFileAsync(settings);
+        await WriteManifestFileAsync(settings, manifest);
     }
 
+    private async Task<Manifest_V2> LoadManifestAsync(Settings settings)
+    {
+        var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
+        var manifestJson = await fileSystem.ReadAllTextAsync(manifestFilePath);
+        return jsonSerializer.Deserialize<Manifest_V2>(manifestJson);
+    }
+    
     private string CreateInstallableDirectoryAsync(Installable installable, Settings settings)
     {
         var installableDirectory = Path.Join(settings.Manifest.Directory, "apps", installable.AppId);
@@ -53,7 +61,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         await fileSystem.WriteAllTextAsync(installableFilePath, installableJson);
     }
 
-    private async Task WriteManifestFileAsync(Settings settings)
+    private async Task WriteManifestFileAsync(Settings settings, Manifest_V2 manifest)
     {
         var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
         var manifestJson = jsonSerializer.Serialize(manifest);

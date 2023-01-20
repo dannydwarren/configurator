@@ -37,6 +37,7 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         var manifestJson = RandomString();
 
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
+        GetMock<IJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(IsAny<string>())).Returns(new Manifest_V2());
         GetMock<IJsonSerializer>().Setup(x => x.Serialize(installable)).Returns(installableJson);
 
         Manifest_V2? capturedManifest = null;
@@ -60,14 +61,9 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
     }
 
     [Fact]
-    public async Task When_saving_multiple_installables()
+    public async Task When_saving_installable_with_existing_installables()
     {
-        var installable1 = new Installable
-        {
-            AppId = RandomString()
-        };
-
-        var installable2 = new Installable
+        var installable = new Installable
         {
             AppId = RandomString()
         };
@@ -79,25 +75,30 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
                 Repo = new Uri($"c:/{RandomString()}"),
             }
         };
+        
+        var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
+        var originalManifestJson = RandomString();
+        var originalManifest = new Manifest_V2
+        {
+            Apps = { RandomString() }
+        };
 
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
+
+        GetMock<IFileSystem>().Setup(x => x.ReadAllTextAsync(manifestFilePath)).ReturnsAsync(originalManifestJson);
+        GetMock<IJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(originalManifestJson)).Returns(originalManifest);
 
         Manifest_V2? capturedManifest = null;
         GetMock<IJsonSerializer>().Setup(x => x.Serialize(IsAny<Manifest_V2>()))
             .Callback<Manifest_V2>(manifest => capturedManifest = manifest);
 
-        await BecauseAsync(async () =>
-        {
-            await ClassUnderTest.SaveInstallableAsync(installable1);
-            await ClassUnderTest.SaveInstallableAsync(installable2);
-        });
+        await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable));
 
         It("appends all app ids to manifest file", () =>
             capturedManifest.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
             {
                 x.Apps.Count.ShouldBe(2);
-                x.Apps.First().ShouldBe(installable1.AppId);
-                x.Apps.Last().ShouldBe(installable2.AppId);
+                x.Apps.Last().ShouldBe(installable.AppId);
             })
         );
     }
