@@ -39,7 +39,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
 
     private string CreateInstallableDirectoryAsync(Installable installable, Settings settings)
     {
-        var installableDirectory = Path.Join(settings.Manifest.Repo.AbsolutePath, installable.AppId);
+        var installableDirectory = Path.Join(settings.Manifest.Directory, installable.AppId);
 
         fileSystem.CreateDirectory(installableDirectory);
         return installableDirectory;
@@ -55,7 +55,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
 
     private async Task WriteManifestFileAsync(Settings settings)
     {
-        var manifestFilePath = Path.Join(settings.Manifest.Repo.AbsolutePath, settings.Manifest.FileName);
+        var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
         var manifestJson = jsonSerializer.Serialize(manifest);
         await fileSystem.WriteAllTextAsync(manifestFilePath, manifestJson);
     }

@@ -24,16 +24,16 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         {
             Manifest = new ManifestSettings
             {
-                Repo = new Uri($"c:/{RandomString()}"),
+                Directory = RandomString(),
                 FileName = RandomString()
             }
         };
 
-        var expectedInstallableDirectory = Path.Join(settings.Manifest.Repo.AbsolutePath, installable.AppId);
+        var expectedInstallableDirectory = Path.Join(settings.Manifest.Directory, installable.AppId);
         var expectedInstallableFilePath = Path.Join(expectedInstallableDirectory, "installable.json");
         var installableJson = RandomString();
 
-        var expectedManifestFilePath = Path.Join(settings.Manifest.Repo.AbsolutePath, settings.Manifest.FileName);
+        var expectedManifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
         var manifestJson = RandomString();
 
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
