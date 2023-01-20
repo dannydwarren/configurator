@@ -30,7 +30,7 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         };
 
         var expectedInstallableDirectory = Path.Join(settings.Manifest.Directory, "apps", installable.AppId);
-        var expectedInstallableFilePath = Path.Join(expectedInstallableDirectory, "installable.json");
+        var expectedInstallableFilePath = Path.Join(expectedInstallableDirectory, "app.json");
         var installableJson = RandomString();
 
         var expectedManifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);

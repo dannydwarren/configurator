@@ -56,7 +56,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     private async Task WriteInstallableFileAsync(Installable installable, string installableDirectory)
     {
         var installableJson = jsonSerializer.Serialize(installable);
-        var installableFilePath = Path.Join(installableDirectory, "installable.json");
+        var installableFilePath = Path.Join(installableDirectory, "app.json");
 
         await fileSystem.WriteAllTextAsync(installableFilePath, installableJson);
     }
