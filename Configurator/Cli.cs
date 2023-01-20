@@ -5,6 +5,7 @@ using System.CommandLine.Parsing;
 using System.Linq;
 using System.Threading.Tasks;
 using Configurator.Configuration;
+using Configurator.Installers;
 using Configurator.Utilities;
 using Configurator.Windows;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,10 +51,28 @@ namespace Configurator
                 CreateSingleFileCommand(),
                 CreateInitializeCommand(),
                 CreateSettingsCommand(),
+                CreateConfigureAppCommand(),
                 CreateBackupCommand()
             };
 
             return rootCommand;
+        }
+
+        private Command CreateConfigureAppCommand()
+        {
+            var configureAppCommand = new Command("configure-app", "Configure app for use on the next machine.");
+            
+            configureAppCommand.AddAlias("configure");
+            configureAppCommand.AddAlias("add-app");
+            configureAppCommand.AddAlias("add");
+
+            configureAppCommand.SetHandler(async () =>
+            {
+                var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
+                await services.GetRequiredService<IConfigureAppCommand>().ExecuteAsync();
+            });
+
+            return configureAppCommand;
         }
 
         private Command CreateBackupCommand()
@@ -82,7 +101,6 @@ namespace Configurator
             listSettingsCommand.SetHandler(async () =>
             {
                 var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-
                 await services.GetRequiredService<IListSettingsCommand>().ExecuteAsync();
             });
 

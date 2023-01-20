@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Configurator.Configuration;
+using Configurator.Installers;
 using Configurator.Utilities;
 using Configurator.Windows;
 using Moq;
@@ -285,18 +286,37 @@ namespace Configurator.UnitTests
         [Fact]
         public async Task When_backing_up()
         {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
             var commandlineArgs = new[] { "backup" };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("activates the backup command",
                 () => GetMock<IConsoleLogger>().Verify(x => x.Debug("Support for backing up apps is in progress...")));
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+
+        [Theory]
+        [InlineData("configure-app")]
+        [InlineData("configure")]
+        [InlineData("add-app")]
+        [InlineData("add")]
+        public async Task When_configuring_an_app(string args)
+        {
+            var configureAppCommandMock = GetMock<IConfigureAppCommand>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureAppCommand)))
+                .Returns(configureAppCommandMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+                .ReturnsAsync(serviceProviderMock.Object);
+
+            var commandlineArgs = new[] { args };
+
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
+
+            It("activates the command", () => GetMock<IConfigureAppCommand>().Verify(x => x.ExecuteAsync()));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
