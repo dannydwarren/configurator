@@ -4,21 +4,22 @@ using System.Text.Json.Serialization;
 
 namespace Configurator.Configuration
 {
-    public interface IJsonSerializer
+    public interface IHumanReadableJsonSerializer
     {
         T Deserialize<T>(string input);
         string Serialize<T>(T input);
     }
 
-    public class JsonSerializer : IJsonSerializer
+    public class HumanReadableJsonSerializer : IHumanReadableJsonSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
         };
 
-        static JsonSerializer()
+        static HumanReadableJsonSerializer()
         {
             Options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
         }

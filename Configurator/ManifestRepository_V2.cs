@@ -13,11 +13,11 @@ public interface IManifestRepository_V2
 public class ManifestRepository_V2 : IManifestRepository_V2
 {
     private readonly ISettingsRepository settingsRepository;
-    private readonly IJsonSerializer jsonSerializer;
+    private readonly IHumanReadableJsonSerializer jsonSerializer;
     private readonly IFileSystem fileSystem;
 
     public ManifestRepository_V2(ISettingsRepository settingsRepository,
-        IJsonSerializer jsonSerializer,
+        IHumanReadableJsonSerializer jsonSerializer,
         IFileSystem fileSystem)
     {
         this.settingsRepository = settingsRepository;

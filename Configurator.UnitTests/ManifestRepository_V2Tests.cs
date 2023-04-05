@@ -37,11 +37,11 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         var manifestJson = RandomString();
 
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
-        GetMock<IJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(IsAny<string>())).Returns(new Manifest_V2());
-        GetMock<IJsonSerializer>().Setup(x => x.Serialize(installable)).Returns(installableJson);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(IsAny<string>())).Returns(new Manifest_V2());
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(installable)).Returns(installableJson);
 
         Manifest_V2? capturedManifest = null;
-        GetMock<IJsonSerializer>().Setup(x => x.Serialize(IsAny<Manifest_V2>()))
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(IsAny<Manifest_V2>()))
             .Callback<Manifest_V2>(manifest => capturedManifest = manifest)
             .Returns(manifestJson);
 
@@ -86,10 +86,10 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
 
         GetMock<IFileSystem>().Setup(x => x.ReadAllTextAsync(manifestFilePath)).ReturnsAsync(originalManifestJson);
-        GetMock<IJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(originalManifestJson)).Returns(originalManifest);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(originalManifestJson)).Returns(originalManifest);
 
         Manifest_V2? capturedManifest = null;
-        GetMock<IJsonSerializer>().Setup(x => x.Serialize(IsAny<Manifest_V2>()))
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(IsAny<Manifest_V2>()))
             .Callback<Manifest_V2>(manifest => capturedManifest = manifest);
 
         await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable));
