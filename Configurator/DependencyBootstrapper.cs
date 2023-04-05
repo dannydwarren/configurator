@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Configurator.Configuration;
-using Configurator.PowerShell;
 using Configurator.Utilities;
 using Configurator.Windows;
 using Microsoft.Extensions.DependencyInjection;

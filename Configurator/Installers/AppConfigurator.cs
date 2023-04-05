@@ -1,5 +1,4 @@
-﻿using System;
-using Configurator.Apps;
+﻿using Configurator.Apps;
 using Configurator.Utilities;
 using Configurator.Windows;
 

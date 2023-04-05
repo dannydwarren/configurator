@@ -1,5 +1,4 @@
 ﻿using System;
-using Configurator.PowerShell;
 using Moq;
 using System.Collections.Generic;
 using System.Threading.Tasks;

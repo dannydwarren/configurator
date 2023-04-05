@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using Configurator.Utilities;
 using Configurator.Windows;
 using Microsoft.Extensions.DependencyInjection;
