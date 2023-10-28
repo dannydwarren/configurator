@@ -176,7 +176,7 @@ namespace Configurator
                 aliases: new[] { "--single-app-id", "-app" },
                 description: "The single app to install by Id. When present the environments arg is ignored.");
 
-            var singleFileCommand = new Command("single-file", "???")
+            var singleFileCommand = new Command("single-file", "Installs apps listed in the single file manifest. This is being deprecated by the manifest repo approach.")
             {
                 manifestPathOption,
                 environmentsOption,
