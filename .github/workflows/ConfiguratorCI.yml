@@ -1,6 +1,7 @@
-name: CI Only
+﻿name: CI Only
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
     paths:
