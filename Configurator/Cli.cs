@@ -52,14 +52,14 @@ namespace Configurator
                 CreateInitializeCommand(),
                 CreateSettingsCommand(),
                 CreateConfigureMachineCommand(),
-                CreateConfigureAppCommand(),
+                CreateAddAppCommand(),
                 CreateBackupCommand()
             };
 
             return rootCommand;
         }
 
-        private Command CreateConfigureAppCommand()
+        private Command CreateAddAppCommand()
         {
             var appIdOption = new Option<string>("--app-id", "Id of the app. Used during installation in many installers.");
             var appTypeOption = new Option<AppType>("--app-type", "Specifies the installer to use.");
@@ -70,24 +70,23 @@ namespace Configurator
                     ?? new List<string>(),
                 description: "Specifies which environments this app should install for.");
 
-            var configureAppCommand = new Command("configure-app", "Configure app for use on the next machine.")
+            var addAppCommand = new Command("add-app", "Add app for use on the next machine.")
             {
                 appIdOption,
                 appTypeOption,
                 environmentsOption
             };
             
-            configureAppCommand.AddAlias("configure");
-            configureAppCommand.AddAlias("add-app");
-            configureAppCommand.AddAlias("add");
+            addAppCommand.AddAlias("add-app");
+            addAppCommand.AddAlias("add");
 
-            configureAppCommand.SetHandler<string, AppType, List<string>>(async (appId, appType, environments) =>
+            addAppCommand.SetHandler<string, AppType, List<string>>(async (appId, appType, environments) =>
             {
                 var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-                await services.GetRequiredService<IConfigureAppCommand>().ExecuteAsync(appId, appType, environments);
+                await services.GetRequiredService<IAddAppCommand>().ExecuteAsync(appId, appType, environments);
             }, appIdOption, appTypeOption, environmentsOption);
 
-            return configureAppCommand;
+            return addAppCommand;
         }
 
         private Command CreateBackupCommand()

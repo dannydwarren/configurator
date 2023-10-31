@@ -284,17 +284,15 @@ namespace Configurator.UnitTests
         }
 
         [Theory]
-        [InlineData("configure-app")]
-        [InlineData("configure")]
         [InlineData("add-app")]
         [InlineData("add")]
-        public async Task When_configuring_an_app(string args)
+        public async Task When_adding_an_app(string args)
         {
-            var configureAppCommandMock = GetMock<IConfigureAppCommand>();
+            var addAppCommandMock = GetMock<IAddAppCommand>();
 
             var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureAppCommand)))
-                .Returns(configureAppCommandMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IAddAppCommand)))
+                .Returns(addAppCommandMock.Object);
 
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
                 .ReturnsAsync(serviceProviderMock.Object);
@@ -312,7 +310,7 @@ namespace Configurator.UnitTests
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("activates the command",
-                () => GetMock<IConfigureAppCommand>().Verify(x =>
+                () => GetMock<IAddAppCommand>().Verify(x =>
                    x.ExecuteAsync(appId, appType, IsSequenceEqual(expectedEnvironments))));
 
             It("returns a success result", () => result.ShouldBe(0));

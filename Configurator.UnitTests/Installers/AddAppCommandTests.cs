@@ -6,12 +6,12 @@ using Xunit;
 
 namespace Configurator.UnitTests.Installers;
 
-public class ConfigureAppCommandTests : UnitTestBase<ConfigureAppCommand>
+public class AddAppCommandTests : UnitTestBase<AddAppCommand>
 {
     [Theory]
     [InlineData(AppType.Winget)]
     [InlineData(AppType.Scoop)]
-    public async Task When_executing(AppType appType)
+    public async Task When_adding_an_app(AppType appType)
     {
         var appId = RandomString();
         var environments = new List<string> { "env1" };
