@@ -2,7 +2,7 @@
 using Configurator.Installers;
 using System.Threading.Tasks;
 
-namespace Configurator.Configuration
+namespace Configurator
 {
     public interface IConfigureMachineCommand
     {

@@ -1,11 +1,10 @@
 ﻿using Configurator.Apps;
-using Configurator.Configuration;
 using Configurator.Installers;
 using Moq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Configurator.UnitTests.Configuration
+namespace Configurator.UnitTests
 {
     public class ConfigureMachineCommandTests : UnitTestBase<ConfigureMachineCommand>
     {
