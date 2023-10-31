@@ -286,7 +286,7 @@ namespace Configurator.UnitTests
         [Theory]
         [InlineData("add-app")]
         [InlineData("add")]
-        public async Task When_adding_an_app(string args)
+        public async Task When_adding_an_app(string arg)
         {
             var addAppCommandMock = GetMock<IAddAppCommand>();
 
@@ -305,7 +305,7 @@ namespace Configurator.UnitTests
             var expectedEnvironments = new List<string> { env1, env2 };
 
             var commandlineArgs = new[]
-                { args, "--app-id", appId, "--app-type", appType.ToString(), "--environments", environments };
+                { arg, "--app-id", appId, "--app-type", appType.ToString(), "--environments", environments };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
@@ -316,8 +316,10 @@ namespace Configurator.UnitTests
             It("returns a success result", () => result.ShouldBe(0));
         }
 
-        [Fact]
-        public async Task When_configuring_machine_in_manifest_from_settings()
+        [Theory]
+        [InlineData("configure-machine")]
+        [InlineData("configure")]
+        public async Task When_configuring_machine_in_manifest_from_settings(string arg)
         {
             var configureMachineCommandMock = GetMock<IConfigureMachineCommand>();
 
@@ -328,7 +330,7 @@ namespace Configurator.UnitTests
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
             .ReturnsAsync(serviceProviderMock.Object);
            
-            var commandlineArgs = new[]{ "configure-machine" };
+            var commandlineArgs = new[]{ arg };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 

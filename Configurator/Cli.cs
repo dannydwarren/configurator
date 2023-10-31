@@ -202,6 +202,9 @@ namespace Configurator
         private Command CreateConfigureMachineCommand()
         {
             var configureMachineCommand = new Command("configure-machine", "Runs all apps of the manifest repo in settings.");
+
+            configureMachineCommand.AddAlias("configure");
+
             configureMachineCommand.SetHandler(async () =>
             {
                 var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
