@@ -86,7 +86,7 @@ namespace Configurator.UnitTests
         [Theory]
         [InlineData("--manifest-path")]
         [InlineData("-m")]
-        public async Task When_launching_with_manifest_path_commandline_args(string alias)
+        public async Task When_launching_single_file_command_with_manifest_path_commandline_args(string alias)
         {
             var machineConfiguratorMock = GetMock<IMachineConfigurator>();
 
@@ -113,7 +113,7 @@ namespace Configurator.UnitTests
         [Theory]
         [InlineData("--environments")]
         [InlineData("-e")]
-        public async Task When_launching_with_environments_commandline_args(string alias)
+        public async Task When_launching_single_file_command_with_environments_commandline_args(string alias)
         {
             var machineConfiguratorMock = GetMock<IMachineConfigurator>();
 
@@ -138,7 +138,7 @@ namespace Configurator.UnitTests
         }
 
         [Fact]
-        public async Task When_launching_with_multiple_environments_commandline_args()
+        public async Task When_launching_single_file_command_with_multiple_environments_commandline_args()
         {
             var machineConfiguratorMock = GetMock<IMachineConfigurator>();
 
@@ -166,7 +166,7 @@ namespace Configurator.UnitTests
         [Theory]
         [InlineData("--downloads-dir")]
         [InlineData("-dl")]
-        public async Task When_launching_with_downloads_dir_commandline_args(string alias)
+        public async Task When_launching_single_file_command_with_downloads_dir_commandline_args(string alias)
         {
             var machineConfiguratorMock = GetMock<IMachineConfigurator>();
 
@@ -193,7 +193,7 @@ namespace Configurator.UnitTests
         [Theory]
         [InlineData("--single-app-id")]
         [InlineData("-app")]
-        public async Task When_launching_with_target_app_commandline_args(string alias)
+        public async Task When_launching_single_file_command_with_target_app_commandline_args(string alias)
         {
             var machineConfiguratorMock = GetMock<IMachineConfigurator>();
 
