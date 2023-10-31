@@ -51,6 +51,7 @@ namespace Configurator
                 CreateSingleFileCommand(),
                 CreateInitializeCommand(),
                 CreateSettingsCommand(),
+                CreateConfigureMachineCommand(),
                 CreateConfigureAppCommand(),
                 CreateBackupCommand()
             };
@@ -197,6 +198,18 @@ namespace Configurator
                 manifestPathOption, environmentsOption, downloadsDirOption, singleAppOption);
 
             return singleFileCommand;
+        }
+
+        private Command CreateConfigureMachineCommand()
+        {
+            var configureMachineCommand = new Command("configure-machine", "Runs all apps of the manifest repo in settings.");
+            configureMachineCommand.SetHandler(async () =>
+            {
+                var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
+                await services.GetRequiredService<IConfigureMachineCommand>().ExecuteAsync();
+            });
+
+            return configureMachineCommand;
         }
     }
 }

@@ -319,6 +319,27 @@ namespace Configurator.UnitTests
         }
 
         [Fact]
+        public async Task When_configuring_machine_in_manifest_from_settings()
+        {
+            var configureMachineCommandMock = GetMock<IConfigureMachineCommand>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureMachineCommand)))
+                .Returns(configureMachineCommandMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            .ReturnsAsync(serviceProviderMock.Object);
+           
+            var commandlineArgs = new[]{ "configure-machine" };
+
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
+
+            It("executes the configure machine command", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync()));
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+
+        [Fact]
         public async Task When_backing_up()
         {
             var commandlineArgs = new[] { "backup" };
