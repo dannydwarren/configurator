@@ -1,4 +1,5 @@
-﻿using Configurator.Utilities;
+﻿using Configurator.Apps;
+using Configurator.Installers;
 using System.Threading.Tasks;
 
 namespace Configurator.Configuration
@@ -10,16 +11,39 @@ namespace Configurator.Configuration
 
     public class ConfigureMachineCommand : IConfigureMachineCommand
     {
-        public IConsoleLogger Logger { get; }
+        public IManifestRepository_V2 ManifestRepository { get; }
+        public IAppInstaller AppInstaller { get; }
+        public IDownloadAppInstaller DownloadAppInstaller { get; }
+        public IAppConfigurator AppConfigurator { get; }
 
-        public ConfigureMachineCommand(IConsoleLogger logger)
+        public ConfigureMachineCommand(IManifestRepository_V2 manifestRepository,
+            IAppInstaller appInstaller,
+            IDownloadAppInstaller downloadAppInstaller,
+            IAppConfigurator appConfigurator)
         {
-            Logger = logger;
+            ManifestRepository = manifestRepository;
+            AppInstaller = appInstaller;
+            DownloadAppInstaller = downloadAppInstaller;
+            AppConfigurator = appConfigurator;
         }
 
         public async Task ExecuteAsync()
         {
-            Logger.Debug(nameof(ConfigureMachineCommand));
+            var manifest = await ManifestRepository.LoadAsync();
+
+            foreach (var app in manifest.InstallableApps)
+            {
+                if (app is IDownloadApp downloadApp)
+                {
+                    await DownloadAppInstaller.InstallAsync(downloadApp);
+                }
+                else
+                {
+                    await AppInstaller.InstallOrUpgradeAsync(app);
+                }
+
+                AppConfigurator.Configure(app);
+            }
         }
     }
 }

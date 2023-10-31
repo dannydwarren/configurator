@@ -7,6 +7,7 @@ namespace Configurator;
 
 public interface IManifestRepository_V2
 {
+    Task<Manifest_V2> LoadAsync();
     Task SaveInstallableAsync(Installable installable);
 }
 
@@ -24,7 +25,12 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         this.jsonSerializer = jsonSerializer;
         this.fileSystem = fileSystem;
     }
-    
+
+    public Task<Manifest_V2> LoadAsync()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public async Task SaveInstallableAsync(Installable installable)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
