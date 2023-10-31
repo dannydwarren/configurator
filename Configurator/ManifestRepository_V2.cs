@@ -39,7 +39,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         var installableDirectory = CreateInstallableDirectoryAsync(installable, settings);
         await WriteInstallableFileAsync(installable, installableDirectory);
 
-        manifest.Apps.Add(installable.AppId);
+        manifest.AppIds.Add(installable.AppId);
         
         await WriteManifestFileAsync(settings, manifest);
     }

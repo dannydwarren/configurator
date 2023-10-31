@@ -55,7 +55,7 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
 
         It("appends app id to manifest file", () =>
         {
-            capturedManifest.ShouldNotBeNull().Apps.Last().ShouldBe(installable.AppId);
+            capturedManifest.ShouldNotBeNull().AppIds.Last().ShouldBe(installable.AppId);
             GetMock<IFileSystem>().Verify(x => x.WriteAllTextAsync(expectedManifestFilePath, manifestJson));
         });
     }
@@ -80,7 +80,7 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         var originalManifestJson = RandomString();
         var originalManifest = new Manifest_V2
         {
-            Apps = { RandomString() }
+            AppIds = { RandomString() }
         };
 
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
@@ -97,8 +97,8 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         It("appends all app ids to manifest file", () =>
             capturedManifest.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
             {
-                x.Apps.Count.ShouldBe(2);
-                x.Apps.Last().ShouldBe(installable.AppId);
+                x.AppIds.Count.ShouldBe(2);
+                x.AppIds.Last().ShouldBe(installable.AppId);
             })
         );
     }

@@ -31,7 +31,7 @@ namespace Configurator.Configuration
         {
             var manifest = await ManifestRepository.LoadAsync();
 
-            foreach (var app in manifest.InstallableApps)
+            foreach (var app in manifest.Apps)
             {
                 if (app is IDownloadApp downloadApp)
                 {

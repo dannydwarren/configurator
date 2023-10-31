@@ -14,7 +14,7 @@ namespace Configurator.UnitTests.Configuration
         {
             var manifest = new Manifest_V2
             {
-                InstallableApps =
+                Apps =
                 {
                     new ScriptApp { AppId = RandomString() },
                     new ScriptApp { AppId = RandomString() },
@@ -33,16 +33,16 @@ namespace Configurator.UnitTests.Configuration
 
             It("installs each app", () =>
             {
-                appInstallerMock.Verify(x => x.InstallOrUpgradeAsync(manifest.InstallableApps[0]));
-                appInstallerMock.Verify(x => x.InstallOrUpgradeAsync(manifest.InstallableApps[1]));
-                downloadAppInstallerMock.Verify(x => x.InstallAsync((IDownloadApp)manifest.InstallableApps[2]));
+                appInstallerMock.Verify(x => x.InstallOrUpgradeAsync(manifest.Apps[0]));
+                appInstallerMock.Verify(x => x.InstallOrUpgradeAsync(manifest.Apps[1]));
+                downloadAppInstallerMock.Verify(x => x.InstallAsync((IDownloadApp)manifest.Apps[2]));
             });
 
             It("configures each app", () =>
             {
-                appConfiguratorMock.Verify(x => x.Configure(manifest.InstallableApps[0]));
-                appConfiguratorMock.Verify(x => x.Configure(manifest.InstallableApps[1]));
-                appConfiguratorMock.Verify(x => x.Configure(manifest.InstallableApps[2]));
+                appConfiguratorMock.Verify(x => x.Configure(manifest.Apps[0]));
+                appConfiguratorMock.Verify(x => x.Configure(manifest.Apps[1]));
+                appConfiguratorMock.Verify(x => x.Configure(manifest.Apps[2]));
             });
         }
     }

@@ -5,6 +5,6 @@ namespace Configurator;
 
 public class Manifest_V2
 {
-    public List<string> Apps { get; init; } = new();
-    public List<IApp> InstallableApps { get; init; } = new();
+    public List<string> AppIds { get; init; } = new();
+    public List<IApp> Apps { get; init; } = new();
 }
