@@ -34,16 +34,16 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         var installableJson = RandomString();
 
         var expectedManifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
-        var manifestJson = RandomString();
+        var manifestFileJson = RandomString();
 
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(IsAny<string>())).Returns(new Manifest_V2());
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ManifestRepository_V2.ManifestFile>(IsAny<string>())).Returns(new ManifestRepository_V2.ManifestFile());
         GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(installable)).Returns(installableJson);
 
-        Manifest_V2? capturedManifest = null;
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(IsAny<Manifest_V2>()))
-            .Callback<Manifest_V2>(manifest => capturedManifest = manifest)
-            .Returns(manifestJson);
+        ManifestRepository_V2.ManifestFile? capturedManifestFile = null;
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(IsAny<ManifestRepository_V2.ManifestFile>()))
+            .Callback<ManifestRepository_V2.ManifestFile>(manifestFile => capturedManifestFile = manifestFile)
+            .Returns(manifestFileJson);
 
         await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable));
 
@@ -55,8 +55,8 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
 
         It("appends app id to manifest file", () =>
         {
-            capturedManifest.ShouldNotBeNull().AppIds.Last().ShouldBe(installable.AppId);
-            GetMock<IFileSystem>().Verify(x => x.WriteAllTextAsync(expectedManifestFilePath, manifestJson));
+            capturedManifestFile.ShouldNotBeNull().Apps.Last().ShouldBe(installable.AppId);
+            GetMock<IFileSystem>().Verify(x => x.WriteAllTextAsync(expectedManifestFilePath, manifestFileJson));
         });
     }
 
@@ -72,33 +72,33 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         {
             Manifest = new ManifestSettings
             {
-                Repo = new Uri($"c:/{RandomString()}"),
+                Repo = RandomUri(),
             }
         };
         
         var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
-        var originalManifestJson = RandomString();
-        var originalManifest = new Manifest_V2
+        var originalManifestFileJson = RandomString();
+        var originalManifestFile = new ManifestRepository_V2.ManifestFile
         {
-            AppIds = { RandomString() }
+            Apps = { RandomString() }
         };
 
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
 
-        GetMock<IFileSystem>().Setup(x => x.ReadAllTextAsync(manifestFilePath)).ReturnsAsync(originalManifestJson);
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Manifest_V2>(originalManifestJson)).Returns(originalManifest);
+        GetMock<IFileSystem>().Setup(x => x.ReadAllTextAsync(manifestFilePath)).ReturnsAsync(originalManifestFileJson);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ManifestRepository_V2.ManifestFile>(originalManifestFileJson)).Returns(originalManifestFile);
 
-        Manifest_V2? capturedManifest = null;
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(IsAny<Manifest_V2>()))
-            .Callback<Manifest_V2>(manifest => capturedManifest = manifest);
+        ManifestRepository_V2.ManifestFile? capturedManifestFile = null;
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Serialize(IsAny<ManifestRepository_V2.ManifestFile>()))
+            .Callback<ManifestRepository_V2.ManifestFile>(manifestFile => capturedManifestFile = manifestFile);
 
         await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable));
 
         It("appends all app ids to manifest file", () =>
-            capturedManifest.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
+            capturedManifestFile.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
             {
-                x.AppIds.Count.ShouldBe(2);
-                x.AppIds.Last().ShouldBe(installable.AppId);
+                x.Apps.Count.ShouldBe(2);
+                x.Apps.Last().ShouldBe(installable.AppId);
             })
         );
     }

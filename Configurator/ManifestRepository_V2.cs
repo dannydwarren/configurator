@@ -30,7 +30,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     public async Task<Manifest_V2> LoadAsync()
     {
         var settings = await settingsRepository.LoadSettingsAsync();
-        var manifestFile = await LoadManifestAsync2(settings);
+        var manifestFile = await LoadManifestFileAsync(settings);
 
         return new Manifest_V2
         {
@@ -41,28 +41,21 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     public async Task SaveInstallableAsync(Installable installable)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
-        var manifest = await LoadManifestAsync(settings);
+        var manifestFile = await LoadManifestFileAsync(settings);
         
         var installableDirectory = CreateInstallableDirectoryAsync(installable, settings);
         await WriteInstallableFileAsync(installable, installableDirectory);
 
-        manifest.AppIds.Add(installable.AppId);
+        manifestFile.Apps.Add(installable.AppId);
         
-        await WriteManifestFileAsync(settings, manifest);
+        await WriteManifestFileAsync(settings, manifestFile);
     }
 
-    private async Task<ManifestFile> LoadManifestAsync2(Settings settings)
+    private async Task<ManifestFile> LoadManifestFileAsync(Settings settings)
     {
         var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
         var manifestFileJson = await fileSystem.ReadAllTextAsync(manifestFilePath);
         return jsonSerializer.Deserialize<ManifestFile>(manifestFileJson);
-    }
-
-    private async Task<Manifest_V2> LoadManifestAsync(Settings settings)
-    {
-        var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
-        var manifestJson = await fileSystem.ReadAllTextAsync(manifestFilePath);
-        return jsonSerializer.Deserialize<Manifest_V2>(manifestJson);
     }
     
     private string CreateInstallableDirectoryAsync(Installable installable, Settings settings)
@@ -81,11 +74,11 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         await fileSystem.WriteAllTextAsync(installableFilePath, installableJson);
     }
 
-    private async Task WriteManifestFileAsync(Settings settings, Manifest_V2 manifest)
+    private async Task WriteManifestFileAsync(Settings settings, ManifestFile manifestFile)
     {
         var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
-        var manifestJson = jsonSerializer.Serialize(manifest);
-        await fileSystem.WriteAllTextAsync(manifestFilePath, manifestJson);
+        var manifestFileJson = jsonSerializer.Serialize(manifestFile);
+        await fileSystem.WriteAllTextAsync(manifestFilePath, manifestFileJson);
     }
 
     public class ManifestFile
