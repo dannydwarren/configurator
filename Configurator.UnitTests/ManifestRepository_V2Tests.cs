@@ -102,4 +102,46 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
             })
         );
     }
+
+    [Fact]
+    public async Task When_loading_an_empty_manifest()
+    {
+        var settings = new Settings
+        {
+            Manifest = new ManifestSettings
+            {
+                Directory = RandomString(),
+                FileName = RandomString()
+            }   
+        };
+        var settingsRepositoryMock = GetMock<ISettingsRepository>();
+        settingsRepositoryMock.Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
+
+        var manifestFileJson = RandomString();
+        var fileSystemMock = GetMock<IFileSystem>();
+        fileSystemMock
+            .Setup(x => x.ReadAllTextAsync(Path.Join(settings.Manifest.Directory, settings.Manifest.FileName)))
+            .ReturnsAsync(manifestFileJson);
+
+        var manifestFile = new ManifestRepository_V2.ManifestFile();
+        var jsonSerializerMock = GetMock<IHumanReadableJsonSerializer>(); 
+        jsonSerializerMock.Setup(x => x.Deserialize<ManifestRepository_V2.ManifestFile>(manifestFileJson)).Returns(manifestFile);
+
+        var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+        It("populates the manifest from the manifest file", () =>
+        {
+            manifest.AppIds.ShouldBeSameAs(manifestFile.Apps);
+        });
+
+        It("returns an empty manifest", () =>
+        {
+            manifest.ShouldNotBeNull()
+                .ShouldSatisfyAllConditions(x =>
+                {
+                    x.AppIds.ShouldBeEmpty();
+                    x.Apps.ShouldBeEmpty();
+                });
+        });
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Configurator.Configuration;
 using Configurator.Utilities;
@@ -26,9 +27,15 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         this.fileSystem = fileSystem;
     }
 
-    public Task<Manifest_V2> LoadAsync()
+    public async Task<Manifest_V2> LoadAsync()
     {
-        throw new System.NotImplementedException();
+        var settings = await settingsRepository.LoadSettingsAsync();
+        var manifestFile = await LoadManifestAsync2(settings);
+
+        return new Manifest_V2
+        {
+            AppIds = manifestFile.Apps
+        };
     }
 
     public async Task SaveInstallableAsync(Installable installable)
@@ -42,6 +49,13 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         manifest.AppIds.Add(installable.AppId);
         
         await WriteManifestFileAsync(settings, manifest);
+    }
+
+    private async Task<ManifestFile> LoadManifestAsync2(Settings settings)
+    {
+        var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
+        var manifestFileJson = await fileSystem.ReadAllTextAsync(manifestFilePath);
+        return jsonSerializer.Deserialize<ManifestFile>(manifestFileJson);
     }
 
     private async Task<Manifest_V2> LoadManifestAsync(Settings settings)
@@ -72,6 +86,11 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
         var manifestJson = jsonSerializer.Serialize(manifest);
         await fileSystem.WriteAllTextAsync(manifestFilePath, manifestJson);
+    }
+
+    public class ManifestFile
+    {
+        public List<string> Apps { get; set; } = new List<string>();
     }
 }
 
