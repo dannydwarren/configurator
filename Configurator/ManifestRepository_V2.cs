@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Configurator.Apps;
 using Configurator.Configuration;
 using Configurator.Utilities;
 
@@ -31,10 +34,40 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     {
         var settings = await settingsRepository.LoadSettingsAsync();
         var manifestFile = await LoadManifestFileAsync(settings);
+        var loadAppTasks = manifestFile.Apps.Select(appId => LoadAppAsync(appId, settings));
+        var apps = await Task.WhenAll(loadAppTasks);
+        var knownApps = apps.Where(x => x != null).ToList();
 
         return new Manifest_V2
         {
-            AppIds = manifestFile.Apps
+            AppIds = manifestFile.Apps,
+            Apps = knownApps
+        };
+    }
+
+    private async Task<IApp> LoadAppAsync(string appId, Settings settings)
+    {
+        var installableAppFilePath = Path.Join(settings.Manifest.Directory, "apps", appId, "app.json");
+        var installableAppFileJson = await fileSystem.ReadAllTextAsync(installableAppFilePath);
+        var installable = jsonSerializer.Deserialize<Installable>(installableAppFileJson);
+
+        return ParseApp(installable);
+    }
+
+    private IApp ParseApp(Installable installable)
+    {
+        return installable switch
+        {
+            //{ AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(installable.AppData.ToString()),
+            //{ AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(installable.AppData.ToString()),
+            //{ AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(installable.AppData.ToString()),
+            //{ AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(installable.AppData.ToString()),
+            //{ AppType: AppType.Scoop } => jsonSerializer.Deserialize<ScoopApp>(installable.AppData.ToString()),
+            //{ AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(installable.AppData.ToString()),
+            { AppType: AppType.Script } => jsonSerializer.Deserialize<ScriptApp>(installable.AppData.ToString()),
+            //{ AppType: AppType.VisualStudioExtension } => jsonSerializer.Deserialize<VisualStudioExtensionApp>(installable.AppData.ToString()),
+            //{ AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(installable.AppData.ToString()),
+            _ => null!
         };
     }
 
@@ -42,12 +75,12 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     {
         var settings = await settingsRepository.LoadSettingsAsync();
         var manifestFile = await LoadManifestFileAsync(settings);
-        
+
         var installableDirectory = CreateInstallableDirectoryAsync(installable, settings);
         await WriteInstallableFileAsync(installable, installableDirectory);
 
         manifestFile.Apps.Add(installable.AppId);
-        
+
         await WriteManifestFileAsync(settings, manifestFile);
     }
 
@@ -57,7 +90,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         var manifestFileJson = await fileSystem.ReadAllTextAsync(manifestFilePath);
         return jsonSerializer.Deserialize<ManifestFile>(manifestFileJson);
     }
-    
+
     private string CreateInstallableDirectoryAsync(Installable installable, Settings settings)
     {
         var installableDirectory = Path.Join(settings.Manifest.Directory, "apps", installable.AppId);
@@ -92,4 +125,5 @@ public class Installable
     public string AppId { get; set; }
     public AppType AppType { get; set; }
     public string Environments { get; set; }
+    public JsonElement AppData { get; set; }
 }
