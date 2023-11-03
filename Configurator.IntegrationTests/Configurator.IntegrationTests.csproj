@@ -43,6 +43,12 @@
       <None Update="TestManifests\scoop-only_manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\test.manifest.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\winget-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\winget-only_manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

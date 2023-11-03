@@ -1,0 +1,5 @@
+﻿{
+    "AppType": "Winget",
+    "AppId": "winget-app-id",
+    "Environments": "Test"
+}

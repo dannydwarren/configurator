@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Configurator.Apps;
@@ -50,6 +51,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         var installableAppFilePath = Path.Join(settings.Manifest.Directory, "apps", appId, "app.json");
         var installableAppFileJson = await fileSystem.ReadAllTextAsync(installableAppFilePath);
         var installable = jsonSerializer.Deserialize<Installable>(installableAppFileJson);
+        installable.AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(installableAppFileJson))).RootElement;
 
         return ParseApp(installable);
     }
@@ -66,7 +68,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
             //{ AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(installable.AppData.ToString()),
             { AppType: AppType.Script } => jsonSerializer.Deserialize<ScriptApp>(installable.AppData.ToString()),
             //{ AppType: AppType.VisualStudioExtension } => jsonSerializer.Deserialize<VisualStudioExtensionApp>(installable.AppData.ToString()),
-            //{ AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(installable.AppData.ToString()),
+            { AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(installable.AppData.ToString()),
             _ => null!
         };
     }
