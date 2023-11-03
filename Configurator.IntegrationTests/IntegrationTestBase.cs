@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Configurator.IntegrationTests.Configuration;
 using Configurator.Utilities;
 using Configurator.Windows;
+using Configurator.Configuration;
 
 namespace Configurator.IntegrationTests
 {
@@ -83,8 +84,9 @@ namespace Configurator.IntegrationTests
 
         private static void RegisterRequiredServices(ServiceCollection services)
         {
-            DependencyInjectionConfig.ConfigureServices(services);
+            Configurator.Configuration.DependencyInjectionConfig.ConfigureServices(services);
 
+            services.AddTransient<ISettingsRepository, InMemorySettingsRepository>();
             services.AddTransient<TClassUnderTest, TClassUnderTest>();
         }
 
