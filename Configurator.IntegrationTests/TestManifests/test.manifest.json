@@ -1,5 +1,8 @@
 ﻿{
     "Apps": [
-        "winget-app-id"
+        "winget-app-id",
+        "winget-app-id-with-install-args",
+        "winget-app-id-with-prevent-upgrade",
+        "winget-app-id-with-configuration"
     ]
 }

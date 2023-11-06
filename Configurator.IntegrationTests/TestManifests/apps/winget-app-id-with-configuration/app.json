@@ -1,0 +1,14 @@
+﻿{
+    "AppType": "Winget",
+    "AppId": "winget-app-id-with-configuration",
+    "Environments": "Test",
+    "Configuration": {
+        "RegistrySettings": [
+            {
+                "KeyName": "key-name-test",
+                "ValueName": "value-name-test",
+                "ValueData": "value-data-test"
+            }
+        ]
+    }
+}

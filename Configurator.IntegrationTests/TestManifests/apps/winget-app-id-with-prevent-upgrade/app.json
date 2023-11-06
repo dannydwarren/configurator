@@ -1,0 +1,6 @@
+﻿{
+    "AppType": "Winget",
+    "AppId": "winget-app-id-with-prevent-upgrade",
+    "Environments": "Test",
+    "PreventUpgrade": true
+}
