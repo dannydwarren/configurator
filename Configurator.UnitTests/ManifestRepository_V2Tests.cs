@@ -234,11 +234,11 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         var installableAppFilePath4 = Path.Join(settings.Manifest.Directory, "apps", manifestFile.Apps[3], "app.json");
         var installableAppFilePath5 = Path.Join(settings.Manifest.Directory, "apps", manifestFile.Apps[4], "app.json");
 
-        var installableAppFileJson1 = RandomString();
-        var installableAppFileJson2 = RandomString();
-        var installableAppFileJson3 = RandomString();
-        var installableAppFileJson4 = RandomString();
-        var installableAppFileJson5 = RandomString();
+        var installableAppFileJson1 = $"{{\"prop1\": \"{RandomString()}\"}}";
+        var installableAppFileJson2 = $"{{\"prop1\": \"{RandomString()}\"}}";
+        var installableAppFileJson3 = $"{{\"prop1\": \"{RandomString()}\"}}";
+        var installableAppFileJson4 = $"{{\"prop1\": \"{RandomString()}\"}}";
+        var installableAppFileJson5 = $"{{\"prop1\": \"{RandomString()}\"}}";
 
         fileSystemMock.Setup(x => x.ReadAllTextAsync(installableAppFilePath1)).ReturnsAsync(installableAppFileJson1);
         fileSystemMock.Setup(x => x.ReadAllTextAsync(installableAppFilePath2)).ReturnsAsync(installableAppFileJson2);
