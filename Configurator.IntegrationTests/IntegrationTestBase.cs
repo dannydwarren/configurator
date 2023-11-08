@@ -67,9 +67,7 @@ namespace Configurator.IntegrationTests
             {
                 if (classUnderTest == null)
                 {
-                    serviceProvider = Services.BuildServiceProvider();
-                    RegistrySettingValueDataConverter.Tokenizer = serviceProvider.GetRequiredService<ITokenizer>();
-
+                    BuildServices();
                     classUnderTest = serviceProvider.GetService<TClassUnderTest>()!;
                 }
 
@@ -79,14 +77,23 @@ namespace Configurator.IntegrationTests
 
         protected TService GetInstance<TService>()
         {
+            BuildServices();
             return serviceProvider!.GetService<TService>()!;
         }
 
+        private void BuildServices()
+        {
+            if(serviceProvider != null)
+                return;
+            
+            serviceProvider = Services.BuildServiceProvider();
+            RegistrySettingValueDataConverter.Tokenizer = serviceProvider.GetRequiredService<ITokenizer>();
+        }
         private static void RegisterRequiredServices(ServiceCollection services)
         {
             Configurator.Configuration.DependencyInjectionConfig.ConfigureServices(services);
 
-            services.AddTransient<ISettingsRepository, InMemorySettingsRepository>();
+            services.AddSingleton<ISettingsRepository, InMemorySettingsRepository>();
             services.AddTransient<TClassUnderTest, TClassUnderTest>();
         }
 

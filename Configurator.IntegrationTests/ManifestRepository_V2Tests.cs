@@ -1,4 +1,5 @@
 ﻿using Configurator.Apps;
+using Configurator.Configuration;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
@@ -8,8 +9,13 @@ namespace Configurator.IntegrationTests
     public class ManifestRepository_V2Tests : IntegrationTestBase<ManifestRepository_V2>
     {
         [Fact]
-        public async Task When_loading()
+        public async Task When_loading_WingetApps()
         {
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
+            settings.Manifest.FileName = "winget.manifest.json";
+            await settingsRepository.SaveAsync(settings);
+
             var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
 
             It($"loads basic {nameof(WingetApp)}", () =>

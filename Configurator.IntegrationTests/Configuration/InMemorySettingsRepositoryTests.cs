@@ -32,5 +32,25 @@ namespace Configurator.IntegrationTests.Configuration
                 });
             });
         }
+
+        [Fact]
+        public async Task When_loading_after_saving()
+        {
+            var originalSettings = await ClassUnderTest.LoadSettingsAsync();
+
+            var newFileName = RandomString();
+            originalSettings.Manifest.FileName = newFileName;
+
+            var settings = await BecauseAsync(async () =>
+            {
+                await ClassUnderTest.SaveAsync(originalSettings);
+                return await ClassUnderTest.LoadSettingsAsync();
+            });
+
+            It("loads saved settings", () =>
+            {
+                settings.Manifest.FileName.ShouldBe(newFileName);
+            });
+        }
     }
 }

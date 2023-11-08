@@ -7,12 +7,14 @@ namespace Configurator.IntegrationTests.Configuration
 {
     public class InMemorySettingsRepository : ISettingsRepository
     {
+        private Settings Settings { get; set; }
+
         public async Task<Settings> LoadSettingsAsync()
         {
             string executingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
             string testManifestsDirectory = Path.Combine(executingDirectory, "..\\..\\..\\TestManifests");
 
-            return new Settings
+            return Settings ??= new Settings
             {
                 Manifest =
                 {
@@ -22,9 +24,11 @@ namespace Configurator.IntegrationTests.Configuration
             };
         }
 
-        public async Task SaveAsync(Settings settings)
+        public Task SaveAsync(Settings settings)
         {
-            throw new System.NotImplementedException();
+            Settings = settings;
+
+            return Task.CompletedTask;
         }
     }
 }
