@@ -28,6 +28,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="TestManifests\apps\script-app-id-with-configuration\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\script-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\winget-app-id-with-configuration\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

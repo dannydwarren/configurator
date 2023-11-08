@@ -67,5 +67,45 @@ namespace Configurator.IntegrationTests
             });
 
         }
+
+        [Fact]
+        public async Task When_loading_ScriptApps()
+        {
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
+            settings.Manifest.FileName = "script.manifest.json";
+            await settingsRepository.SaveAsync(settings);
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads {nameof(ScriptApp)}", () =>
+            {
+                manifest.Apps[0]
+                    .ShouldBeOfType<ScriptApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("script-app-id");
+                        x.InstallScript.ShouldBe("install-script");
+                        x.VerificationScript.ShouldBe("verification-script");
+                        x.UpgradeScript.ShouldBe("upgrade-script");
+                        x.Configuration.ShouldBeNull();
+                    });
+            });
+
+            It($"loads {nameof(ScriptApp)} with {nameof(ScriptApp.Configuration)}", () =>
+            {
+                manifest.Apps[1]
+                    .ShouldBeOfType<ScriptApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("script-app-id-with-configuration");
+                        x.Configuration.ShouldNotBeNull().RegistrySettings.ShouldHaveSingleItem()
+                            .ShouldSatisfyAllConditions(y =>
+                            {
+                                y.KeyName.ShouldBe("key-name-test");
+                                y.ValueName.ShouldBe("value-name-test");
+                                y.ValueData.ShouldBe("value-data-test");
+                            });
+                    });
+            });
+        }
     }
 }
