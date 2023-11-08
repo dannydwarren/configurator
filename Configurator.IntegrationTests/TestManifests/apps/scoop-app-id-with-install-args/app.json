@@ -1,0 +1,6 @@
+﻿{
+    "AppType": "Scoop",
+    "AppId": "scoop-app-id-with-install-args",
+    "Environments": "Test",
+    "InstallArgs": "install-args"
+}

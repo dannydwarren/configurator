@@ -1,0 +1,8 @@
+﻿{
+    "Apps": [
+        "scoop-app-id",
+        "scoop-app-id-with-install-args",
+        "scoop-app-id-with-prevent-upgrade",
+        "scoop-app-id-with-configuration"
+    ]
+}

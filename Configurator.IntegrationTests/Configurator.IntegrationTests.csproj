@@ -28,6 +28,18 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="TestManifests\apps\scoop-app-id-with-configuration\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\scoop-app-id-with-install-args\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\scoop-app-id-with-prevent-upgrade\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\scoop-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\script-app-id-with-configuration\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -56,6 +68,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\scoop-only_manifest.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\scoop.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\winget.manifest.json">

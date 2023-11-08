@@ -78,7 +78,7 @@ namespace Configurator.IntegrationTests
 
             var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
 
-            It($"loads {nameof(ScriptApp)}", () =>
+            It($"loads basic {nameof(ScriptApp)}", () =>
             {
                 manifest.Apps[0]
                     .ShouldBeOfType<ScriptApp>().ShouldSatisfyAllConditions(x =>
@@ -98,6 +98,65 @@ namespace Configurator.IntegrationTests
                     {
                         x.AppId.ShouldBe("script-app-id-with-configuration");
                         x.Configuration.ShouldNotBeNull().RegistrySettings.ShouldHaveSingleItem()
+                            .ShouldSatisfyAllConditions(y =>
+                            {
+                                y.KeyName.ShouldBe("key-name-test");
+                                y.ValueName.ShouldBe("value-name-test");
+                                y.ValueData.ShouldBe("value-data-test");
+                            });
+                    });
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_ScoopApps()
+        {
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
+            settings.Manifest.FileName = "scoop.manifest.json";
+            await settingsRepository.SaveAsync(settings);
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads basic {nameof(ScoopApp)}", () =>
+            {
+                manifest.Apps[0]
+                    .ShouldBeOfType<ScoopApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("scoop-app-id");
+                        x.InstallArgs.ShouldBeEmpty();
+                        x.PreventUpgrade.ShouldBeFalse();
+                        x.Configuration.ShouldBeNull();
+                    });
+            });
+
+            It($"loads {nameof(ScoopApp)} with {nameof(ScoopApp.InstallArgs)}", () =>
+            {
+                manifest.Apps[1]
+                    .ShouldBeOfType<ScoopApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("scoop-app-id-with-install-args");
+                        x.InstallArgs.ShouldBe(" install-args");
+                    });
+            });
+
+            It($"loads {nameof(ScoopApp)} with {nameof(ScoopApp.PreventUpgrade)}", () =>
+            {
+                manifest.Apps[2]
+                    .ShouldBeOfType<ScoopApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("scoop-app-id-with-prevent-upgrade");
+                        x.PreventUpgrade.ShouldBeTrue();
+                    });
+            });
+
+            It($"loads {nameof(ScoopApp)} with {nameof(ScoopApp.Configuration)}", () =>
+            {
+                manifest.Apps[3]
+                    .ShouldBeOfType<ScoopApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("scoop-app-id-with-configuration");
+                        x.Configuration.RegistrySettings.ShouldHaveSingleItem()
                             .ShouldSatisfyAllConditions(y =>
                             {
                                 y.KeyName.ShouldBe("key-name-test");

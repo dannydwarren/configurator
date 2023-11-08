@@ -1,0 +1,6 @@
+﻿{
+    "AppType": "Scoop",
+    "AppId": "scoop-app-id-with-prevent-upgrade",
+    "Environments": "Test",
+    "PreventUpgrade": true
+}
