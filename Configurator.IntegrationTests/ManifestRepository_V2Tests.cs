@@ -126,43 +126,6 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
-        public async Task When_loading_ScriptApps()
-        {
-            await SetManifestFileName("script.manifest.json");
-
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
-
-            It($"loads basic {nameof(ScriptApp)}", () =>
-            {
-                manifest.Apps[0]
-                    .ShouldBeOfType<ScriptApp>().ShouldSatisfyAllConditions(x =>
-                    {
-                        x.AppId.ShouldBe("script-app-id");
-                        x.InstallScript.ShouldBe("install-script");
-                        x.VerificationScript.ShouldBe("verification-script");
-                        x.UpgradeScript.ShouldBe("upgrade-script");
-                        x.Configuration.ShouldBeNull();
-                    });
-            });
-
-            It($"loads {nameof(ScriptApp)} with {nameof(ScriptApp.Configuration)}", () =>
-            {
-                manifest.Apps[1]
-                    .ShouldBeOfType<ScriptApp>().ShouldSatisfyAllConditions(x =>
-                    {
-                        x.AppId.ShouldBe("script-app-id-with-configuration");
-                        x.Configuration.ShouldNotBeNull().RegistrySettings.ShouldHaveSingleItem()
-                            .ShouldSatisfyAllConditions(y =>
-                            {
-                                y.KeyName.ShouldBe("key-name-test");
-                                y.ValueName.ShouldBe("value-name-test");
-                                y.ValueData.ShouldBe("value-data-test");
-                            });
-                    });
-            });
-        }
-
-        [Fact]
         public async Task When_loading_ScoopApps()
         {
             await SetManifestFileName("scoop.manifest.json");
@@ -208,6 +171,43 @@ namespace Configurator.IntegrationTests
                     {
                         x.AppId.ShouldBe("scoop-app-id-with-configuration");
                         x.Configuration.RegistrySettings.ShouldHaveSingleItem()
+                            .ShouldSatisfyAllConditions(y =>
+                            {
+                                y.KeyName.ShouldBe("key-name-test");
+                                y.ValueName.ShouldBe("value-name-test");
+                                y.ValueData.ShouldBe("value-data-test");
+                            });
+                    });
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_ScriptApps()
+        {
+            await SetManifestFileName("script.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads basic {nameof(ScriptApp)}", () =>
+            {
+                manifest.Apps[0]
+                    .ShouldBeOfType<ScriptApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("script-app-id");
+                        x.InstallScript.ShouldBe("install-script");
+                        x.VerificationScript.ShouldBe("verification-script");
+                        x.UpgradeScript.ShouldBe("upgrade-script");
+                        x.Configuration.ShouldBeNull();
+                    });
+            });
+
+            It($"loads {nameof(ScriptApp)} with {nameof(ScriptApp.Configuration)}", () =>
+            {
+                manifest.Apps[1]
+                    .ShouldBeOfType<ScriptApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("script-app-id-with-configuration");
+                        x.Configuration.ShouldNotBeNull().RegistrySettings.ShouldHaveSingleItem()
                             .ShouldSatisfyAllConditions(y =>
                             {
                                 y.KeyName.ShouldBe("key-name-test");
