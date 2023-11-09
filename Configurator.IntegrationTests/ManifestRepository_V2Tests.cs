@@ -233,6 +233,25 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_loading_VisualStudioExtensionApps()
+        {
+            await SetManifestFileName("visual-studio-extension.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads basic {nameof(VisualStudioExtensionApp)}", () =>
+            {
+                manifest.Apps[0]
+                    .ShouldBeOfType<VisualStudioExtensionApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("visual-studio-extension-app-id");
+                        x.DownloaderArgs.GetProperty("Publisher").GetString().ShouldBe("publisher-1");
+                        x.DownloaderArgs.GetProperty("ExtensionName").GetString().ShouldBe("extension-name-1");
+                    });
+            });
+        }
+
+        [Fact]
         public async Task When_loading_WingetApps()
         {
             await SetManifestFileName("winget.manifest.json");
