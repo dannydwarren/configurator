@@ -9,6 +9,20 @@ namespace Configurator.IntegrationTests
     public class ManifestRepository_V2Tests : IntegrationTestBase<ManifestRepository_V2>
     {
         [Fact]
+        public async Task When_loading_Gitconfigs()
+        {
+            await SetManifestFileName("gitconfig.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads basic {nameof(ScriptApp)}", () =>
+            {
+                manifest.Apps.ShouldHaveSingleItem()
+                    .ShouldBeOfType<GitconfigApp>().AppId.ShouldBe("gitconfig-app-id");
+            });
+        }
+
+        [Fact]
         public async Task When_loading_ScriptApps()
         {
             await SetManifestFileName("script.manifest.json");

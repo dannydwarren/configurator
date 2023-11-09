@@ -60,7 +60,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     {
         return installable switch
         {
-            //{ AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(installable.AppData.ToString()),
+            { AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(installable.AppData.ToString()),
             //{ AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(installable.AppData.ToString()),
             //{ AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(installable.AppData.ToString()),
             //{ AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(installable.AppData.ToString()),
