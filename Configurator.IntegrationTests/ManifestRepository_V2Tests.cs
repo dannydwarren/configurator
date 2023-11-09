@@ -23,6 +23,20 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_loading_NonPackageApp()
+        {
+            await SetManifestFileName("non-package.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads basic {nameof(NonPackageApp)}", () =>
+            {
+                manifest.Apps.ShouldHaveSingleItem()
+                    .ShouldBeOfType<NonPackageApp>().AppId.ShouldBe("non-package-app-id");
+            });
+        }
+
+        [Fact]
         public async Task When_loading_ScriptApps()
         {
             await SetManifestFileName("script.manifest.json");
