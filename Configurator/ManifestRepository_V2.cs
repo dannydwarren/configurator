@@ -50,25 +50,25 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     {
         var installableAppFilePath = Path.Join(settings.Manifest.Directory, "apps", appId, "app.json");
         var installableAppFileJson = await fileSystem.ReadAllTextAsync(installableAppFilePath);
-        var installable = jsonSerializer.Deserialize<Installable>(installableAppFileJson);
-        installable.AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(installableAppFileJson))).RootElement;
+        var rawInstallable = jsonSerializer.Deserialize<RawInstallable>(installableAppFileJson);
+        rawInstallable.AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(installableAppFileJson))).RootElement;
 
-        return ParseApp(installable);
+        return ParseApp(rawInstallable);
     }
 
-    private IApp ParseApp(Installable installable)
+    private IApp ParseApp(RawInstallable rawInstallable)
     {
-        return installable switch
+        return rawInstallable switch
         {
-            { AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(installable.AppData.ToString()),
-            { AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(installable.AppData.ToString()),
-            { AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(installable.AppData.ToString()),
-            { AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(installable.AppData.ToString()),
-            { AppType: AppType.Scoop } => jsonSerializer.Deserialize<ScoopApp>(installable.AppData.ToString()),
-            { AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(installable.AppData.ToString()),
-            { AppType: AppType.Script } => jsonSerializer.Deserialize<ScriptApp>(installable.AppData.ToString()),
-            { AppType: AppType.VisualStudioExtension } => jsonSerializer.Deserialize<VisualStudioExtensionApp>(installable.AppData.ToString()),
-            { AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(installable.AppData.ToString()),
+            { AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.Scoop } => jsonSerializer.Deserialize<ScoopApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.Script } => jsonSerializer.Deserialize<ScriptApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.VisualStudioExtension } => jsonSerializer.Deserialize<VisualStudioExtensionApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(rawInstallable.AppData.ToString()),
             _ => null!
         };
     }
@@ -120,6 +120,14 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     {
         public List<string> Apps { get; set; } = new List<string>();
     }
+
+    public class RawInstallable
+    {
+        public string AppId { get; set; }
+        public AppType AppType { get; set; }
+        public string Environments { get; set; }
+        public JsonElement AppData { get; set; }
+    }
 }
 
 public class Installable
@@ -127,5 +135,4 @@ public class Installable
     public string AppId { get; set; }
     public AppType AppType { get; set; }
     public string Environments { get; set; }
-    public JsonElement AppData { get; set; }
 }

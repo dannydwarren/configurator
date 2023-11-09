@@ -1,7 +1,6 @@
 ﻿using Configurator.Apps;
 using Configurator.Configuration;
 using Configurator.Windows;
-using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +10,31 @@ namespace Configurator.IntegrationTests
 {
     public class ManifestRepository_V2Tests : IntegrationTestBase<ManifestRepository_V2>
     {
+        [Fact]
+        public async Task When_saving_an_installable()
+        {
+            var installable = new Installable
+            {
+                AppId = RandomString(),
+                AppType = AppType.Winget,
+                Environments = RandomString(),
+            };
+
+            await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable));
+
+            var manifest = await ClassUnderTest.LoadAsync();
+
+            It("saves", () =>
+            {
+                manifest.AppIds.ShouldHaveSingleItem().ShouldBe(installable.AppId);
+                manifest.Apps.ShouldHaveSingleItem().ShouldSatisfyAllConditions(x =>
+                {
+                    x.AppId.ShouldBe(installable.AppId);
+                    x.ShouldBeOfType<WingetApp>();
+                });
+            });
+        }
+
         [Fact]
         public async Task When_loading_Gitconfigs()
         {

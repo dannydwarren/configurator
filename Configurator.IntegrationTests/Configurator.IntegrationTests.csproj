@@ -127,6 +127,9 @@
       <None Update="TestManifests\script.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\test.manifest.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\visual-studio-extension.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

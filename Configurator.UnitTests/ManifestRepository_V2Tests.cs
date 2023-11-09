@@ -15,42 +15,42 @@ namespace Configurator.UnitTests;
 
 public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
 {
-    private readonly List<Installable> installables;
+    private readonly List<ManifestRepository_V2.RawInstallable> installables;
     private readonly List<ScriptApp> knownScriptApps;
 
     public ManifestRepository_V2Tests()
     {
-        installables = new List<Installable>
+        installables = new List<ManifestRepository_V2.RawInstallable>
             {
-                new Installable
+                new ManifestRepository_V2.RawInstallable
                 {
                     AppId = RandomString(),
                     AppType = AppType.Script,
                     Environments = "Personal".ToLower(),
                     AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(@"{""app"": 1}"))).RootElement
                 },
-                new Installable
+                new ManifestRepository_V2.RawInstallable
                 {
                     AppId = RandomString(),
                     AppType = AppType.Script,
                     Environments = "Media",
                     AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(@"{""app"": 2}"))).RootElement
                 },
-                new Installable
+                new ManifestRepository_V2.RawInstallable
                 {
                     AppId = RandomString(),
                     AppType = AppType.Script,
                     Environments = "Work",
                     AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(@"{""app"": 3}"))).RootElement
                 },
-                new Installable
+                new ManifestRepository_V2.RawInstallable
                 {
                     AppId = RandomString(),
                     AppType = AppType.Script,
                     Environments = "All",
                     AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(@"{""app"": 4}"))).RootElement
                 },
-                new Installable
+                new ManifestRepository_V2.RawInstallable
                 {
                     AppId = RandomString(),
                     AppType = AppType.Unknown,
@@ -246,11 +246,11 @@ public class ManifestRepository_V2Tests : UnitTestBase<ManifestRepository_V2>
         fileSystemMock.Setup(x => x.ReadAllTextAsync(installableAppFilePath4)).ReturnsAsync(installableAppFileJson4);
         fileSystemMock.Setup(x => x.ReadAllTextAsync(installableAppFilePath5)).ReturnsAsync(installableAppFileJson5);
 
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Installable>(installableAppFileJson1)).Returns(installables[0]);
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Installable>(installableAppFileJson2)).Returns(installables[1]);
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Installable>(installableAppFileJson3)).Returns(installables[2]);
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Installable>(installableAppFileJson4)).Returns(installables[3]);
-        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<Installable>(installableAppFileJson5)).Returns(installables[4]);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ManifestRepository_V2.RawInstallable>(installableAppFileJson1)).Returns(installables[0]);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ManifestRepository_V2.RawInstallable>(installableAppFileJson2)).Returns(installables[1]);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ManifestRepository_V2.RawInstallable>(installableAppFileJson3)).Returns(installables[2]);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ManifestRepository_V2.RawInstallable>(installableAppFileJson4)).Returns(installables[3]);
+        GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ManifestRepository_V2.RawInstallable>(installableAppFileJson5)).Returns(installables[4]);
 
         GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ScriptApp>(installables[0].AppData.ToString())).Returns(knownScriptApps[0]);
         GetMock<IHumanReadableJsonSerializer>().Setup(x => x.Deserialize<ScriptApp>(installables[1].AppData.ToString())).Returns(knownScriptApps[1]);
