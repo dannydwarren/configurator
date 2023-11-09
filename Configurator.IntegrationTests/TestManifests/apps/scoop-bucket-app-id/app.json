@@ -1,0 +1,5 @@
+﻿{
+    "AppType": "ScoopBucket",
+    "AppId": "scoop-bucket-app-id",
+    "Environments": "Test"
+}

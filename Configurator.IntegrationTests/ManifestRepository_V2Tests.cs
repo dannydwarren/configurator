@@ -182,6 +182,20 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_loading_ScoopBucketApps()
+        {
+            await SetManifestFileName("scoop-bucket.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads basic {nameof(ScoopBucketApp)}", () =>
+            {
+                manifest.Apps.ShouldHaveSingleItem()
+                    .ShouldBeOfType<ScoopBucketApp>().AppId.ShouldBe("scoop-bucket-app-id");
+            });
+        }
+
+        [Fact]
         public async Task When_loading_ScriptApps()
         {
             await SetManifestFileName("script.manifest.json");

@@ -65,7 +65,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
             { AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(installable.AppData.ToString()),
             { AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(installable.AppData.ToString()),
             { AppType: AppType.Scoop } => jsonSerializer.Deserialize<ScoopApp>(installable.AppData.ToString()),
-            //{ AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(installable.AppData.ToString()),
+            { AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(installable.AppData.ToString()),
             { AppType: AppType.Script } => jsonSerializer.Deserialize<ScriptApp>(installable.AppData.ToString()),
             //{ AppType: AppType.VisualStudioExtension } => jsonSerializer.Deserialize<VisualStudioExtensionApp>(installable.AppData.ToString()),
             { AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(installable.AppData.ToString()),
