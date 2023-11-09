@@ -1,0 +1,6 @@
+﻿{
+    "AppType": "PowerShellModule",
+    "AppId": "power-shell-module-app-id-with-prevent-upgrade",
+    "Environments": "Test",
+    "PreventUpgrade": true
+}

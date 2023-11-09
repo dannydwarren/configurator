@@ -1,0 +1,6 @@
+﻿{
+    "AppType": "PowerShellModule",
+    "AppId": "power-shell-module-app-id-with-install-args",
+    "Environments": "Test",
+    "InstallArgs": "install-args"
+}

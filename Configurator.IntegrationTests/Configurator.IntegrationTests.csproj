@@ -40,6 +40,18 @@
       <None Update="TestManifests\apps\power-shell-app-package-app-id\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\apps\power-shell-module-app-id-with-configuration\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\power-shell-module-app-id-with-install-args\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\power-shell-module-app-id-with-prevent-upgrade\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\power-shell-module-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\scoop-app-id-with-configuration\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -83,6 +95,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\power-shell-app-packages.manifest.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\power-shell-module.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\scoop-buckets-only_manifest.json">
