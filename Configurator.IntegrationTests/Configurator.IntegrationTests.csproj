@@ -34,6 +34,12 @@
       <None Update="TestManifests\apps\non-package-app-id\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\apps\power-shell-app-package-app-id-with-prevent-upgrade\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\power-shell-app-package-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\scoop-app-id-with-configuration\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -74,6 +80,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\power-shell-app-package-only_manifest.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\power-shell-app-packages.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\scoop-buckets-only_manifest.json">

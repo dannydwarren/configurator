@@ -1,0 +1,6 @@
+﻿{
+    "Apps": [
+        "power-shell-app-package-app-id",
+        "power-shell-app-package-app-id-with-prevent-upgrade"
+    ]
+}

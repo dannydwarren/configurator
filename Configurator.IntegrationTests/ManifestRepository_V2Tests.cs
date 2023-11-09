@@ -1,6 +1,7 @@
 ﻿using Configurator.Apps;
 using Configurator.Configuration;
 using Shouldly;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -23,7 +24,7 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
-        public async Task When_loading_NonPackageApp()
+        public async Task When_loading_NonPackageApps()
         {
             await SetManifestFileName("non-package.manifest.json");
 
@@ -33,6 +34,38 @@ namespace Configurator.IntegrationTests
             {
                 manifest.Apps.ShouldHaveSingleItem()
                     .ShouldBeOfType<NonPackageApp>().AppId.ShouldBe("non-package-app-id");
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_PowerShellAppPackages()
+        {
+            await SetManifestFileName("power-shell-app-packages.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It($"loads basic {nameof(PowerShellAppPackage)}", () =>
+            {
+                manifest.Apps.First()
+                    .ShouldBeOfType<PowerShellAppPackage>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("power-shell-app-package-app-id");
+                        x.Downloader.ShouldBe("some-downloader");
+                        x.DownloaderArgs.ToString().ShouldNotBeEmpty();
+                        x.PreventUpgrade.ShouldBeFalse();
+                    });
+            });
+
+            It($"loads {nameof(PowerShellAppPackage)} with {nameof(PowerShellAppPackage.PreventUpgrade)}", () =>
+            {
+                manifest.Apps.Last()
+                    .ShouldBeOfType<PowerShellAppPackage>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("power-shell-app-package-app-id-with-prevent-upgrade");
+                        x.Downloader.ShouldBe("some-downloader");
+                        x.DownloaderArgs.ToString().ShouldNotBeEmpty();
+                        x.PreventUpgrade.ShouldBe(true);
+                    });
             });
         }
 
