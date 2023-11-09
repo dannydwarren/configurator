@@ -52,6 +52,9 @@
       <None Update="TestManifests\apps\power-shell-module-app-id\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\apps\registry-settings-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\scoop-app-id-with-configuration\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -104,6 +107,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\power-shell-module.manifest.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\registry-settings.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\scoop-bucket.manifest.json">
