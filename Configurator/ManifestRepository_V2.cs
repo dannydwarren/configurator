@@ -78,12 +78,20 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         var settings = await settingsRepository.LoadSettingsAsync();
         var manifestFile = await LoadManifestFileAsync(settings);
 
+        if (CheckInstallableAlreadyInManifest(installable, manifestFile))
+            return;
+
         var installableDirectory = CreateInstallableDirectoryAsync(installable, settings);
         await WriteInstallableFileAsync(installable, installableDirectory);
 
         manifestFile.Apps.Add(installable.AppId);
 
         await WriteManifestFileAsync(settings, manifestFile);
+    }
+
+    private bool CheckInstallableAlreadyInManifest(Installable installable, ManifestFile manifestFile)
+    {
+        return manifestFile.Apps.Contains(installable.AppId);
     }
 
     private async Task<ManifestFile> LoadManifestFileAsync(Settings settings)

@@ -99,6 +99,50 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_saving_an_installable_twice_no_changes_should_be_made()
+        {
+            var specialFolders = GetInstance<ISpecialFolders>();
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
+            settings.Manifest.Directory = $"{specialFolders.GetLocalAppDataPath()}/temp/integration-tests";
+            Directory.CreateDirectory(settings.Manifest.Directory);
+            settings.Manifest.FileName = $"{RandomString()}.manifest.json";
+            await settingsRepository.SaveAsync(settings);
+
+            var originalInstallable = new Installable
+            {
+                AppId = RandomString(),
+                AppType = AppType.Winget,
+                Environments = RandomString(),
+            };
+
+            await ClassUnderTest.SaveInstallableAsync(originalInstallable);
+
+            var modifiedInstallable = new Installable
+            {
+                AppId = originalInstallable.AppId,
+                AppType = AppType.Script,
+                Environments = RandomString(),
+            };
+
+            await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(modifiedInstallable));
+
+            var manifest = await ClassUnderTest.LoadAsync();
+
+            It("does not save", () =>
+            {
+                manifest.AppIds.ShouldHaveSingleItem().ShouldBe(originalInstallable.AppId);
+                manifest.Apps.ShouldHaveSingleItem().ShouldSatisfyAllConditions(x =>
+                {
+                    x.AppId.ShouldBe(originalInstallable.AppId);
+                    x.ShouldBeOfType<WingetApp>();                    
+                });
+            });
+
+            Directory.Delete(settings.Manifest.Directory, recursive: true);
+        }
+
+        [Fact]
         public async Task When_loading_Gitconfigs()
         {
             await SetManifestFileName("gitconfig.manifest.json");
