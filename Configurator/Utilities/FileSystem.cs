@@ -15,6 +15,7 @@ namespace Configurator.Utilities
         Task WriteAllTextAsync(string path, string contents);
         bool Exists(string path);
         void CreateDirectory(string path);
+        void CreateFile(string fileName);
     }
 
     public class FileSystem : IFileSystem
@@ -69,6 +70,11 @@ namespace Configurator.Utilities
         public void CreateDirectory(string path)
         {
             Directory.CreateDirectory(path);
+        }
+
+        public void CreateFile(string fileName)
+        {
+            using var _ = File.Create(fileName);
         }
     }
 }

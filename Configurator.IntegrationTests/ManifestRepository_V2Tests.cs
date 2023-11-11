@@ -1,7 +1,9 @@
 ﻿using Configurator.Apps;
 using Configurator.Configuration;
+using Configurator.Utilities;
 using Configurator.Windows;
 using Shouldly;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,8 +13,16 @@ namespace Configurator.IntegrationTests
     public class ManifestRepository_V2Tests : IntegrationTestBase<ManifestRepository_V2>
     {
         [Fact]
-        public async Task When_saving_an_installable()
+        public async Task When_saving_an_installable_to_a_new_manifest()
         {
+            var specialFolders = GetInstance<ISpecialFolders>();
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
+            settings.Manifest.Directory = $"{specialFolders.GetLocalAppDataPath()}/temp/integration-tests";
+            Directory.CreateDirectory(settings.Manifest.Directory);
+            settings.Manifest.FileName = $"{RandomString()}.manifest.json";
+            await settingsRepository.SaveAsync(settings);
+
             var installable = new Installable
             {
                 AppId = RandomString(),
@@ -33,6 +43,8 @@ namespace Configurator.IntegrationTests
                     x.ShouldBeOfType<WingetApp>();
                 });
             });
+
+            Directory.Delete(settings.Manifest.Directory, recursive: true);
         }
 
         [Fact]

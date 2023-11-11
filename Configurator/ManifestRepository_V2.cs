@@ -89,8 +89,18 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     private async Task<ManifestFile> LoadManifestFileAsync(Settings settings)
     {
         var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
+        await EnsureManifestFileExists(manifestFilePath);
         var manifestFileJson = await fileSystem.ReadAllTextAsync(manifestFilePath);
         return jsonSerializer.Deserialize<ManifestFile>(manifestFileJson);
+    }
+
+    private async Task EnsureManifestFileExists(string fileName)
+    {
+        if (fileSystem.Exists(fileName))
+            return;
+
+        fileSystem.CreateFile(fileName);
+        await fileSystem.WriteAllTextAsync(fileName, "{}");
     }
 
     private string CreateInstallableDirectoryAsync(Installable installable, Settings settings)
