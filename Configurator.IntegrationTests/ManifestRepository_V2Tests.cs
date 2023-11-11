@@ -48,6 +48,57 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_saving_an_installable_to_an_existing_manifest()
+        {
+            var specialFolders = GetInstance<ISpecialFolders>();
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
+            settings.Manifest.Directory = $"{specialFolders.GetLocalAppDataPath()}/temp/integration-tests";
+            Directory.CreateDirectory(settings.Manifest.Directory);
+            settings.Manifest.FileName = $"{RandomString()}.manifest.json";
+            await settingsRepository.SaveAsync(settings);
+
+            var installable1 = new Installable
+            {
+                AppId = RandomString(),
+                AppType = AppType.Winget,
+                Environments = RandomString(),
+            };
+
+            await ClassUnderTest.SaveInstallableAsync(installable1);
+
+            var installable2 = new Installable
+            {
+                AppId = RandomString(),
+                AppType = AppType.Script,
+                Environments = RandomString(),
+            };
+
+            await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable2));
+
+            var manifest = await ClassUnderTest.LoadAsync();
+
+            It("saves the new app and keeps the first", () =>
+            {
+                manifest.AppIds[0].ShouldBe(installable1.AppId);
+                manifest.Apps[0].ShouldSatisfyAllConditions(x =>
+                {
+                    x.AppId.ShouldBe(installable1.AppId);
+                    x.ShouldBeOfType<WingetApp>();
+                });
+
+                manifest.AppIds[1].ShouldBe(installable2.AppId);
+                manifest.Apps[1].ShouldSatisfyAllConditions(x =>
+                {
+                    x.AppId.ShouldBe(installable2.AppId);
+                    x.ShouldBeOfType<ScriptApp>();
+                });
+            });
+
+            Directory.Delete(settings.Manifest.Directory, recursive: true);
+        }
+
+        [Fact]
         public async Task When_loading_Gitconfigs()
         {
             await SetManifestFileName("gitconfig.manifest.json");
