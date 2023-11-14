@@ -1,0 +1,9 @@
+﻿{
+    "Apps": [
+        "environment-1-app-id-1",
+        "environment-1-app-id-2",
+        "environment-1-and-3-app-id-3",
+        "environment-2-app-id-1",
+        "environment-3-app-id-1"
+    ]
+}

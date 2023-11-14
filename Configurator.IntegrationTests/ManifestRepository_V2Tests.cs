@@ -3,6 +3,7 @@ using Configurator.Configuration;
 using Configurator.Utilities;
 using Configurator.Windows;
 using Shouldly;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -478,6 +479,56 @@ namespace Configurator.IntegrationTests
                     x.ValueName.ShouldBe("uint");
                     x.ValueData.ShouldBeOfType<uint>().ShouldBe((uint)42);
                 });
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_apps_with_default_enviroments()
+        {
+            await SetManifestFileName("environments.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It("loads all apps", () =>
+            {
+                manifest.Apps.Count.ShouldBe(5);
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_apps_for_a_specific_environment()
+        {
+            await SetManifestFileName("environments.manifest.json");
+
+            var environments = new List<string>
+            {
+                "environment2"
+            };
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(environments));
+
+            It("only loads apps matching the specified environment, ignoring case", () =>
+            {
+                manifest.Apps.Count.ShouldBe(1);
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_apps_for_multiple_environments()
+        {
+            await SetManifestFileName("environments.manifest.json");
+
+            var environments = new List<string>
+            {
+                "Environment2",
+                "Environment3"
+            };
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(environments));
+
+            It("only loads apps matching the specified environments", () =>
+            {
+                manifest.Apps.Count.ShouldBe(3);
             });
         }
 

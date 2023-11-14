@@ -12,7 +12,7 @@ namespace Configurator;
 
 public interface IManifestRepository_V2
 {
-    Task<Manifest_V2> LoadAsync();
+    Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments = null!);
     Task SaveInstallableAsync(Installable installable);
 }
 
@@ -31,29 +31,40 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         this.fileSystem = fileSystem;
     }
 
-    public async Task<Manifest_V2> LoadAsync()
+    public async Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments = null!)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
         var manifestFile = await LoadManifestFileAsync(settings);
-        var loadAppTasks = manifestFile.Apps.Select(appId => LoadAppAsync(appId, settings));
-        var apps = await Task.WhenAll(loadAppTasks);
-        var knownApps = apps.Where(x => x != null).ToList();
+        var loadInstallableTasks = manifestFile.Apps.Select(appId => LoadInstallableAsync(appId, settings));
+        var installables = await Task.WhenAll(loadInstallableTasks);
+        var apps = installables
+            .Where(installable => IncludeForSpecifiedEnvironments(specifiedEnvironments, installable))
+            .Select(ParseApp)
+            .Where(x => x != null)
+            .ToList();
 
         return new Manifest_V2
         {
             AppIds = manifestFile.Apps,
-            Apps = knownApps
+            Apps = apps
         };
     }
 
-    private async Task<IApp> LoadAppAsync(string appId, Settings settings)
+    private static bool IncludeForSpecifiedEnvironments(List<string> specifiedEnvironments, RawInstallable installable)
+    {
+        var installableEnvironmentsLowered = installable.Environments.ToLower();
+
+        return specifiedEnvironments?.Any(env => installableEnvironmentsLowered.Contains(env.ToLower())) ?? true;
+    }
+
+    private async Task<RawInstallable> LoadInstallableAsync(string appId, Settings settings)
     {
         var installableAppFilePath = Path.Join(settings.Manifest.Directory, "apps", appId, "app.json");
         var installableAppFileJson = await fileSystem.ReadAllTextAsync(installableAppFilePath);
         var rawInstallable = jsonSerializer.Deserialize<RawInstallable>(installableAppFileJson);
         rawInstallable.AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(installableAppFileJson))).RootElement;
 
-        return ParseApp(rawInstallable);
+        return rawInstallable;
     }
 
     private IApp ParseApp(RawInstallable rawInstallable)

@@ -22,7 +22,7 @@ namespace Configurator.UnitTests
             };
 
             var manifestRepositoryMock = GetMock<IManifestRepository_V2>();
-            manifestRepositoryMock.Setup(x => x.LoadAsync()).ReturnsAsync(manifest);
+            manifestRepositoryMock.Setup(x => x.LoadAsync(null!)).ReturnsAsync(manifest);
 
             var appInstallerMock = GetMock<IAppInstaller>();
             var downloadAppInstallerMock = GetMock<IDownloadAppInstaller>();
