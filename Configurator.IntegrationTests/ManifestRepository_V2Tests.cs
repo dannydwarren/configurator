@@ -259,46 +259,6 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
-        public async Task When_loading_an_app_with_registry_settings()
-        {
-            await SetManifestFileName("registry-settings.manifest.json");
-
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
-
-            var registrySettings = manifest.Apps.Single().Configuration!.RegistrySettings;
-
-            It($"loads string {nameof(RegistrySetting.ValueData)}", () =>
-            {
-                registrySettings[0].ShouldSatisfyAllConditions(x =>
-                {
-                    x.KeyName.ShouldBe("key-1");
-                    x.ValueName.ShouldBe("string");
-                    x.ValueData.ShouldBe("string-data");
-                });
-            });
-
-            It($"loads string {nameof(RegistrySetting.ValueData)} with environment tokens", () =>
-            {
-                registrySettings[1].ShouldSatisfyAllConditions(x =>
-                {
-                    x.KeyName.ShouldBe("key-2");
-                    x.ValueName.ShouldBe("string");
-                    x.ValueData.ShouldBe("C:\\Program Files\\string-data");
-                });
-            });
-
-            It($"loads int {nameof(RegistrySetting.ValueData)}", () =>
-            {
-                registrySettings[2].ShouldSatisfyAllConditions(x =>
-                {
-                    x.KeyName.ShouldBe("key-3");
-                    x.ValueName.ShouldBe("uint");
-                    x.ValueData.ShouldBeOfType<uint>().ShouldBe((uint)42);
-                });
-            });
-        }
-
-        [Fact]
         public async Task When_loading_ScoopApps()
         {
             await SetManifestFileName("scoop.manifest.json");
@@ -479,6 +439,46 @@ namespace Configurator.IntegrationTests
                     });
             });
 
+        }
+
+        [Fact]
+        public async Task When_loading_an_app_with_registry_settings()
+        {
+            await SetManifestFileName("registry-settings.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            var registrySettings = manifest.Apps.Single().Configuration!.RegistrySettings;
+
+            It($"loads string {nameof(RegistrySetting.ValueData)}", () =>
+            {
+                registrySettings[0].ShouldSatisfyAllConditions(x =>
+                {
+                    x.KeyName.ShouldBe("key-1");
+                    x.ValueName.ShouldBe("string");
+                    x.ValueData.ShouldBe("string-data");
+                });
+            });
+
+            It($"loads string {nameof(RegistrySetting.ValueData)} with environment tokens", () =>
+            {
+                registrySettings[1].ShouldSatisfyAllConditions(x =>
+                {
+                    x.KeyName.ShouldBe("key-2");
+                    x.ValueName.ShouldBe("string");
+                    x.ValueData.ShouldBe("C:\\Program Files\\string-data");
+                });
+            });
+
+            It($"loads int {nameof(RegistrySetting.ValueData)}", () =>
+            {
+                registrySettings[2].ShouldSatisfyAllConditions(x =>
+                {
+                    x.KeyName.ShouldBe("key-3");
+                    x.ValueName.ShouldBe("uint");
+                    x.ValueData.ShouldBeOfType<uint>().ShouldBe((uint)42);
+                });
+            });
         }
 
         private async Task SetManifestFileName(string manifestFileName)
