@@ -31,6 +31,9 @@
       <None Update="TestManifests\apps\environment-1-and-3-app-id-3\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\apps\unknown-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\environment-3-app-id-1\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -143,6 +146,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\script.manifest.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\unknown.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\visual-studio-extension.manifest.json">

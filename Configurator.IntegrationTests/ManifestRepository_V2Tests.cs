@@ -439,7 +439,19 @@ namespace Configurator.IntegrationTests
                             });
                     });
             });
+        }
 
+        [Fact]
+        public async Task When_loading_UnknownApps()
+        {
+            await SetManifestFileName("unknown.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+
+            It("does not load unknown apps", () =>
+            {
+                manifest.Apps.ShouldBeEmpty();
+            });
         }
 
         [Fact]
