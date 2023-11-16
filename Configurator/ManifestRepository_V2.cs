@@ -12,7 +12,7 @@ namespace Configurator;
 
 public interface IManifestRepository_V2
 {
-    Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments = null!);
+    Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments);
     Task SaveInstallableAsync(Installable installable);
 }
 
@@ -31,7 +31,7 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         this.fileSystem = fileSystem;
     }
 
-    public async Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments = null!)
+    public async Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
         var manifestFile = await LoadManifestFileAsync(settings);
@@ -54,7 +54,10 @@ public class ManifestRepository_V2 : IManifestRepository_V2
     {
         var installableEnvironmentsLowered = installable.Environments.ToLower();
 
-        return specifiedEnvironments?.Any(env => installableEnvironmentsLowered.Contains(env.ToLower())) ?? true;
+        var noEnvironmentsHaveBeenSpecified = !specifiedEnvironments.Any();
+        var installableTargetsASpecifiedEnvironment = specifiedEnvironments.Any(env => installableEnvironmentsLowered.Contains(env.ToLower()));
+
+        return noEnvironmentsHaveBeenSpecified || installableTargetsASpecifiedEnvironment;
     }
 
     private async Task<RawInstallable> LoadInstallableAsync(string appId, Settings settings)

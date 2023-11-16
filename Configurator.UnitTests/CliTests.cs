@@ -121,8 +121,8 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
                 .Returns(machineConfiguratorMock.Object);
 
-            var environmentArg = RandomString();
-            var commandlineArgs = new[] { "single-file", alias, environmentArg };
+            var environmentOption = RandomString();
+            var commandlineArgs = new[] { "single-file", alias, environmentOption };
 
             IArguments? capturedArguments = null;
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
@@ -131,8 +131,8 @@ namespace Configurator.UnitTests
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().Environments.ShouldBe(new List<string> { environmentArg }));
+            It("populates environments option correctly",
+                () => capturedArguments.ShouldNotBeNull().Environments.ShouldBe(new List<string> { environmentOption }));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
@@ -334,7 +334,31 @@ namespace Configurator.UnitTests
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("executes the configure machine command", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync()));
+            It("executes the configure machine command", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync(new List<string>())));
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+
+        [Theory]
+        [InlineData("--environments")]
+        [InlineData("-e")]
+        public async Task When_configuring_machine_for_specific_environments(string alias)
+        {
+            var configureMachineCommandMock = GetMock<IConfigureMachineCommand>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureMachineCommand)))
+                .Returns(configureMachineCommandMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            .ReturnsAsync(serviceProviderMock.Object);
+
+            var environmentsOption = RandomString();
+            var commandlineArgs = new[] { "configure", alias, environmentsOption };
+
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
+
+            It("specifies the environments", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync(new List<string> { environmentsOption })));
 
             It("returns a success result", () => result.ShouldBe(0));
         }

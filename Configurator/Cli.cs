@@ -201,15 +201,27 @@ namespace Configurator
 
         private Command CreateConfigureMachineCommand()
         {
-            var configureMachineCommand = new Command("configure-machine", "Runs all apps of the manifest repo in settings.");
+            var environmentsOption = new Option<List<string>>(
+                aliases: new[] { "--environments", "-e" },
+                parseArgument: x =>
+                    x.Tokens.Select(y => new Token?(y)).FirstOrDefault()?.Value
+                        .Split("|", StringSplitOptions.RemoveEmptyEntries).ToList()
+                        ?? new List<string>(),
+                isDefault: true,
+                description: "Pipe separated list of environments to target in the manifest.");
+
+            var configureMachineCommand = new Command("configure-machine", "Runs all apps of the manifest repo in settings.")
+            {
+                environmentsOption
+            };
 
             configureMachineCommand.AddAlias("configure");
 
-            configureMachineCommand.SetHandler(async () =>
+            configureMachineCommand.SetHandler<List<string>>(async (environments) =>
             {
                 var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-                await services.GetRequiredService<IConfigureMachineCommand>().ExecuteAsync();
-            });
+                await services.GetRequiredService<IConfigureMachineCommand>().ExecuteAsync(environments);
+            }, environmentsOption);
 
             return configureMachineCommand;
         }

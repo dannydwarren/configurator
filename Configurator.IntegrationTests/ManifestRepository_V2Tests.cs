@@ -33,7 +33,7 @@ namespace Configurator.IntegrationTests
 
             await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable));
 
-            var manifest = await ClassUnderTest.LoadAsync();
+            var manifest = await ClassUnderTest.LoadAsync(new List<string>());
 
             It("saves", () =>
             {
@@ -77,7 +77,7 @@ namespace Configurator.IntegrationTests
 
             await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(installable2));
 
-            var manifest = await ClassUnderTest.LoadAsync();
+            var manifest = await ClassUnderTest.LoadAsync(new List<string>());
 
             It("saves the new app and keeps the first", () =>
             {
@@ -128,7 +128,7 @@ namespace Configurator.IntegrationTests
 
             await BecauseAsync(() => ClassUnderTest.SaveInstallableAsync(modifiedInstallable));
 
-            var manifest = await ClassUnderTest.LoadAsync();
+            var manifest = await ClassUnderTest.LoadAsync(new List<string>());
 
             It("does not save", () =>
             {
@@ -148,7 +148,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("gitconfig.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(ScriptApp)}", () =>
             {
@@ -162,7 +162,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("non-package.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(NonPackageApp)}", () =>
             {
@@ -176,7 +176,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("power-shell-app-packages.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(PowerShellAppPackage)}", () =>
             {
@@ -208,7 +208,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("power-shell-module.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(PowerShellModuleApp)}", () =>
             {
@@ -264,7 +264,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("scoop.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(ScoopApp)}", () =>
             {
@@ -320,7 +320,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("scoop-bucket.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(ScoopBucketApp)}", () =>
             {
@@ -334,7 +334,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("script.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(ScriptApp)}", () =>
             {
@@ -371,7 +371,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("visual-studio-extension.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(VisualStudioExtensionApp)}", () =>
             {
@@ -390,7 +390,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("winget.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(WingetApp)}", () =>
             {
@@ -446,7 +446,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("unknown.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It("does not load unknown apps", () =>
             {
@@ -459,7 +459,7 @@ namespace Configurator.IntegrationTests
         {
             await SetManifestFileName("registry-settings.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             var registrySettings = manifest.Apps.Single().Configuration!.RegistrySettings;
 
@@ -495,11 +495,11 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
-        public async Task When_loading_apps_with_default_enviroments()
+        public async Task When_loading_apps_with_no_specified_enviroments()
         {
             await SetManifestFileName("environments.manifest.json");
 
-            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync());
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It("loads all apps", () =>
             {

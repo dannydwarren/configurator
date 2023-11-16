@@ -1,12 +1,13 @@
 ﻿using Configurator.Apps;
 using Configurator.Installers;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Configurator
 {
     public interface IConfigureMachineCommand
     {
-        Task ExecuteAsync();
+        Task ExecuteAsync(List<string> environments);
     }
 
     public class ConfigureMachineCommand : IConfigureMachineCommand
@@ -27,9 +28,9 @@ namespace Configurator
             AppConfigurator = appConfigurator;
         }
 
-        public async Task ExecuteAsync()
+        public async Task ExecuteAsync(List<string> environments)
         {
-            var manifest = await ManifestRepository.LoadAsync();
+            var manifest = await ManifestRepository.LoadAsync(environments);
 
             foreach (var app in manifest.Apps)
             {
