@@ -1,5 +1,5 @@
 ﻿{
     "AppType": "Winget",
-    "AppId": "environment-1-and-3-app-id-1",
+    "AppId": "environment-1-and-3-app-id-3",
     "Environments": "Environment1|Environment3"
 }
