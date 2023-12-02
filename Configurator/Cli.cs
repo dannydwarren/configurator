@@ -209,19 +209,23 @@ namespace Configurator
                         ?? new List<string>(),
                 isDefault: true,
                 description: "Pipe separated list of environments to target in the manifest.");
+            var singleAppOption = new Option<string>(
+                aliases: new[] { "--single-app-id", "-app" },
+                description: "The single app to install by Id. When present the environments arg is ignored.");
 
             var configureMachineCommand = new Command("configure-machine", "Runs all apps of the manifest repo in settings.")
             {
-                environmentsOption
+                environmentsOption,
+                singleAppOption
             };
 
             configureMachineCommand.AddAlias("configure");
 
-            configureMachineCommand.SetHandler<List<string>>(async (environments) =>
+            configureMachineCommand.SetHandler<List<string>, string>(async (environments, singleAppId) =>
             {
                 var services = await dependencyBootstrapper.InitializeAsync(Arguments.Default);
-                await services.GetRequiredService<IConfigureMachineCommand>().ExecuteAsync(environments);
-            }, environmentsOption);
+                await services.GetRequiredService<IConfigureMachineCommand>().ExecuteAsync(environments, singleAppId);
+            }, environmentsOption, singleAppOption);
 
             return configureMachineCommand;
         }

@@ -31,7 +31,7 @@ namespace Configurator.UnitTests
             var downloadAppInstallerMock = GetMock<IDownloadAppInstaller>();
             var appConfiguratorMock = GetMock<IAppConfigurator>();
 
-            await BecauseAsync(() => ClassUnderTest.ExecuteAsync(environments));
+            await BecauseAsync(() => ClassUnderTest.ExecuteAsync(environments, null!));
 
             It("installs each app", () =>
             {

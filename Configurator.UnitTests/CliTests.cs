@@ -329,12 +329,36 @@ namespace Configurator.UnitTests
 
             GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
             .ReturnsAsync(serviceProviderMock.Object);
-           
-            var commandlineArgs = new[]{ arg };
+
+            var commandlineArgs = new[] { arg };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("executes the configure machine command", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync(new List<string>())));
+            It("executes the configure machine command", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync(new List<string>(), null!)));
+
+            It("returns a success result", () => result.ShouldBe(0));
+        }
+
+        [Theory]
+        [InlineData("--single-app-id")]
+        [InlineData("-app")]
+        public async Task When_configuring_single_app_in_manifest_from_settings(string alias)
+        {
+            var configureMachineCommandMock = GetMock<IConfigureMachineCommand>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureMachineCommand)))
+                .Returns(configureMachineCommandMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            .ReturnsAsync(serviceProviderMock.Object);
+
+            var singleAppId = RandomString();
+            var commandlineArgs = new[] { "configure", alias, singleAppId };
+
+            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
+
+            It("executes the configure machine command for a single app", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync(new List<string>(), singleAppId)));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
@@ -358,7 +382,7 @@ namespace Configurator.UnitTests
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
-            It("specifies the environments", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync(new List<string> { environmentsOption })));
+            It("specifies the environments", () => configureMachineCommandMock.Verify(x => x.ExecuteAsync(new List<string> { environmentsOption }, null!)));
 
             It("returns a success result", () => result.ShouldBe(0));
         }

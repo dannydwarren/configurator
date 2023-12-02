@@ -7,7 +7,7 @@ namespace Configurator
 {
     public interface IConfigureMachineCommand
     {
-        Task ExecuteAsync(List<string> environments);
+        Task ExecuteAsync(List<string> environments, string singleAppId);
     }
 
     public class ConfigureMachineCommand : IConfigureMachineCommand
@@ -28,7 +28,7 @@ namespace Configurator
             AppConfigurator = appConfigurator;
         }
 
-        public async Task ExecuteAsync(List<string> environments)
+        public async Task ExecuteAsync(List<string> environments, string singleAppId)
         {
             var manifest = await ManifestRepository.LoadAsync(environments);
 
