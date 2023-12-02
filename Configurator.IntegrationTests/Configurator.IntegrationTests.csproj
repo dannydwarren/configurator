@@ -106,7 +106,7 @@
       <None Update="TestManifests\apps\winget-app-id-with-prevent-upgrade\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="TestManifests\environments.manifest.json">
+      <None Update="TestManifests\multiple-apps.manifest.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="TestManifests\gitconfig.manifest.json">

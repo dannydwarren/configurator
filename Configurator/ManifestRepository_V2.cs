@@ -34,6 +34,19 @@ public class ManifestRepository_V2 : IManifestRepository_V2
 
     public async Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments)
     {
+        return await LoadManifestAsync(specifiedEnvironments);
+    }
+
+    public async Task<IApp> LoadAppAsync(string appId)
+    {
+        var manifest = await LoadManifestAsync(new List<string>());
+        var app = manifest.Apps.First(x => x.AppId == appId);
+        
+        return app;
+    }
+
+    private async Task<Manifest_V2> LoadManifestAsync(List<string> specifiedEnvironments)
+    {
         var settings = await settingsRepository.LoadSettingsAsync();
         var manifestFile = await LoadManifestFileAsync(settings);
         var loadInstallableTasks = manifestFile.Apps.Select(appId => LoadInstallableAsync(appId, settings));
@@ -51,10 +64,6 @@ public class ManifestRepository_V2 : IManifestRepository_V2
         };
     }
 
-    public Task<IApp> LoadAppAsync(string appId)
-    {
-        throw new System.NotImplementedException();
-    }
 
     private static bool IncludeForSpecifiedEnvironments(List<string> specifiedEnvironments, RawInstallable installable)
     {

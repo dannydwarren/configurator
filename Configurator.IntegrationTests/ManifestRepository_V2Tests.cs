@@ -144,6 +144,21 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_loading_single_app()
+        {
+            await SetManifestFileName("multiple-apps.manifest.json");
+           
+            var appId = "environment-1-and-3-app-id-3";
+
+            var app = await BecauseAsync(() => ClassUnderTest.LoadAppAsync(appId));
+
+            It("loads app matching the specifiec appId", () =>
+            {
+                app.AppId.ShouldBe(appId);
+            });
+        }
+
+        [Fact]
         public async Task When_loading_Gitconfigs()
         {
             await SetManifestFileName("gitconfig.manifest.json");
@@ -497,7 +512,7 @@ namespace Configurator.IntegrationTests
         [Fact]
         public async Task When_loading_apps_with_no_specified_enviroments()
         {
-            await SetManifestFileName("environments.manifest.json");
+            await SetManifestFileName("multiple-apps.manifest.json");
 
             var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
@@ -510,7 +525,7 @@ namespace Configurator.IntegrationTests
         [Fact]
         public async Task When_loading_apps_for_a_specific_environment()
         {
-            await SetManifestFileName("environments.manifest.json");
+            await SetManifestFileName("multiple-apps.manifest.json");
 
             var environments = new List<string>
             {
@@ -528,7 +543,7 @@ namespace Configurator.IntegrationTests
         [Fact]
         public async Task When_loading_apps_for_multiple_environments()
         {
-            await SetManifestFileName("environments.manifest.json");
+            await SetManifestFileName("multiple-apps.manifest.json");
 
             var environments = new List<string>
             {
