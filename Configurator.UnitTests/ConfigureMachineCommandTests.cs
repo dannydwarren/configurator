@@ -47,5 +47,32 @@ namespace Configurator.UnitTests
                 appConfiguratorMock.Verify(x => x.Configure(manifest.Apps[2]));
             });
         }
+
+        [Fact]
+        public async Task When_installing_single_manifest_app()
+        {
+            var singleAppId = RandomString();
+
+            var app = new ScriptApp { AppId = singleAppId };
+
+            var manifestRepositoryMock = GetMock<IManifestRepository_V2>();
+            manifestRepositoryMock.Setup(x => x.LoadAppAsync(singleAppId)).ReturnsAsync(app);
+
+            var appInstallerMock = GetMock<IAppInstaller>();
+            var downloadAppInstallerMock = GetMock<IDownloadAppInstaller>();
+            var appConfiguratorMock = GetMock<IAppConfigurator>();
+
+            await BecauseAsync(() => ClassUnderTest.ExecuteAsync(new List<string>(), singleAppId));
+
+            It("installs only specified app", () =>
+            {
+                appInstallerMock.Verify(x => x.InstallOrUpgradeAsync(app));
+            });
+
+            It("configures only specified app", () =>
+            {
+                appConfiguratorMock.Verify(x => x.Configure(app));
+            });
+        }
     }
 }

@@ -13,6 +13,7 @@ namespace Configurator;
 public interface IManifestRepository_V2
 {
     Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments);
+    Task<IApp> LoadAppAsync(string appId);
     Task SaveInstallableAsync(Installable installable);
 }
 
@@ -48,6 +49,11 @@ public class ManifestRepository_V2 : IManifestRepository_V2
             AppIds = manifestFile.Apps,
             Apps = apps
         };
+    }
+
+    public Task<IApp> LoadAppAsync(string appId)
+    {
+        throw new System.NotImplementedException();
     }
 
     private static bool IncludeForSpecifiedEnvironments(List<string> specifiedEnvironments, RawInstallable installable)

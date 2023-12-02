@@ -1,5 +1,6 @@
 ﻿using Configurator.Apps;
 using Configurator.Installers;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -30,21 +31,46 @@ namespace Configurator
 
         public async Task ExecuteAsync(List<string> environments, string singleAppId)
         {
+            var installSingleApp = !string.IsNullOrEmpty(singleAppId);
+            if (installSingleApp)
+            {
+                await ConfigureSingleAppAsync(singleAppId);
+            }
+            else
+            {
+                await ConfigureEnvironmentAppsAsync(environments);
+            }
+        }
+
+        private async Task ConfigureSingleAppAsync(string appId)
+        {
+            var app = await ManifestRepository.LoadAppAsync(appId);
+
+            await ConfigureAppAsync(app);
+        }
+
+        private async Task ConfigureEnvironmentAppsAsync(List<string> environments)
+        {
             var manifest = await ManifestRepository.LoadAsync(environments);
 
             foreach (var app in manifest.Apps)
             {
-                if (app is IDownloadApp downloadApp)
-                {
-                    await DownloadAppInstaller.InstallAsync(downloadApp);
-                }
-                else
-                {
-                    await AppInstaller.InstallOrUpgradeAsync(app);
-                }
-
-                AppConfigurator.Configure(app);
+                await ConfigureAppAsync(app);
             }
+        }
+
+        private async Task ConfigureAppAsync(IApp app)
+        {
+            if (app is IDownloadApp downloadApp)
+            {
+                await DownloadAppInstaller.InstallAsync(downloadApp);
+            }
+            else
+            {
+                await AppInstaller.InstallOrUpgradeAsync(app);
+            }
+
+            AppConfigurator.Configure(app);
         }
     }
 }
