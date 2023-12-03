@@ -2,6 +2,7 @@
 
 ```powershell
 $bootstrapStopwatch = [Diagnostics.Stopwatch]::StartNew()
+Set-ExecutionPolicy RemoteSigned -Force
 
 Invoke-Command {
     $asset = (iwr -useb https://api.github.com/repos/dannydwarren/configurator/releases/latest | ConvertFrom-Json).assets | ? { $_.name -like "*.exe" }
@@ -12,8 +13,9 @@ $downloadDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Download duration: $($downloadDuration)"
 
 $bootstrapStopwatch.Restart()
-."$HOME\Downloads\Configurator.exe" settings set manifest.repo "https://github.com/dannydwarren/configurator.git"
-."$HOME\Downloads\Configurator.exe" single-file --manifest-path "https://raw.githubusercontent.com/dannydwarren/machine-configs/main/manifests/danny.manifest.json" --environments "Personal"
+."$HOME\Downloads\Configurator.exe" settings set manifest.repo "https://github.com/dannydwarren/machine-configs.git"
+."$HOME\Downloads\Configurator.exe" initialize
+."$HOME\Downloads\Configurator.exe" configure --environments "All|Personal"
 Write-Output "Download duration: $($downloadDuration)"
 $bootstrapDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Configurator duration: $($bootstrapDuration)"
