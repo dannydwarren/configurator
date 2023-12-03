@@ -36,6 +36,7 @@ namespace Configurator
         public async Task InitializeAsync()
         {
             await powerShellConfiguration.SetWindowsPowerShellExecutionPolicyAsync();
+            await wingetConfiguration.UpgradeAsync();
             await wingetConfiguration.AcceptSourceAgreementsAsync();
             await powerShellCoreInstaller.InstallAsync();
             await powerShellConfiguration.SetPowerShellCoreExecutionPolicyAsync();

@@ -19,6 +19,7 @@ namespace Configurator.UnitTests
 
             It("configures winget", () =>
             {
+                GetMock<IWingetConfiguration>().Verify(x => x.UpgradeAsync());
                 GetMock<IWingetConfiguration>().Verify(x => x.AcceptSourceAgreementsAsync());
             });
             
