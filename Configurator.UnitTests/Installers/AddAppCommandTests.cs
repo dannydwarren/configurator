@@ -18,7 +18,7 @@ public class AddAppCommandTests : UnitTestBase<AddAppCommand>
         var expectedEnvironments = string.Join("|", environments);
 
         Installable? capturedInstallable = null;
-        GetMock<IManifestRepository_V2>().Setup(x => x.SaveInstallableAsync(IsAny<Installable>()))
+        GetMock<IManifestRepository>().Setup(x => x.SaveInstallableAsync(IsAny<Installable>()))
             .Callback<Installable>(installable => { capturedInstallable = installable; });
 
         await BecauseAsync(() => ClassUnderTest.ExecuteAsync(appId, appType, environments));

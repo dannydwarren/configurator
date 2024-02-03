@@ -13,12 +13,12 @@ namespace Configurator
 
     public class ConfigureMachineCommand : IConfigureMachineCommand
     {
-        public IManifestRepository_V2 ManifestRepository { get; }
+        public IManifestRepository ManifestRepository { get; }
         public IAppInstaller AppInstaller { get; }
         public IDownloadAppInstaller DownloadAppInstaller { get; }
         public IAppConfigurator AppConfigurator { get; }
 
-        public ConfigureMachineCommand(IManifestRepository_V2 manifestRepository,
+        public ConfigureMachineCommand(IManifestRepository manifestRepository,
             IAppInstaller appInstaller,
             IDownloadAppInstaller downloadAppInstaller,
             IAppConfigurator appConfigurator)

@@ -24,7 +24,7 @@ namespace Configurator.UnitTests
                 }
             };
 
-            var manifestRepositoryMock = GetMock<IManifestRepository_V2>();
+            var manifestRepositoryMock = GetMock<IManifestRepository>();
             manifestRepositoryMock.Setup(x => x.LoadAsync(environments)).ReturnsAsync(manifest);
 
             var appInstallerMock = GetMock<IAppInstaller>();
@@ -55,7 +55,7 @@ namespace Configurator.UnitTests
 
             var app = new ScriptApp { AppId = singleAppId };
 
-            var manifestRepositoryMock = GetMock<IManifestRepository_V2>();
+            var manifestRepositoryMock = GetMock<IManifestRepository>();
             manifestRepositoryMock.Setup(x => x.LoadAppAsync(singleAppId)).ReturnsAsync(app);
 
             var appInstallerMock = GetMock<IAppInstaller>();

@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Configurator.IntegrationTests
 {
-    public class ManifestRepository_V2Tests : IntegrationTestBase<ManifestRepository_V2>
+    public class ManifestRepositoryTests : IntegrationTestBase<ManifestRepository>
     {
         [Fact]
         public async Task When_saving_an_installable_to_a_new_manifest()

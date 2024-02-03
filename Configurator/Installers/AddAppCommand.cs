@@ -10,9 +10,9 @@ public interface IAddAppCommand
 
 public class AddAppCommand : IAddAppCommand
 {
-    private readonly IManifestRepository_V2 manifestRepository;
+    private readonly IManifestRepository manifestRepository;
 
-    public AddAppCommand(IManifestRepository_V2 manifestRepository)
+    public AddAppCommand(IManifestRepository manifestRepository)
     {
         this.manifestRepository = manifestRepository;
     }

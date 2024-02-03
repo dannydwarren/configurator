@@ -10,20 +10,20 @@ using Configurator.Utilities;
 
 namespace Configurator;
 
-public interface IManifestRepository_V2
+public interface IManifestRepository
 {
     Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments);
     Task<IApp> LoadAppAsync(string appId);
     Task SaveInstallableAsync(Installable installable);
 }
 
-public class ManifestRepository_V2 : IManifestRepository_V2
+public class ManifestRepository : IManifestRepository
 {
     private readonly ISettingsRepository settingsRepository;
     private readonly IHumanReadableJsonSerializer jsonSerializer;
     private readonly IFileSystem fileSystem;
 
-    public ManifestRepository_V2(ISettingsRepository settingsRepository,
+    public ManifestRepository(ISettingsRepository settingsRepository,
         IHumanReadableJsonSerializer jsonSerializer,
         IFileSystem fileSystem)
     {
