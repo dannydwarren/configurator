@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Configurator.Configuration;
 using Emmersion.Http;
 
 namespace Configurator.Utilities
@@ -11,15 +12,15 @@ namespace Configurator.Utilities
 
     public class ResourceDownloader : IResourceDownloader
     {
-        private readonly IArguments arguments;
+        private readonly ISettingsRepository settingsRepository;
         private readonly IHttpClient httpClient;
         private readonly IFileSystem fileSystem;
 
-        public ResourceDownloader(IArguments arguments,
+        public ResourceDownloader(ISettingsRepository settingsRepository,
             IHttpClient httpClient,
             IFileSystem fileSystem)
         {
-            this.arguments = arguments;
+            this.settingsRepository = settingsRepository;
             this.httpClient = httpClient;
             this.fileSystem = fileSystem;
         }
@@ -39,7 +40,9 @@ namespace Configurator.Utilities
                 throw new Exception($"Failed with status code {response.StatusCode} to download {fileName}");
             }
 
-            var filePath = $"{arguments.DownloadsDir}\\{fileName}";
+            var settings = await settingsRepository.LoadSettingsAsync();
+
+            var filePath = $"{settings.DownloadsDirectory.AbsolutePath}\\{fileName}";
             await fileSystem.WriteStreamAsync(filePath, response.Stream);
 
             return filePath;

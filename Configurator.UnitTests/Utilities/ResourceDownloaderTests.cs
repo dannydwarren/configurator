@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Configurator.Configuration;
 using Configurator.Utilities;
 using Emmersion.Http;
 using Moq;
@@ -14,15 +15,15 @@ namespace Configurator.UnitTests.Utilities
         [Fact]
         public async Task When_downloading()
         {
-            var downloadsDir = RandomString();
+            var settings = new Settings();
             var fileName = RandomString();
             var fileUrl = RandomString();
             var httpResponse = new HttpStreamResponse(200, new HttpHeaders(), new MemoryStream());
             IHttpRequest? capturedHttpRequest = null;
             string? capturedPath = null;
-            var expectedFilePath = $"{downloadsDir}\\{fileName}";
+            var expectedFilePath = $"{settings.DownloadsDirectory.AbsolutePath}\\{fileName}";
 
-            GetMock<IArguments>().SetupGet(x => x.DownloadsDir).Returns(downloadsDir);
+            GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
 
             GetMock<IHttpClient>().Setup(x => x.ExecuteAsStreamAsync(IsAny<IHttpRequest>()))
                 .Callback<IHttpRequest>(httpRequest => capturedHttpRequest = httpRequest)

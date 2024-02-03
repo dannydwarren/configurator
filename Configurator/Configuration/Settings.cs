@@ -4,6 +4,7 @@ namespace Configurator.Configuration
 {
     public class Settings
     {
+        public Uri DownloadsDirectory { get; set; } = new Uri("C:/tmp/configurator-downloads", UriKind.Absolute);
         public ManifestSettings Manifest { get; set; } = new ManifestSettings();
         public GitSettings Git { get; set; } = new GitSettings();
     }
@@ -17,6 +18,6 @@ namespace Configurator.Configuration
 
     public class GitSettings
     {
-        public Uri CloneDirectory { get; set; } = new Uri(@"C:\src", UriKind.Absolute);
+        public Uri CloneDirectory { get; set; } = new Uri("C:/src", UriKind.Absolute);
     }
 }
