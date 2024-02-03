@@ -51,173 +51,6 @@ namespace Configurator.UnitTests
         }
 
         [Fact]
-        public async Task When_launching_single_file_command_with_default_args()
-        {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
-            IArguments? capturedArguments = null;
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
-                .Callback<IArguments>(arguments => capturedArguments = arguments)
-                .ReturnsAsync(serviceProviderMock.Object);
-
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync("single-file"));
-
-            It("populates arguments correctly", () =>
-            {
-                capturedArguments.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
-                {
-                    x.ManifestPath.ShouldBe(Arguments.Default.ManifestPath);
-                    x.Environments.ShouldBe(Arguments.Default.Environments);
-                    x.DownloadsDir.ShouldBe(Arguments.Default.DownloadsDir);
-                    x.SingleAppId.ShouldBeNull();
-                });
-            });
-
-            It("runs machine configurator",
-                () => { machineConfiguratorMock.Verify(x => x.ExecuteAsync(), Times.Once); });
-
-            It("returns a success result", () => result.ShouldBe(0));
-        }
-
-        [Theory]
-        [InlineData("--manifest-path")]
-        [InlineData("-m")]
-        public async Task When_launching_single_file_command_with_manifest_path_commandline_args(string alias)
-        {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
-            var manifestPathArg = RandomString();
-            var commandlineArgs = new[] { "single-file", alias, manifestPathArg };
-
-            IArguments? capturedArguments = null;
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
-                .Callback<IArguments>(arguments => capturedArguments = arguments)
-                .ReturnsAsync(serviceProviderMock.Object);
-
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
-
-            It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().ManifestPath.ShouldBe(manifestPathArg));
-
-            It("returns a success result", () => result.ShouldBe(0));
-        }
-
-        [Theory]
-        [InlineData("--environments")]
-        [InlineData("-e")]
-        public async Task When_launching_single_file_command_with_environments_commandline_args(string alias)
-        {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
-            var environmentOption = RandomString();
-            var commandlineArgs = new[] { "single-file", alias, environmentOption };
-
-            IArguments? capturedArguments = null;
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
-                .Callback<IArguments>(arguments => capturedArguments = arguments)
-                .ReturnsAsync(serviceProviderMock.Object);
-
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
-
-            It("populates environments option correctly",
-                () => capturedArguments.ShouldNotBeNull().Environments.ShouldBe(new List<string> { environmentOption }));
-
-            It("returns a success result", () => result.ShouldBe(0));
-        }
-
-        [Fact]
-        public async Task When_launching_single_file_command_with_multiple_environments_commandline_args()
-        {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
-            var env1 = RandomString();
-            var env2 = RandomString();
-            var commandlineArgs = new[] { "single-file", "--environments", $"{env1}|{env2}" };
-
-            IArguments? capturedArguments = null;
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
-                .Callback<IArguments>(arguments => capturedArguments = arguments)
-                .ReturnsAsync(serviceProviderMock.Object);
-
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
-
-            It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().Environments.ShouldBe(new List<string> { env1, env2 }));
-
-            It("returns a success result", () => result.ShouldBe(0));
-        }
-
-        [Theory]
-        [InlineData("--downloads-dir")]
-        [InlineData("-dl")]
-        public async Task When_launching_single_file_command_with_downloads_dir_commandline_args(string alias)
-        {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
-            var downloadDirArg = RandomString();
-            var commandlineArgs = new[] { "single-file", alias, downloadDirArg };
-
-            IArguments? capturedArguments = null;
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
-                .Callback<IArguments>(arguments => capturedArguments = arguments)
-                .ReturnsAsync(serviceProviderMock.Object);
-
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
-
-            It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().DownloadsDir.ShouldBe(downloadDirArg));
-
-            It("returns a success result", () => result.ShouldBe(0));
-        }
-
-        [Theory]
-        [InlineData("--single-app-id")]
-        [InlineData("-app")]
-        public async Task When_launching_single_file_command_with_target_app_commandline_args(string alias)
-        {
-            var machineConfiguratorMock = GetMock<IMachineConfigurator>();
-
-            var serviceProviderMock = GetMock<IServiceProvider>();
-            serviceProviderMock.Setup(x => x.GetService(typeof(IMachineConfigurator)))
-                .Returns(machineConfiguratorMock.Object);
-
-            var singleAppIdArg = RandomString();
-            var commandlineArgs = new[] { "single-file", alias, singleAppIdArg };
-
-            IArguments? capturedArguments = null;
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(IsAny<IArguments>()))
-                .Callback<IArguments>(arguments => capturedArguments = arguments)
-                .ReturnsAsync(serviceProviderMock.Object);
-
-            var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
-
-            It("populates arguments correctly",
-                () => capturedArguments.ShouldNotBeNull().SingleAppId.ShouldBe(singleAppIdArg));
-
-            It("returns a success result", () => result.ShouldBe(0));
-        }
-
-        [Fact]
         public async Task When_initializing()
         {
             var initializeCommandMock = GetMock<IInitializeCommand>();
@@ -226,7 +59,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IInitializeCommand)))
                 .Returns(initializeCommandMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
                 .ReturnsAsync(serviceProviderMock.Object);
 
             var commandlineArgs = new[] { "initialize" };
@@ -247,7 +80,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(ISetSettingCommand)))
                 .Returns(setSettingCommandMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
                 .ReturnsAsync(serviceProviderMock.Object);
 
             var settingNameArg = RandomString();
@@ -271,7 +104,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IListSettingsCommand)))
                 .Returns(listSettingsWorkflowMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
                 .ReturnsAsync(serviceProviderMock.Object);
 
             var commandlineArgs = new[] { "settings", "list" };
@@ -294,7 +127,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IAddAppCommand)))
                 .Returns(addAppCommandMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
                 .ReturnsAsync(serviceProviderMock.Object);
 
             var appId = RandomString();
@@ -327,7 +160,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureMachineCommand)))
                 .Returns(configureMachineCommandMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
             .ReturnsAsync(serviceProviderMock.Object);
 
             var commandlineArgs = new[] { arg };
@@ -350,7 +183,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureMachineCommand)))
                 .Returns(configureMachineCommandMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
             .ReturnsAsync(serviceProviderMock.Object);
 
             var singleAppId = RandomString();
@@ -374,7 +207,7 @@ namespace Configurator.UnitTests
             serviceProviderMock.Setup(x => x.GetService(typeof(IConfigureMachineCommand)))
                 .Returns(configureMachineCommandMock.Object);
 
-            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync(Arguments.Default))
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
             .ReturnsAsync(serviceProviderMock.Object);
 
             var environmentsOption = RandomString();

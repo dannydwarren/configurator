@@ -21,12 +21,7 @@ namespace Configurator.IntegrationTests
         [Fact]
         public async Task When_initializing_with_no_args()
         {
-            var services = await BecauseAsync(() => ClassUnderTest.InitializeAsync(Arguments.Default));
-
-            It("initializes arguments", () =>
-            {
-                services.ShouldNotBeNull().GetRequiredService<IArguments>().ShouldBe(Arguments.Default);
-            });
+            var services = await BecauseAsync(() => ClassUnderTest.InitializeAsync());
 
             It("initializes static dependencies", () =>
             {

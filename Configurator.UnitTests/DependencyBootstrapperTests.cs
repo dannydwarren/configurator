@@ -13,27 +13,12 @@ namespace Configurator.UnitTests
         [Fact]
         public void When_initializing_service_provider_with_no_args()
         {
-            IArguments? capturedArgs = null;
-            GetMock<IServiceCollection>().Setup(x => x.Add(IsAny<ServiceDescriptor>()))
-                .Callback<ServiceDescriptor>(serviceDescriptor =>
-                {
-                    if (serviceDescriptor.ImplementationInstance is IArguments arguments)
-                    {
-                        capturedArgs = arguments;
-                    }
-                });
-
-            var serviceProvider = Because(() => ClassUnderTest.InitializeServiceProvider(Arguments.Default));
+            var serviceProvider = Because(() => ClassUnderTest.InitializeServiceProvider());
 
             It("configures dependencies", () =>
             {
                 GetMock<IServiceCollection>().Verify(x => x.Add(Moq.It.Is<ServiceDescriptor>(y => y.ServiceType == typeof(ITokenizer))), Times.Once);
                 serviceProvider.ShouldNotBeNull();
-            });
-
-            It("uses default args", () =>
-            {
-                capturedArgs.ShouldBe(Arguments.Default);
             });
         }
 

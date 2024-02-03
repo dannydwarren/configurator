@@ -10,7 +10,7 @@ namespace Configurator
 {
     public interface IDependencyBootstrapper
     {
-        Task<IServiceProvider> InitializeAsync(IArguments arguments);
+        Task<IServiceProvider> InitializeAsync();
     }
 
     public class DependencyBootstrapper : IDependencyBootstrapper
@@ -22,12 +22,12 @@ namespace Configurator
             this.serviceCollection = serviceCollection;
         }
 
-        public async Task<IServiceProvider> InitializeAsync(IArguments arguments)
+        public async Task<IServiceProvider> InitializeAsync()
         {
-            var serviceProvider = InitializeServiceProvider(arguments);
+            var serviceProvider = InitializeServiceProvider();
             InitializeStaticDependencies(serviceProvider);
 
-            await WriteDependencyDebugInfo(serviceProvider);
+            WriteDependencyDebugInfo(serviceProvider);
 
             return serviceProvider;
         }
@@ -35,10 +35,9 @@ namespace Configurator
         /// <summary>
         /// Not for public consumption! Only exposed for unit testing!
         /// </summary>
-        internal ServiceProvider InitializeServiceProvider(IArguments arguments)
+        internal ServiceProvider InitializeServiceProvider()
         {
             DependencyInjectionConfig.ConfigureServices(serviceCollection);
-            serviceCollection.AddSingleton(arguments);
 
             return serviceCollection.BuildServiceProvider();
         }
@@ -51,7 +50,7 @@ namespace Configurator
             RegistrySettingValueDataConverter.Tokenizer = services.GetRequiredService<ITokenizer>();
         }
 
-        private static async Task WriteDependencyDebugInfo(IServiceProvider services)
+        private static void WriteDependencyDebugInfo(IServiceProvider services)
         {
             var logger = services.GetRequiredService<IConsoleLogger>();
 
@@ -59,15 +58,6 @@ namespace Configurator
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
                 .InformationalVersion;
             logger.Debug($"{nameof(Configurator)} version: {version}");
-
-            var args = services.GetRequiredService<IArguments>();
-            logger.Debug($@"{nameof(IArguments)}:
-{{
-  {nameof(args.ManifestPath)} = ""{args.ManifestPath}""
-  {nameof(args.Environments)} = ""{string.Join("|", args.Environments)}""
-  {nameof(args.DownloadsDir)} = ""{args.DownloadsDir}""
-  {nameof(args.SingleAppId)} = ""{args.SingleAppId}""
-}}");
         }
     }
 }
