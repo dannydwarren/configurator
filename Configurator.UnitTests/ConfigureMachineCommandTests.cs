@@ -14,7 +14,7 @@ namespace Configurator.UnitTests
         {
             var environments = new List<string>();
 
-            var manifest = new Manifest_V2
+            var manifest = new Manifest
             {
                 Apps =
                 {

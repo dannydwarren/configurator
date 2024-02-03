@@ -12,7 +12,7 @@ namespace Configurator;
 
 public interface IManifestRepository
 {
-    Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments);
+    Task<Manifest> LoadAsync(List<string> specifiedEnvironments);
     Task<IApp> LoadAppAsync(string appId);
     Task SaveInstallableAsync(Installable installable);
 }
@@ -32,7 +32,7 @@ public class ManifestRepository : IManifestRepository
         this.fileSystem = fileSystem;
     }
 
-    public async Task<Manifest_V2> LoadAsync(List<string> specifiedEnvironments)
+    public async Task<Manifest> LoadAsync(List<string> specifiedEnvironments)
     {
         return await LoadManifestAsync(specifiedEnvironments);
     }
@@ -45,7 +45,7 @@ public class ManifestRepository : IManifestRepository
         return app;
     }
 
-    private async Task<Manifest_V2> LoadManifestAsync(List<string> specifiedEnvironments)
+    private async Task<Manifest> LoadManifestAsync(List<string> specifiedEnvironments)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
         var manifestFile = await LoadManifestFileAsync(settings);
@@ -57,7 +57,7 @@ public class ManifestRepository : IManifestRepository
             .Where(x => x != null)
             .ToList();
 
-        return new Manifest_V2
+        return new Manifest
         {
             AppIds = manifestFile.Apps,
             Apps = apps
