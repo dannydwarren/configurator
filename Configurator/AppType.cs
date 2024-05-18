@@ -4,6 +4,7 @@
     {
         Unknown,
         Script,
+        PowerShell,
         PowerShellAppPackage,
         PowerShellModule,
         Winget,

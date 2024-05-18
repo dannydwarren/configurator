@@ -91,6 +91,7 @@ public class ManifestRepository : IManifestRepository
         {
             { AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(rawInstallable.AppData.ToString()),
             { AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.PowerShell } => jsonSerializer.Deserialize<PowerShellApp>(rawInstallable.AppData.ToString()),
             { AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(rawInstallable.AppData.ToString()),
             { AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(rawInstallable.AppData.ToString()),
             { AppType: AppType.Scoop } => jsonSerializer.Deserialize<ScoopApp>(rawInstallable.AppData.ToString()),

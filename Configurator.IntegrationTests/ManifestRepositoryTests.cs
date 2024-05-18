@@ -187,6 +187,20 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_loading_PowerShellApps()
+        {
+            await SetManifestFileName("powershell.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
+
+            It($"loads basic {nameof(PowerShellApp)}", () =>
+            {
+                manifest.Apps.ShouldHaveSingleItem()
+                    .ShouldBeOfType<PowerShellApp>().AppId.ShouldBe("powershell-app-id-1");
+            });
+        }
+
+        [Fact]
         public async Task When_loading_PowerShellAppPackages()
         {
             await SetManifestFileName("power-shell-app-packages.manifest.json");
