@@ -189,14 +189,14 @@ namespace Emmersion.Http.IntegrationTests
         [Test]
         public void WhenPermanentRedirectShouldNotBeFollowed()
         {
-            var request = new HttpRequest {Url = "https://jigsaw.w3.org/HTTP/300/301.html"};
+            var request = new HttpRequest {Url = "http://jigsaw.w3.org/HTTP/300/301.html"};
             client = new HttpClient(new HttpClientOptions {AllowAutoRedirect = false});
 
             var response = client.Execute(request);
 
             Assert.That(response.StatusCode, Is.EqualTo(expected: 301));
             Assert.That(response.Body, Is.Not.Empty);
-            Assert.That(response.Headers.GetValue("location"), Is.EqualTo("https://jigsaw.w3.org/HTTP/300/Overview.html").IgnoreCase);
+            Assert.That(response.Headers.GetValue("location"), Is.EqualTo("https://jigsaw.w3.org/HTTP/300/301.html").IgnoreCase);
         }
 
         [Test]
@@ -276,7 +276,7 @@ namespace Emmersion.Http.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(expected: 200));
             Assert.That(response.Body, Is.Not.Empty);
             Assert.That(response.Headers.GetAllHeaderNames().Count, Is.GreaterThan(expected: 0));
-            Assert.That(response.Headers.GetValue("server"), Is.EqualTo("ECS").IgnoreCase);
+            Assert.That(response.Headers.GetValue("server"), Is.EqualTo("ECAcc").IgnoreCase);
             Assert.That(response.Headers.GetValue("location"), Is.Empty);
         }
 
