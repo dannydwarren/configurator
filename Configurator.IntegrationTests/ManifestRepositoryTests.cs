@@ -165,7 +165,7 @@ namespace Configurator.IntegrationTests
 
             var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
-            It($"loads basic {nameof(ScriptApp)}", () =>
+            It($"loads basic {nameof(GitconfigApp)}", () =>
             {
                 manifest.Apps.ShouldHaveSingleItem()
                     .ShouldBeOfType<GitconfigApp>().AppId.ShouldBe("gitconfig-app-id");
