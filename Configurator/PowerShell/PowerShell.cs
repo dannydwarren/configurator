@@ -16,6 +16,7 @@ namespace Configurator.PowerShell
         Task<TResult> ExecuteWindowsAsync<TResult>(string script);
     }
 
+    //https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/choosing-the-right-nuget-package?view=powershell-7.4
     public class PowerShell : IPowerShell
     {
         private readonly IProcessRunner processRunner;
@@ -36,7 +37,7 @@ namespace Configurator.PowerShell
             this.specialFolders = specialFolders;
             this.consoleLogger = consoleLogger;
         }
-//https://devblogs.microsoft.com/powershell/depending-on-the-right-powershell-nuget-package-in-your-net-project/
+
         public async Task ExecuteAsync(string script)
         {
             var processInstructions = await BuildCoreProcessInstructionsAsync(script, runAsAdmin: false);
