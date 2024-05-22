@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -48,12 +49,14 @@ public class ManifestRepository : IManifestRepository
     private async Task<Manifest> LoadManifestAsync(List<string> specifiedEnvironments)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
-        var manifestFile = await LoadManifestFileAsync(settings);
-        var loadInstallableTasks = manifestFile.Apps.Select(appId => LoadInstallableAsync(appId, settings));
+        var manifestFile = await LoadManifestFileAsync(settings.Manifest);
+        var loadInstallableTasks = manifestFile.Apps.Select(appId => LoadInstallableAsync(appId, settings.Manifest));
         var installables = await Task.WhenAll(loadInstallableTasks);
         var apps = installables
             .Where(installable => IncludeForSpecifiedEnvironments(specifiedEnvironments, installable))
             .Select(ParseApp)
+            .Where(x => x != null)
+            .Select(x => MapShellAppScripts(x, settings.Manifest))
             .Where(x => x != null)
             .ToList();
 
@@ -64,6 +67,41 @@ public class ManifestRepository : IManifestRepository
         };
     }
 
+    private IApp MapShellAppScripts(IApp app, ManifestSettings manifestSettings)
+    {
+        if (app.Shell == Shell.None)
+            return app;
+
+        var appDirectory = GetAppDirectory(app.AppId, manifestSettings);
+        var shellScriptExtension = GetShellScriptExtension(app);
+
+        var installScriptFilePath = Path.Join(appDirectory, $"install{shellScriptExtension}");
+        var upgradeScriptFilePath = Path.Join(appDirectory, $"upgrade{shellScriptExtension}");
+        var verificationScriptFilePath = Path.Join(appDirectory, $"verification{shellScriptExtension}");
+
+        if(!File.Exists(installScriptFilePath))
+        {
+            return null!;
+        }
+
+        if (app is PowerShellApp powerShellApp)
+        {
+            powerShellApp.InstallScript = installScriptFilePath;
+            powerShellApp.UpgradeScript = fileSystem.Exists(upgradeScriptFilePath) ? upgradeScriptFilePath : null;
+            powerShellApp.VerificationScript = fileSystem.Exists(verificationScriptFilePath) ? verificationScriptFilePath : null;
+        }
+
+        return app;
+    }
+
+    private string GetShellScriptExtension(IApp app)
+    {
+        return app.Shell switch
+        {
+            Shell.PowerShell => ".ps1",
+            _ => throw new NotImplementedException(),
+        };
+    }
 
     private static bool IncludeForSpecifiedEnvironments(List<string> specifiedEnvironments, RawInstallable installable)
     {
@@ -75,9 +113,10 @@ public class ManifestRepository : IManifestRepository
         return noEnvironmentsHaveBeenSpecified || installableTargetsASpecifiedEnvironment;
     }
 
-    private async Task<RawInstallable> LoadInstallableAsync(string appId, Settings settings)
+    private async Task<RawInstallable> LoadInstallableAsync(string appId, ManifestSettings manifestSettings)
     {
-        var installableAppFilePath = Path.Join(settings.Manifest.Directory, "apps", appId, "app.json");
+        var appDirectory = GetAppDirectory(appId, manifestSettings);
+        var installableAppFilePath = Path.Join(appDirectory, "app.json");
         var installableAppFileJson = await fileSystem.ReadAllTextAsync(installableAppFilePath);
         var rawInstallable = jsonSerializer.Deserialize<RawInstallable>(installableAppFileJson);
         rawInstallable.AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(installableAppFileJson))).RootElement;
@@ -106,17 +145,17 @@ public class ManifestRepository : IManifestRepository
     public async Task SaveInstallableAsync(Installable installable)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
-        var manifestFile = await LoadManifestFileAsync(settings);
+        var manifestFile = await LoadManifestFileAsync(settings.Manifest);
 
         if (CheckInstallableAlreadyInManifest(installable, manifestFile))
             return;
 
-        var installableDirectory = CreateInstallableDirectoryAsync(installable, settings);
+        var installableDirectory = CreateInstallableDirectoryAsync(installable, settings.Manifest);
         await WriteInstallableFileAsync(installable, installableDirectory);
 
         manifestFile.Apps.Add(installable.AppId);
 
-        await WriteManifestFileAsync(settings, manifestFile);
+        await WriteManifestFileAsync(settings.Manifest, manifestFile);
     }
 
     private bool CheckInstallableAlreadyInManifest(Installable installable, ManifestFile manifestFile)
@@ -124,9 +163,9 @@ public class ManifestRepository : IManifestRepository
         return manifestFile.Apps.Contains(installable.AppId);
     }
 
-    private async Task<ManifestFile> LoadManifestFileAsync(Settings settings)
+    private async Task<ManifestFile> LoadManifestFileAsync(ManifestSettings manifestSettings)
     {
-        var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
+        var manifestFilePath = Path.Join(manifestSettings.Directory, manifestSettings.FileName);
         await EnsureManifestFileExists(manifestFilePath);
         var manifestFileJson = await fileSystem.ReadAllTextAsync(manifestFilePath);
         return jsonSerializer.Deserialize<ManifestFile>(manifestFileJson);
@@ -141,9 +180,9 @@ public class ManifestRepository : IManifestRepository
         await fileSystem.WriteAllTextAsync(fileName, "{}");
     }
 
-    private string CreateInstallableDirectoryAsync(Installable installable, Settings settings)
+    private string CreateInstallableDirectoryAsync(Installable installable, ManifestSettings manifestSettings)
     {
-        var installableDirectory = Path.Join(settings.Manifest.Directory, "apps", installable.AppId);
+        var installableDirectory = GetAppDirectory(installable.AppId, manifestSettings);
 
         fileSystem.CreateDirectory(installableDirectory);
         return installableDirectory;
@@ -157,11 +196,16 @@ public class ManifestRepository : IManifestRepository
         await fileSystem.WriteAllTextAsync(installableFilePath, installableJson);
     }
 
-    private async Task WriteManifestFileAsync(Settings settings, ManifestFile manifestFile)
+    private async Task WriteManifestFileAsync(ManifestSettings manifestSettings, ManifestFile manifestFile)
     {
-        var manifestFilePath = Path.Join(settings.Manifest.Directory, settings.Manifest.FileName);
+        var manifestFilePath = Path.Join(manifestSettings.Directory, manifestSettings.FileName);
         var manifestFileJson = jsonSerializer.Serialize(manifestFile);
         await fileSystem.WriteAllTextAsync(manifestFilePath, manifestFileJson);
+    }
+
+    private string GetAppDirectory(string appId, ManifestSettings manifestSettings)
+    {
+        return Path.Join(manifestSettings.Directory, "apps", appId);
     }
 
     public class ManifestFile

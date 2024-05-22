@@ -1,0 +1,5 @@
+﻿{
+    "AppType": "PowerShell",
+    "AppId": "powershell-app-id-3",
+    "Environments": "Test"
+}

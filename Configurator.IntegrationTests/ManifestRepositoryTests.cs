@@ -190,13 +190,55 @@ namespace Configurator.IntegrationTests
         public async Task When_loading_PowerShellApps()
         {
             await SetManifestFileName("powershell.manifest.json");
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
 
             var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
             It($"loads basic {nameof(PowerShellApp)}", () =>
             {
-                manifest.Apps.ShouldHaveSingleItem()
-                    .ShouldBeOfType<PowerShellApp>().AppId.ShouldBe("powershell-app-id-1");
+                manifest.Apps.First()
+                    .ShouldBeOfType<PowerShellApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("powershell-app-id-1");
+                        x.Shell.ShouldBe(Shell.PowerShell);
+                        x.InstallScript.ShouldBe(Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\install.ps1"));
+                        x.UpgradeScript.ShouldBe(Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\upgrade.ps1"));
+                        x.VerificationScript.ShouldBe(Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\verification.ps1"));
+                    });
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_PowerShellApps_and_non_install_scripts_cannot_be_found()
+        {
+            await SetManifestFileName("powershell.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
+
+            It($"loads {nameof(PowerShellApp)} with null non-install scripts", () =>
+            {
+                manifest.Apps.Skip(1).First()
+                    .ShouldBeOfType<PowerShellApp>().ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("powershell-app-id-2");
+                        x.InstallScript.ShouldNotBeEmpty();
+                        x.UpgradeScript.ShouldBeNull();
+                        x.VerificationScript.ShouldBeNull();
+                    });
+            });
+        }
+
+        [Fact]
+        public async Task When_loading_PowerShellApps_and_install_script_cannot_be_found()
+        {
+            await SetManifestFileName("powershell.manifest.json");
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
+
+            It($"does not load {nameof(PowerShellApp)} with missing install script", () =>
+            {
+                manifest.Apps.ShouldNotContain(x => x.AppId == "powershell-app-id-3");
             });
         }
 

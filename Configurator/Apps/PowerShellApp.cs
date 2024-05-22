@@ -6,16 +6,18 @@ namespace Configurator.Apps
     {
         public string AppId { get; set; }
 
-        public string? InstallArgs => throw new NotImplementedException();
+        public Shell Shell => Shell.PowerShell;
 
-        public bool PreventUpgrade => throw new NotImplementedException();
+        public string InstallScript { get; set; }
 
-        public string InstallScript => throw new NotImplementedException();
+        public string? VerificationScript { get; set; }
 
-        public string? VerificationScript => throw new NotImplementedException();
+        public string? UpgradeScript { get; set; }
 
-        public string? UpgradeScript => throw new NotImplementedException();
+        string? IApp.InstallArgs => throw new NotSupportedException();
 
-        public AppConfiguration? Configuration => throw new NotImplementedException();
+        bool IApp.PreventUpgrade => throw new NotSupportedException();
+
+        AppConfiguration? IApp.Configuration => throw new NotSupportedException();
     }
 }

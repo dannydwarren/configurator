@@ -1,10 +1,11 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Configurator.Apps
 {
     public interface IApp
     {
         string AppId { get; }
+        Shell Shell => Shell.None;
         string? InstallArgs { get; }
         bool PreventUpgrade { get; }
         string InstallScript { get; }

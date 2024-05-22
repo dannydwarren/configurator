@@ -34,6 +34,12 @@
       <None Update="TestManifests\apps\powershell-app-id-1\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\apps\powershell-app-id-3\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TestManifests\apps\powershell-app-id-2\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\unknown-app-id\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

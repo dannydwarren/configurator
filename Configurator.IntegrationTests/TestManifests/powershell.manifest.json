@@ -1,5 +1,7 @@
 ﻿{
     "Apps": [
-        "powershell-app-id-1"
+        "powershell-app-id-1",
+        "powershell-app-id-2",
+        "powershell-app-id-3"
     ]
 }
