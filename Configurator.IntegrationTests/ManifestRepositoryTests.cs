@@ -197,8 +197,8 @@ namespace Configurator.IntegrationTests
 
             It($"loads basic {nameof(PowerShellApp)}", () =>
             {
-                manifest.Apps.First()
-                    .ShouldBeOfType<PowerShellApp>().ShouldSatisfyAllConditions(x =>
+                var targetApp = manifest.Apps.First();
+                targetApp.ShouldBeOfType<PowerShellApp>().ShouldSatisfyAllConditions(x =>
                     {
                         x.AppId.ShouldBe("powershell-app-id-1");
                         x.Shell.ShouldBe(Shell.PowerShell);
@@ -206,6 +206,13 @@ namespace Configurator.IntegrationTests
                         x.UpgradeScript.ShouldBe($". {Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\upgrade.ps1")}");
                         x.VerificationScript.ShouldBe($". {Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\verification.ps1")}");
                     });
+
+                targetApp.ShouldSatisfyAllConditions(x =>
+                {
+                    x.InstallArgs.ShouldBeNull();
+                    x.PreventUpgrade.ShouldBeFalse();
+                    x.Configuration.ShouldBeNull();
+                });
             });
         }
 

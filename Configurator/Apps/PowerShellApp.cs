@@ -14,10 +14,10 @@ namespace Configurator.Apps
 
         public string? UpgradeScript { get; set; }
 
-        string? IApp.InstallArgs => throw new NotSupportedException();
+        string? IApp.InstallArgs => null;
 
-        bool IApp.PreventUpgrade => throw new NotSupportedException();
+        bool IApp.PreventUpgrade => false;
 
-        AppConfiguration? IApp.Configuration => throw new NotSupportedException();
+        AppConfiguration? IApp.Configuration => null;
     }
 }
