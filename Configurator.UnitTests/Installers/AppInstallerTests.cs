@@ -253,6 +253,8 @@ namespace Configurator.UnitTests.Installers
             var mockApp = GetMock<IApp>();
             mockApp.SetupGet(x => x.AppId).Returns(RandomString());
             mockApp.SetupGet(x => x.Shell).Returns(Shell.PowerShell);
+            mockApp.SetupGet(x => x.InstallScript).Returns("install.ps1");
+            mockApp.SetupGet(x => x.VerificationScript).Returns("verification.ps1");
             var app = mockApp.Object;
 
             var verificationResultPreInstall = false;

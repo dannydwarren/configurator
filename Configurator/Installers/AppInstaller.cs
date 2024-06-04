@@ -58,6 +58,7 @@ namespace Configurator.Installers
                 {
                     await powerShell.ExecuteAsync(actionScript);
                 }
+
                 var postInstallVerificationResult = await VerifyAppAsync(app, forceWindowsPowerShell);
                 if (!postInstallVerificationResult)
                 {
