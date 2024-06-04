@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,13 @@ namespace Configurator.Utilities
 
     public class ProcessRunner : IProcessRunner
     {
+        private readonly IConsoleLogger consoleLogger;
+
+        public ProcessRunner(IConsoleLogger consoleLogger)
+        {
+            this.consoleLogger = consoleLogger;
+        }
+
         public async Task<ProcessResult> ExecuteAsync(ProcessInstructions instructions)
         {
             var process = BuildProcess(instructions);
@@ -64,7 +72,7 @@ namespace Configurator.Utilities
             return Task.Run(process.WaitForExit, cancellationTokenSource.Token);
         }
 
-        private static Task RunOutputLoop(Process process, ProcessResult result,
+        private Task RunOutputLoop(Process process, ProcessResult result,
             CancellationTokenSource cancellationTokenSource)
         {
             return Task.Run(() =>
@@ -81,12 +89,13 @@ namespace Configurator.Utilities
                     if (output != null)
                     {
                         result.AllOutput.Add(output);
+                        consoleLogger.Debug(output);                        
                     }
                 }
             }, cancellationTokenSource.Token);
         }
 
-        private static Task RunErrorLoop(Process process, ProcessResult result,
+        private Task RunErrorLoop(Process process, ProcessResult result,
             CancellationTokenSource cancellationTokenSource)
         {
             return Task.Run(() =>
@@ -100,7 +109,9 @@ namespace Configurator.Utilities
 
                     if (dirtyError != null)
                     {
-                        result.Errors.Add(CleanError(dirtyError));
+                        var error = CleanError(dirtyError);
+                        result.Errors.Add(error);
+                        consoleLogger.Debug(error);
                     }
                 }
             }, cancellationTokenSource.Token);

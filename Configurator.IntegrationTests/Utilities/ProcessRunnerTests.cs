@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Configurator.Configuration;
 using Configurator.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;
 
@@ -75,6 +76,11 @@ Write-Output $result";
         [Fact]
         public async Task When_executing_and_expecting_output()
         {
+            var fakeLogger = new FakeConsoleLogger();
+            Services.AddSingleton<IConsoleLogger>(fakeLogger);
+
+            var consoleLogger = GetInstance<ConsoleLogger>();
+
             var outputs = new List<string>
             {
                 RandomString(),
@@ -94,11 +100,16 @@ Write-Output '{outputs[2]}'";
                 result.AllOutput.ShouldBe(outputs);
                 result.LastOutput.ShouldBe(outputs.Last());
             });
+
+            It("logs each output", () => fakeLogger.DebugMessages.ShouldBeEquivalentTo(outputs));
         }
 
         [Fact]
         public async Task When_executing_with_errors()
         {
+            var fakeLogger = new FakeConsoleLogger();
+            Services.AddSingleton<IConsoleLogger>(fakeLogger);
+            
             var errors = new List<string>
             {
                 RandomString(),
@@ -115,7 +126,9 @@ Write-Error '{errors[2]}'";
 
             var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync(processInstructions));
 
-            It("returns the script errors", () => { result.Errors.ShouldBe(expectedErrors); });
+            It("returns the script errors", () => result.Errors.ShouldBe(expectedErrors));
+
+            It("logs each error", () => fakeLogger.DebugMessages.ShouldBeEquivalentTo(expectedErrors));
         }
         
         private static ProcessInstructions BuildPwshInstructions(string script, bool runAsAdmin = false)
@@ -127,6 +140,56 @@ Write-Error '{errors[2]}'";
                 Arguments = $"-Command {script}"
             };
             return processInstructions;
+        }
+
+        private class FakeConsoleLogger : IConsoleLogger
+        {
+            public List<string> DebugMessages { get; } = new List<string>();
+            void IConsoleLogger.Debug(string message)
+            {
+                DebugMessages.Add(message);
+            }
+
+            public List<string> ErrorMessages { get; } = new List<string>();
+            void IConsoleLogger.Error(string message)
+            {
+                ErrorMessages.Add(message);
+            }
+
+            void IConsoleLogger.Error(string message, Exception exception)
+            {
+                throw new NotImplementedException();
+            }
+
+            void IConsoleLogger.Info(string message)
+            {
+                throw new NotImplementedException();
+            }
+
+            void IConsoleLogger.Progress(string message)
+            {
+                throw new NotImplementedException();
+            }
+
+            void IConsoleLogger.Result(string message)
+            {
+                throw new NotImplementedException();
+            }
+
+            void IConsoleLogger.Table<T>(List<T> rows)
+            {
+                throw new NotImplementedException();
+            }
+
+            void IConsoleLogger.Verbose(string message)
+            {
+                throw new NotImplementedException();
+            }
+
+            void IConsoleLogger.Warn(string message)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
