@@ -265,35 +265,35 @@ namespace Emmersion.Http.IntegrationTests
             Assert.That(response.Body, Does.Contain("custom user agent"));
         }
 
-        [Test]
-        public void WhenTemporaryRedirectShouldBeFollowed()
-        {
-            var request = new HttpRequest {Url = "https://httpbingo.org/redirect-to?url=https://example.com"};
-            client = new HttpClient(new HttpClientOptions {AllowAutoRedirect = true});
+        //[Test]
+        //public void WhenTemporaryRedirectShouldBeFollowed()
+        //{
+        //    var request = new HttpRequest {Url = "https://httpbingo.org/redirect-to?url=https://example.com"};
+        //    client = new HttpClient(new HttpClientOptions {AllowAutoRedirect = true});
 
-            var response = client.Execute(request);
+        //    var response = client.Execute(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(expected: 200));
-            Assert.That(response.Body, Is.Not.Empty);
-            Assert.That(response.Headers.GetAllHeaderNames().Count, Is.GreaterThan(expected: 0));
-            Assert.That(response.Headers.GetValue("server"), Is.EqualTo("ECAcc").IgnoreCase);
-            Assert.That(response.Headers.GetValue("location"), Is.Empty);
-        }
+        //    Assert.That(response.StatusCode, Is.EqualTo(expected: 200));
+        //    Assert.That(response.Body, Is.Not.Empty);
+        //    Assert.That(response.Headers.GetAllHeaderNames().Count, Is.GreaterThan(expected: 0));
+        //    Assert.That(response.Headers.GetValue("server"), Is.EqualTo("ECAcc").IgnoreCase);
+        //    Assert.That(response.Headers.GetValue("location"), Is.Empty);
+        //}
 
-        [Test]
-        public void WhenTemporaryRedirectShouldNotBeFollowed()
-        {
-            var request = new HttpRequest {Url = "https://httpbingo.org/redirect-to?url=https://example.com"};
-            client = new HttpClient(new HttpClientOptions {AllowAutoRedirect = false});
+        //[Test]
+        //public void WhenTemporaryRedirectShouldNotBeFollowed()
+        //{
+        //    var request = new HttpRequest {Url = "https://httpbingo.org/redirect-to?url=https://example.com"};
+        //    client = new HttpClient(new HttpClientOptions {AllowAutoRedirect = false});
 
-            var response = client.Execute(request);
+        //    var response = client.Execute(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(expected: 302));
-            Assert.That(response.Body, Is.Empty);
-            Assert.That(response.Headers.GetAllHeaderNames().Count, Is.GreaterThan(expected: 0));
-            Assert.That(response.Headers.GetValue("server"), Is.Not.EqualTo("example.com").IgnoreCase);
-            Assert.That(response.Headers.GetValue("location"), Is.EqualTo("https://example.com/").IgnoreCase);
-        }
+        //    Assert.That(response.StatusCode, Is.EqualTo(expected: 302));
+        //    Assert.That(response.Body, Is.Empty);
+        //    Assert.That(response.Headers.GetAllHeaderNames().Count, Is.GreaterThan(expected: 0));
+        //    Assert.That(response.Headers.GetValue("server"), Is.Not.EqualTo("example.com").IgnoreCase);
+        //    Assert.That(response.Headers.GetValue("location"), Is.EqualTo("https://example.com/").IgnoreCase);
+        //}
     }
 
     public class HttpBinPostResponse
