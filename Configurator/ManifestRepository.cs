@@ -86,9 +86,9 @@ public class ManifestRepository : IManifestRepository
 
         if (app is PowerShellApp powerShellApp)
         {
-            powerShellApp.InstallScript = installScriptFilePath;
-            powerShellApp.UpgradeScript = fileSystem.Exists(upgradeScriptFilePath) ? upgradeScriptFilePath : null;
-            powerShellApp.VerificationScript = fileSystem.Exists(verificationScriptFilePath) ? verificationScriptFilePath : null;
+            powerShellApp.InstallScript = $". {installScriptFilePath}";
+            powerShellApp.UpgradeScript = fileSystem.Exists(upgradeScriptFilePath) ? $". {upgradeScriptFilePath}" : null;
+            powerShellApp.VerificationScript = fileSystem.Exists(verificationScriptFilePath) ? $". {verificationScriptFilePath}" : null;
         }
 
         return app;
