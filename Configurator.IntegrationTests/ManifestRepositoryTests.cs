@@ -202,9 +202,9 @@ namespace Configurator.IntegrationTests
                     {
                         x.AppId.ShouldBe("powershell-app-id-1");
                         x.Shell.ShouldBe(Shell.PowerShell);
-                        x.InstallScript.ShouldBe($". {Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\install.ps1")}");
-                        x.UpgradeScript.ShouldBe($". {Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\upgrade.ps1")}");
-                        x.VerificationScript.ShouldBe($". {Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\verification.ps1")}");
+                        x.InstallScript.ShouldBe($". \"{Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\install.ps1")}\"");
+                        x.UpgradeScript.ShouldBe($". \"{Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\upgrade.ps1")}\"");
+                        x.VerificationScript.ShouldBe($". \"{Path.Join(settings.Manifest.Directory, "apps\\powershell-app-id-1\\verification.ps1")}\"");
                     });
 
                 targetApp.ShouldSatisfyAllConditions(x =>
