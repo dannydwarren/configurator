@@ -16,7 +16,7 @@ $bootstrapStopwatch.Restart()
 ."$HOME\Downloads\Configurator.exe" settings set manifest.repo "https://github.com/dannydwarren/machine-configs.git"
 ."$HOME\Downloads\Configurator.exe" settings set downloadsdirectory "C:\Users\danny\Downloads"
 ."$HOME\Downloads\Configurator.exe" initialize
-."$HOME\Downloads\Configurator.exe" configure --environments "All|Personal"
+."$HOME\Downloads\Configurator.exe" configure --environments "All"
 Write-Output "Download duration: $($downloadDuration)"
 $bootstrapDuration = $bootstrapStopwatch.Elapsed
 Write-Output "Configurator duration: $($bootstrapDuration)"
