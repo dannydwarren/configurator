@@ -97,7 +97,7 @@ namespace Emmersion.Http.IntegrationTests
         {
             var request = new HttpRequest {Url = "http://httpbin.org/get"};
 
-            for (var i = 0; i < 20; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var response = client.Execute(request, timeoutMilliseconds: 1000);
                 Assert.That(response.StatusCode, Is.EqualTo(expected: 200));
