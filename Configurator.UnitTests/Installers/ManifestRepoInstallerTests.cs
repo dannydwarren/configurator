@@ -22,7 +22,7 @@ public class ManifestRepoInstallerTests : UnitTestBase<ManifestRepoInstaller>
             },
             Git = new GitSettings
             {
-                CloneDirectory = new Uri($@"c:\{RandomString()}\")
+                CloneDirectory = new Uri($@"c:\{RandomString()}")
             }
         };
         GetMock<ISettingsRepository>().Setup(x => x.LoadSettingsAsync()).ReturnsAsync(settings);
@@ -37,7 +37,7 @@ public class ManifestRepoInstallerTests : UnitTestBase<ManifestRepoInstaller>
             capturedApp.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
             {
                 x.AppId.ShouldBe(settings.Manifest.Repo.ToString());
-                x.CloneRootDirectory.ShouldBe(settings.Git.CloneDirectory.AbsolutePath);
+                x.CloneRootDirectory.ShouldBe(settings.Git.CloneDirectory.AbsolutePath + "\\");
             }));
     }
 

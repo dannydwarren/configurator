@@ -8,7 +8,7 @@ public class GitRepoApp : IApp
     public string? InstallArgs => null;
     public bool PreventUpgrade => false;
 
-    private string cloneRootDirectory = @"c:\src\";
+    private string cloneRootDirectory = "";
     public string CloneRootDirectory
     {
         get => cloneRootDirectory;

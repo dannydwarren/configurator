@@ -54,7 +54,7 @@ public class ManifestRepository : IManifestRepository
         var installables = await Task.WhenAll(loadInstallableTasks);
         var apps = installables
             .Where(installable => IncludeForSpecifiedEnvironments(specifiedEnvironments, installable))
-            .Select(ParseApp)
+            .Select(x  => ParseApp(x, settings.Git))
             .Where(x => x != null)
             .Select(x => MapShellAppScripts(x, settings.Manifest))
             .Where(x => x != null)
@@ -124,11 +124,12 @@ public class ManifestRepository : IManifestRepository
         return rawInstallable;
     }
 
-    private IApp ParseApp(RawInstallable rawInstallable)
+    private IApp ParseApp(RawInstallable rawInstallable, GitSettings gitSettings)
     {
         return rawInstallable switch
         {
             { AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.GitRepo } => ParseGitRepoApp(rawInstallable, gitSettings),
             { AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(rawInstallable.AppData.ToString()),
             { AppType: AppType.PowerShell } => jsonSerializer.Deserialize<PowerShellApp>(rawInstallable.AppData.ToString()),
             { AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(rawInstallable.AppData.ToString()),
@@ -140,6 +141,14 @@ public class ManifestRepository : IManifestRepository
             { AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(rawInstallable.AppData.ToString()),
             _ => null!
         };
+    }
+
+    private GitRepoApp ParseGitRepoApp(RawInstallable rawInstallable, GitSettings gitSettings)
+    {
+        var app = jsonSerializer.Deserialize<GitRepoApp>(rawInstallable.AppData.ToString());
+        app.CloneRootDirectory = gitSettings.CloneDirectory.AbsolutePath;
+
+        return app;
     }
 
     public async Task SaveInstallableAsync(Installable installable)

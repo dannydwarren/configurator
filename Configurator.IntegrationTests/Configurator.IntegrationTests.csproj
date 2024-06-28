@@ -31,6 +31,9 @@
       <None Update="TestManifests\apps\environment-1-and-3-app-id-3\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TestManifests\apps\git-repo-app-id\app.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="TestManifests\apps\powershell-app-id-1\app.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

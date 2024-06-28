@@ -1,0 +1,5 @@
+﻿{
+    "AppType": "GitRepo",
+    "AppId": "git-repo-app-id",
+    "Environments": "Test"
+}

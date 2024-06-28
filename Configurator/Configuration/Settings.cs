@@ -18,6 +18,6 @@ namespace Configurator.Configuration
 
     public class GitSettings
     {
-        public Uri CloneDirectory { get; set; } = new Uri("C:/src", UriKind.Absolute);
+        public Uri CloneDirectory { get; set; } = new Uri(@"C:\src\", UriKind.Absolute);
     }
 }

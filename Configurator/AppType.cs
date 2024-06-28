@@ -12,6 +12,7 @@
         ScoopBucket,
         Gitconfig,
         NonPackageApp,
-        VisualStudioExtension
+        VisualStudioExtension,
+        GitRepo
     }
 }

@@ -173,6 +173,26 @@ namespace Configurator.IntegrationTests
         }
 
         [Fact]
+        public async Task When_loading_GitRepoApps()
+        {
+            await SetManifestFileName("git-repo.manifest.json");
+            var settingsRepository = GetInstance<ISettingsRepository>();
+            var settings = await settingsRepository.LoadSettingsAsync();
+
+            var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
+
+            It($"loads basic {nameof(GitRepoApp)}", () =>
+            {
+                manifest.Apps.ShouldHaveSingleItem().ShouldBeOfType<GitRepoApp>()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.AppId.ShouldBe("git-repo-app-id");
+                        x.CloneRootDirectory.ShouldBe(settings.Git.CloneDirectory.AbsolutePath);
+                    });
+            });
+        }
+
+        [Fact]
         public async Task When_loading_NonPackageApps()
         {
             await SetManifestFileName("non-package.manifest.json");
