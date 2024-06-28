@@ -36,7 +36,8 @@ public class ManifestRepoInstallerTests : UnitTestBase<ManifestRepoInstaller>
         It("installs", () =>
             capturedApp.ShouldNotBeNull().ShouldSatisfyAllConditions(x =>
             {
-                x.AppId.ShouldBe(settings.Manifest.Repo.ToString());
+                x.AppId.ShouldBe("git.manifest-repo");
+                x.InstallArgs.ShouldBe(settings.Manifest.Repo.ToString());
                 x.CloneRootDirectory.ShouldBe(settings.Git.CloneDirectory.AbsolutePath + "\\");
             }));
     }

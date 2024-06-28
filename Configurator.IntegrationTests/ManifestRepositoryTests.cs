@@ -168,7 +168,7 @@ namespace Configurator.IntegrationTests
             It($"loads basic {nameof(GitconfigApp)}", () =>
             {
                 manifest.Apps.ShouldHaveSingleItem()
-                    .ShouldBeOfType<GitconfigApp>().AppId.ShouldBe("gitconfig-app-id");
+                .ShouldBeOfType<GitconfigApp>().AppId.ShouldBe("gitconfig-app-id");
             });
         }
 
@@ -181,13 +181,21 @@ namespace Configurator.IntegrationTests
 
             var manifest = await BecauseAsync(() => ClassUnderTest.LoadAsync(new List<string>()));
 
-            It($"loads basic {nameof(GitRepoApp)}", () =>
+            It($"loads basic {nameof(GitRepoApp)} and does not load misconfigured apps", () =>
             {
                 manifest.Apps.ShouldHaveSingleItem().ShouldBeOfType<GitRepoApp>()
                     .ShouldSatisfyAllConditions(x =>
                     {
                         x.AppId.ShouldBe("git-repo-app-id");
+                        x.InstallArgs.ShouldNotBeNull().ShouldBe("https://organization/repo.git");
+                        x.PreventUpgrade.ShouldBeTrue();
                         x.CloneRootDirectory.ShouldBe(settings.Git.CloneDirectory.AbsolutePath);
+                        x.InstallScript.ShouldContain(x.CloneRootDirectory);
+                        x.InstallScript.ShouldContain(x.InstallArgs);
+                        x.UpgradeScript.ShouldContain(x.CloneRootDirectory);
+                        x.UpgradeScript.ShouldContain("C:/src/repo");
+                        x.VerificationScript.ShouldContain(x.CloneRootDirectory);
+                        x.VerificationScript.ShouldContain("C:/src/repo");
                     });
             });
         }

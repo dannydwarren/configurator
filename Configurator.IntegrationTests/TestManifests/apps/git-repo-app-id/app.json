@@ -1,5 +1,7 @@
 ﻿{
     "AppType": "GitRepo",
     "AppId": "git-repo-app-id",
+    "InstallArgs": "https://organization/repo.git",
+    "PreventUpgrade": true,
     "Environments": "Test"
 }

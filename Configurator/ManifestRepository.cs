@@ -109,6 +109,11 @@ public class ManifestRepository : IManifestRepository
         var app = jsonSerializer.Deserialize<GitRepoApp>(rawInstallable.AppData.ToString());
         app.CloneRootDirectory = gitSettings.CloneDirectory.AbsolutePath;
 
+        if (string.IsNullOrWhiteSpace(app.InstallArgs))
+        {
+            return null!;
+        }
+
         return app;
     }
 

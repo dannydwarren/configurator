@@ -1,5 +1,7 @@
 ﻿{
     "Apps": [
-        "git-repo-app-id"
+        "git-repo-app-id",
+        "git-repo-app-id-missing-install-args",
+        "git-repo-app-id-blank-install-args"
     ]
 }
