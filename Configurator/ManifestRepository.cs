@@ -54,9 +54,7 @@ public class ManifestRepository : IManifestRepository
         var installables = await Task.WhenAll(loadInstallableTasks);
         var apps = installables
             .Where(installable => IncludeForSpecifiedEnvironments(specifiedEnvironments, installable))
-            .Select(x  => ParseApp(x, settings.Git))
-            .Where(x => x != null)
-            .Select(x => MapShellAppScripts(x, settings.Manifest))
+            .Select(x  => ParseApp(x, settings))
             .Where(x => x != null)
             .ToList();
 
@@ -66,8 +64,61 @@ public class ManifestRepository : IManifestRepository
             Apps = apps
         };
     }
+    private async Task<RawInstallable> LoadInstallableAsync(string appId, ManifestSettings manifestSettings)
+    {
+        var appDirectory = GetAppDirectory(appId, manifestSettings);
+        var installableAppFilePath = Path.Join(appDirectory, "app.json");
+        var installableAppFileJson = await fileSystem.ReadAllTextAsync(installableAppFilePath);
+        var rawInstallable = jsonSerializer.Deserialize<RawInstallable>(installableAppFileJson);
+        rawInstallable.AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(installableAppFileJson))).RootElement;
 
-    private IApp MapShellAppScripts(IApp app, ManifestSettings manifestSettings)
+        return rawInstallable;
+    }
+
+    private static bool IncludeForSpecifiedEnvironments(List<string> specifiedEnvironments, RawInstallable installable)
+    {
+        var installableEnvironmentsLowered = installable.Environments.ToLower();
+
+        var noEnvironmentsHaveBeenSpecified = !specifiedEnvironments.Any();
+        var installableTargetsASpecifiedEnvironment = specifiedEnvironments.Any(env => installableEnvironmentsLowered.Contains(env.ToLower()));
+
+        return noEnvironmentsHaveBeenSpecified || installableTargetsASpecifiedEnvironment;
+    }
+
+    private IApp ParseApp(RawInstallable rawInstallable, Settings settings)
+    {
+        return rawInstallable switch
+        {
+            { AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.GitRepo } => ParseGitRepoApp(rawInstallable, settings.Git),
+            { AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.PowerShell } => ParsePowerShellApp(rawInstallable, settings.Manifest),
+            { AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.Scoop } => jsonSerializer.Deserialize<ScoopApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.Script } => jsonSerializer.Deserialize<ScriptApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.VisualStudioExtension } => jsonSerializer.Deserialize<VisualStudioExtensionApp>(rawInstallable.AppData.ToString()),
+            { AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(rawInstallable.AppData.ToString()),
+            _ => null!
+        };
+    }
+
+    private GitRepoApp ParseGitRepoApp(RawInstallable rawInstallable, GitSettings gitSettings)
+    {
+        var app = jsonSerializer.Deserialize<GitRepoApp>(rawInstallable.AppData.ToString());
+        app.CloneRootDirectory = gitSettings.CloneDirectory.AbsolutePath;
+
+        return app;
+    }
+
+    private PowerShellApp ParsePowerShellApp(RawInstallable rawInstallable, ManifestSettings manifestSettings)
+    {
+        var app = jsonSerializer.Deserialize<PowerShellApp>(rawInstallable.AppData.ToString());
+        return MapShellAppScripts<PowerShellApp>(app, manifestSettings);
+    }
+    
+    private T MapShellAppScripts<T>(T app, ManifestSettings manifestSettings) where T : IApp
     {
         if (app.Shell == Shell.None)
             return app;
@@ -79,9 +130,9 @@ public class ManifestRepository : IManifestRepository
         var upgradeScriptFilePath = Path.Join(appDirectory, $"upgrade{shellScriptExtension}");
         var verificationScriptFilePath = Path.Join(appDirectory, $"verification{shellScriptExtension}");
 
-        if(!File.Exists(installScriptFilePath))
+        if (!File.Exists(installScriptFilePath))
         {
-            return null!;
+            return default!;
         }
 
         if (app is PowerShellApp powerShellApp)
@@ -102,55 +153,6 @@ public class ManifestRepository : IManifestRepository
             _ => throw new NotImplementedException(),
         };
     }
-
-    private static bool IncludeForSpecifiedEnvironments(List<string> specifiedEnvironments, RawInstallable installable)
-    {
-        var installableEnvironmentsLowered = installable.Environments.ToLower();
-
-        var noEnvironmentsHaveBeenSpecified = !specifiedEnvironments.Any();
-        var installableTargetsASpecifiedEnvironment = specifiedEnvironments.Any(env => installableEnvironmentsLowered.Contains(env.ToLower()));
-
-        return noEnvironmentsHaveBeenSpecified || installableTargetsASpecifiedEnvironment;
-    }
-
-    private async Task<RawInstallable> LoadInstallableAsync(string appId, ManifestSettings manifestSettings)
-    {
-        var appDirectory = GetAppDirectory(appId, manifestSettings);
-        var installableAppFilePath = Path.Join(appDirectory, "app.json");
-        var installableAppFileJson = await fileSystem.ReadAllTextAsync(installableAppFilePath);
-        var rawInstallable = jsonSerializer.Deserialize<RawInstallable>(installableAppFileJson);
-        rawInstallable.AppData = JsonDocument.Parse(new MemoryStream(Encoding.UTF8.GetBytes(installableAppFileJson))).RootElement;
-
-        return rawInstallable;
-    }
-
-    private IApp ParseApp(RawInstallable rawInstallable, GitSettings gitSettings)
-    {
-        return rawInstallable switch
-        {
-            { AppType: AppType.Gitconfig } => jsonSerializer.Deserialize<GitconfigApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.GitRepo } => ParseGitRepoApp(rawInstallable, gitSettings),
-            { AppType: AppType.NonPackageApp } => jsonSerializer.Deserialize<NonPackageApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.PowerShell } => jsonSerializer.Deserialize<PowerShellApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.PowerShellAppPackage } => jsonSerializer.Deserialize<PowerShellAppPackage>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.PowerShellModule } => jsonSerializer.Deserialize<PowerShellModuleApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.Scoop } => jsonSerializer.Deserialize<ScoopApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.ScoopBucket } => jsonSerializer.Deserialize<ScoopBucketApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.Script } => jsonSerializer.Deserialize<ScriptApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.VisualStudioExtension } => jsonSerializer.Deserialize<VisualStudioExtensionApp>(rawInstallable.AppData.ToString()),
-            { AppType: AppType.Winget } => jsonSerializer.Deserialize<WingetApp>(rawInstallable.AppData.ToString()),
-            _ => null!
-        };
-    }
-
-    private GitRepoApp ParseGitRepoApp(RawInstallable rawInstallable, GitSettings gitSettings)
-    {
-        var app = jsonSerializer.Deserialize<GitRepoApp>(rawInstallable.AppData.ToString());
-        app.CloneRootDirectory = gitSettings.CloneDirectory.AbsolutePath;
-
-        return app;
-    }
-
     public async Task SaveInstallableAsync(Installable installable)
     {
         var settings = await settingsRepository.LoadSettingsAsync();
