@@ -17,6 +17,11 @@ namespace Configurator.UnitTests
                 GetMock<IPowerShellConfiguration>().Verify(x => x.SetWindowsPowerShellExecutionPolicyAsync());
             });
 
+            It("installs itself", () =>
+            {
+                GetMock<ISelfInstaller>().Verify(x => x.InstallAsync());
+            });
+
             It("configures winget", () =>
             {
                 GetMock<IWingetConfiguration>().Verify(x => x.UpgradeAsync());
