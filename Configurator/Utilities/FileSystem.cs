@@ -16,6 +16,7 @@ namespace Configurator.Utilities
         bool Exists(string path);
         void CreateDirectory(string path);
         void CreateFile(string fileName);
+        void MoveFile(string sourcePath, string destinationPath);
     }
 
     public class FileSystem : IFileSystem
@@ -75,6 +76,11 @@ namespace Configurator.Utilities
         public void CreateFile(string fileName)
         {
             using var _ = File.Create(fileName);
+        }
+
+        public void MoveFile(string sourcePath, string destinationPath)
+        {
+           File.Move(sourcePath, destinationPath);
         }
     }
 }
