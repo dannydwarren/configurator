@@ -8,46 +8,35 @@ namespace Configurator.Installers
 {
     public interface IDownloadAppInstaller
     {
-        Task InstallAsync(IDownloadApp app);
+        Task InstallOrUpgradeAsync(IDownloadApp app);
     }
 
     public class DownloadAppInstaller : IDownloadAppInstaller
     {
         private readonly IConsoleLogger consoleLogger;
-        private readonly IPowerShell powerShell;
+        private readonly IAppInstaller appInstaller;
         private readonly IDownloaderFactory downloaderFactory;
 
         public DownloadAppInstaller(IConsoleLogger consoleLogger,
-            IPowerShell powerShell,
+            IAppInstaller appInstaller,
             IDownloaderFactory downloaderFactory)
         {
             this.consoleLogger = consoleLogger;
-            this.powerShell = powerShell;
+            this.appInstaller = appInstaller;
             this.downloaderFactory = downloaderFactory;
         }
 
-        public async Task InstallAsync(IDownloadApp app)
+        public async Task InstallOrUpgradeAsync(IDownloadApp app)
         {
-            consoleLogger.Info($"Installing '{app.AppId}'");
+            consoleLogger.Info($"Downloading '{app.AppId}'");
 
             IDownloader downloader = downloaderFactory.GetDownloader(app.Downloader);
 
             app.DownloadedFilePath = await downloader.DownloadAsync(app.DownloaderArgs.ToString()!);
 
-            if (app.VerificationScript == null)
-            {
-                await powerShell.ExecuteAsync(app.InstallScript);
-            }
-            else
-            {
-                var isAppInstalled = await powerShell.ExecuteAsync<bool>(app.VerificationScript);
-                if (!isAppInstalled)
-                {
-                    await powerShell.ExecuteAsync(app.InstallScript);
-                }
-            }
+            consoleLogger.Result($"Downloaded '{app.AppId}'");
 
-            consoleLogger.Result($"Installed '{app.AppId}'");
+            await appInstaller.InstallOrUpgradeAsync(app);
         }
     }
 }

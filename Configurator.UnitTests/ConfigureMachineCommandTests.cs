@@ -37,7 +37,7 @@ namespace Configurator.UnitTests
             {
                 appInstallerMock.Verify(x => x.InstallOrUpgradeAsync(manifest.Apps[0]));
                 appInstallerMock.Verify(x => x.InstallOrUpgradeAsync(manifest.Apps[1]));
-                downloadAppInstallerMock.Verify(x => x.InstallAsync((IDownloadApp)manifest.Apps[2]));
+                downloadAppInstallerMock.Verify(x => x.InstallOrUpgradeAsync((IDownloadApp)manifest.Apps[2]));
             });
 
             It("configures each app", () =>

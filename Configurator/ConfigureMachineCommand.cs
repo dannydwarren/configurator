@@ -63,7 +63,7 @@ namespace Configurator
         {
             if (app is IDownloadApp downloadApp)
             {
-                await DownloadAppInstaller.InstallAsync(downloadApp);
+                await DownloadAppInstaller.InstallOrUpgradeAsync(downloadApp);
             }
             else
             {
