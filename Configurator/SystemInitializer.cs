@@ -39,11 +39,11 @@ namespace Configurator
         public async Task InitializeAsync()
         {
             await powerShellConfiguration.SetWindowsPowerShellExecutionPolicyAsync();
-            await selfInstaller.InstallAsync();
             await wingetConfiguration.UpgradeAsync();
             await wingetConfiguration.AcceptSourceAgreementsAsync();
             await powerShellCoreInstaller.InstallAsync();
             await powerShellConfiguration.SetPowerShellCoreExecutionPolicyAsync();
+            await selfInstaller.InstallAsync();
             await scoopCliInstaller.InstallAsync();
             await gitInstaller.InstallAsync();
             await manifestRepoInstaller.InstallAsync();
