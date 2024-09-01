@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Configurator.Apps;
 using Configurator.Downloaders;
-using Configurator.PowerShell;
 using Configurator.Utilities;
 
 namespace Configurator.Installers
