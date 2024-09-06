@@ -17,6 +17,7 @@ namespace Configurator.Utilities
         void CreateDirectory(string path);
         void CreateFile(string fileName);
         void MoveFile(string sourcePath, string destinationPath);
+        void CopyFile(string sourcePath, string destinationPath);
     }
 
     public class FileSystem : IFileSystem
@@ -81,6 +82,11 @@ namespace Configurator.Utilities
         public void MoveFile(string sourcePath, string destinationPath)
         {
            File.Move(sourcePath, destinationPath);
+        }
+
+        public void CopyFile(string sourcePath, string destinationPath)
+        {
+            File.Copy(sourcePath, destinationPath);
         }
     }
 }
