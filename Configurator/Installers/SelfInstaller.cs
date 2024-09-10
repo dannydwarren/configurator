@@ -18,15 +18,17 @@ namespace Configurator.Installers
         private static readonly string ConfiguratorInstallationDirectory = "c:\\Configurator";
         private readonly IDownloadAppInstaller appInstaller;
         private readonly IFileSystem fileSystem;
+        private readonly IEnvironmentRepository environmentRepository;
         private static readonly GitHubAssestApp configuratorApp = new()
         {
             AppId = "Configurator",
         };
 
-        public SelfInstaller(IDownloadAppInstaller appInstaller, IFileSystem fileSystem)
+        public SelfInstaller(IDownloadAppInstaller appInstaller, IFileSystem fileSystem, IEnvironmentRepository environmentRepository)
         {
             this.appInstaller = appInstaller;
             this.fileSystem = fileSystem;
+            this.environmentRepository = environmentRepository;
         }
 
 
@@ -42,6 +44,8 @@ namespace Configurator.Installers
             await appInstaller.InstallOrUpgradeAsync(configuratorApp);
 
             MoveToInstallationDirectory();
+
+            environmentRepository.AddToMachinePath(ConfiguratorInstallationDirectory);
         }
 
         private void MoveToInstallationDirectory()
