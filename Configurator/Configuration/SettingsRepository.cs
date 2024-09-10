@@ -51,11 +51,19 @@ namespace Configurator.Configuration
                 fileSystem.CreateDirectory(specialFolders.GetLocalAppDataPath());
                 await WriteSettingsAsync(EmptySettings);
             }
+
+            EnsureDownloadsDirectoryExists(EmptySettings);
         }
 
         public async Task SaveAsync(Settings settings)
         {
             await WriteSettingsAsync(settings);
+            EnsureDownloadsDirectoryExists(settings);
+        }
+
+        private void EnsureDownloadsDirectoryExists(Settings settings)
+        {
+            fileSystem.CreateDirectory(settings.DownloadsDirectory.AbsolutePath);
         }
 
         private async Task WriteSettingsAsync(Settings settings)

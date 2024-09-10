@@ -71,6 +71,12 @@ namespace Configurator.UnitTests.Configuration
                     .Verify(x => x.WriteAllTextAsync(fullyQualifiedSettingsFilePath, settingsJson));
             });
 
+            It($"ensures the {nameof(Settings.DownloadsDirectory)} exists", () =>
+            {
+                GetMock<IFileSystem>()
+                    .Verify(x => x.CreateDirectory(settings.DownloadsDirectory.AbsolutePath));
+            });
+
             It("returns newly written settings", () => settings.ShouldBeSameAs(expectedSettings));
         }
         
@@ -88,6 +94,12 @@ namespace Configurator.UnitTests.Configuration
             {
                 GetMock<IFileSystem>()
                     .Verify(x => x.WriteAllTextAsync(fullyQualifiedSettingsFilePath, settingsJson));
+            });
+
+            It($"ensures the {nameof(Settings.DownloadsDirectory)} exists", () =>
+            {
+                GetMock<IFileSystem>()
+                    .Verify(x => x.CreateDirectory(settings.DownloadsDirectory.AbsolutePath));
             });
         }
     }
