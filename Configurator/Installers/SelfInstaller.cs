@@ -41,13 +41,13 @@ namespace Configurator.Installers
 
             await appInstaller.InstallOrUpgradeAsync(configuratorApp);
 
-            CopyToInstallationDirectory();
+            MoveToInstallationDirectory();
         }
 
-        private void CopyToInstallationDirectory()
+        private void MoveToInstallationDirectory()
         {
             fileSystem.CreateDirectory(ConfiguratorInstallationDirectory);
-            fileSystem.CopyFile(configuratorApp.DownloadedFilePath, Path.Combine(ConfiguratorInstallationDirectory, "Configurator.exe"));
+            fileSystem.MoveFile(configuratorApp.DownloadedFilePath, Path.Combine(ConfiguratorInstallationDirectory, "Configurator.exe"));
         }
 
         private static async Task SetConfiguratorAppDownloaderArgs()

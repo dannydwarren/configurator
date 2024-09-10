@@ -45,7 +45,7 @@ namespace Configurator.UnitTests.Installers
             It("moves to installation location", () =>
             {
                 fileSystemMock.Verify(x => x.CreateDirectory(ExpectedConfiguratorInstallationDirectory));
-                fileSystemMock.Verify(x => x.CopyFile(capturedApp.DownloadedFilePath, Path.Combine(ExpectedConfiguratorInstallationDirectory, "Configurator.exe")));
+                fileSystemMock.Verify(x => x.MoveFile(capturedApp.DownloadedFilePath, Path.Combine(ExpectedConfiguratorInstallationDirectory, "Configurator.exe")));
             });
         }
 
