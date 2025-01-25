@@ -91,7 +91,11 @@ namespace Configurator
         private Command CreateBackupCommand()
         {
             var backupCommand = new Command("backup", "Backup app configurations etc. for use on the next machine.");
-            backupCommand.SetHandler(() => consoleLogger.Debug("Support for backing up apps is in progress..."));
+            backupCommand.SetHandler(async () =>
+            {
+                var services = await dependencyBootstrapper.InitializeAsync();
+                await services.GetRequiredService<IBackupMachineCommand>().ExecuteAsync();
+            });
 
             return backupCommand;
         }

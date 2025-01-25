@@ -223,12 +223,21 @@ namespace Configurator.UnitTests
         [Fact]
         public async Task When_backing_up()
         {
+            var backupMachineCommandMock = GetMock<IBackupMachineCommand>();
+
+            var serviceProviderMock = GetMock<IServiceProvider>();
+            serviceProviderMock.Setup(x => x.GetService(typeof(IBackupMachineCommand)))
+                .Returns(backupMachineCommandMock.Object);
+
+            GetMock<IDependencyBootstrapper>().Setup(x => x.InitializeAsync())
+                .ReturnsAsync(serviceProviderMock.Object);
+            
             var commandlineArgs = new[] { "backup" };
 
             var result = await BecauseAsync(() => ClassUnderTest.LaunchAsync(commandlineArgs));
 
             It("activates the backup command",
-                () => GetMock<IConsoleLogger>().Verify(x => x.Debug("Support for backing up apps is in progress...")));
+                () => backupMachineCommandMock.Verify(x => x.ExecuteAsync()));
 
             It("returns a success result", () => result.ShouldBe(0));
         }
