@@ -13,5 +13,3 @@ function configurator-publish() {
     Write-Host "Configurator Project: $projectPath"
     dotnet publish $projectPath /p:Version="0.0.0-dev" --configuration Release --output $configuratorDevDeploymentPath
 }
-
-Write-Host "local-publish finished"
