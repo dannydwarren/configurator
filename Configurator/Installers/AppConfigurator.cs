@@ -20,17 +20,20 @@ namespace Configurator.Installers
         private readonly ISettingsRepository settingsRepository;
         private readonly IFileSystem fileSystem;
         private readonly IPowerShell powerShell;
+        private readonly IConsoleLogger consoleLogger;
 
         public AppConfigurator(
             IRegistryRepository registryRepository,
             ISettingsRepository settingsRepository,
             IFileSystem fileSystem,
-            IPowerShell powerShell)
+            IPowerShell powerShell,
+            IConsoleLogger consoleLogger)
         {
             this.registryRepository = registryRepository;
             this.settingsRepository = settingsRepository;
             this.fileSystem = fileSystem;
             this.powerShell = powerShell;
+            this.consoleLogger = consoleLogger;
         }
 
         public void Configure(IApp app)
@@ -58,7 +61,9 @@ namespace Configurator.Installers
             var backupFilePath = Path.Join(settings.Manifest.Directory, $@"apps\{app.AppId}\backup.ps1");
             if (fileSystem.Exists(backupFilePath))
             {
+                consoleLogger.Info($"Backing up {app.AppId}...");
                 await powerShell.ExecuteAsync(backupFilePath);
+                consoleLogger.Result($"Backed up {app.AppId}!");
             }
         }
     }

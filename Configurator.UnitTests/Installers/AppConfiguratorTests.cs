@@ -107,6 +107,12 @@ namespace Configurator.UnitTests.Installers
             {
                 GetMock<IPowerShell>().Verify(x => x.ExecuteAsync(expectedBackupScriptPath));
             });
+            
+            It("logs useful messages", () =>
+            {
+                GetMock<IConsoleLogger>().Verify(x => x.Info($"Backing up {app.AppId}..."));
+                GetMock<IConsoleLogger>().Verify(x => x.Result($"Backed up {app.AppId}!"));
+            });
         }
 
         [Fact]
