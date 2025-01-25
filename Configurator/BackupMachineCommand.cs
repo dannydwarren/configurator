@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Configurator.Installers;
 
 namespace Configurator;
 
@@ -9,8 +11,22 @@ public interface IBackupMachineCommand
 
 public class BackupMachineCommand : IBackupMachineCommand
 {
-    public Task ExecuteAsync()
+    private readonly IManifestRepository manifestRepository;
+    private readonly IAppConfigurator appConfigurator;
+
+    public BackupMachineCommand(IManifestRepository manifestRepository, IAppConfigurator appConfigurator)
     {
-        throw new System.NotImplementedException();
+        this.manifestRepository = manifestRepository;
+        this.appConfigurator = appConfigurator;
+    }
+    
+    public async Task ExecuteAsync()
+    {
+        var manifest = await manifestRepository.LoadAsync(new List<string>());
+
+        foreach (var app in manifest.Apps)  
+        {
+            await appConfigurator.Backup(app);
+        }
     }
 }

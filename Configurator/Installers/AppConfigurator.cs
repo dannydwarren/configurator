@@ -1,4 +1,5 @@
-﻿using Configurator.Apps;
+﻿using System.Threading.Tasks;
+using Configurator.Apps;
 using Configurator.Utilities;
 using Configurator.Windows;
 
@@ -7,6 +8,7 @@ namespace Configurator.Installers
     public interface IAppConfigurator
     {
         void Configure(IApp app);
+        Task Backup(IApp app);
     }
 
     public class AppConfigurator : IAppConfigurator
@@ -29,6 +31,11 @@ namespace Configurator.Installers
             {
                 registryRepository.SetValue(setting.KeyName, setting.ValueName, setting.ValueData);
             });
+        }
+
+        public Task Backup(IApp app)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
