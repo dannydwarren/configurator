@@ -81,13 +81,11 @@ namespace Configurator.PowerShell
         private async Task<ProcessInstructions> BuildCoreProcessInstructionsAsync(string script, bool runAsAdmin)
         {
             var environmentReadyScript = BuildEnvironmentReadyScript("PowerShell", script);
-            
+
             var scriptFile = await scriptToFileConverter.ToPowerShellAsync(environmentReadyScript);
 
-            var powerShellCoreInstallLocation = registryRepository.GetValue(
-                @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\31ab5147-9a97-4452-8443-d9709f0516e1",
-                "InstallLocation");
-            
+            var powerShellCoreInstallLocation = GetPowerShellCoreInstallLocation();
+
             var processInstructions = new ProcessInstructions
             {
                 RunAsAdmin = runAsAdmin,
@@ -95,6 +93,18 @@ namespace Configurator.PowerShell
                 Arguments = $@"-File {scriptFile}"
             };
             return processInstructions;
+        }
+
+        private string GetPowerShellCoreInstallLocation()
+        {
+            var installedVersionsKey = @"SOFTWARE\Microsoft\PowerShellCore\InstalledVersions";
+            var subKeys = registryRepository.GetSubKeyNames(installedVersionsKey);
+
+            if (subKeys.Length == 0)
+                throw new Exception("PowerShell Core is not installed. No versions found in registry.");
+
+            var versionKey = $@"HKEY_LOCAL_MACHINE\{installedVersionsKey}\{subKeys[0]}";
+            return registryRepository.GetValue(versionKey, "InstallLocation");
         }
 
         private async Task<ProcessInstructions> BuildWindowsProcessInstructionsAsync(string script, bool runAsAdmin)

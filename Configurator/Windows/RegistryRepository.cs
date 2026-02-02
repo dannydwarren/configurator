@@ -8,6 +8,7 @@ namespace Configurator.Windows
     {
         string GetValue(string keyName, string valueName);
         void SetValue(string keyName, string valueName, object value);
+        string[] GetSubKeyNames(string keyName);
     }
 
     public class RegistryRepository : IRegistryRepository
@@ -62,6 +63,12 @@ namespace Configurator.Windows
                     e);
                 throw;
             }
+        }
+
+        public string[] GetSubKeyNames(string keyName)
+        {
+            using var key = Registry.LocalMachine.OpenSubKey(keyName);
+            return key?.GetSubKeyNames() ?? Array.Empty<string>();
         }
     }
 }

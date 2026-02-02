@@ -46,8 +46,11 @@ if ($profile -eq $null -or $profile -eq '') {{
                 .Callback<ProcessInstructions>(instructions => capturedInstructions = instructions)
                 .ReturnsAsync(powerShellResult);
 
+            var installedVersionGuid = Guid.NewGuid().ToString();
+            GetMock<IRegistryRepository>().Setup(x => x.GetSubKeyNames(@"SOFTWARE\Microsoft\PowerShellCore\InstalledVersions"))
+                .Returns(new[] { installedVersionGuid });
             GetMock<IRegistryRepository>().Setup(x => x.GetValue(
-                    @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\31ab5147-9a97-4452-8443-d9709f0516e1",
+                    $@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\{installedVersionGuid}",
                     "InstallLocation"))
                 .Returns(powerShellCoreInstallLocation);
 
@@ -125,6 +128,14 @@ if ($profile -eq $null -or $profile -eq '') {{
 
             GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(IsAny<string>())).ReturnsAsync(scriptFilePath);
 
+            var installedVersionGuid = Guid.NewGuid().ToString();
+            GetMock<IRegistryRepository>().Setup(x => x.GetSubKeyNames(@"SOFTWARE\Microsoft\PowerShellCore\InstalledVersions"))
+                .Returns(new[] { installedVersionGuid });
+            GetMock<IRegistryRepository>().Setup(x => x.GetValue(
+                    $@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\{installedVersionGuid}",
+                    "InstallLocation"))
+                .Returns("");
+
             if (versionUnderTest == PowerShellVersion.Core)
                 await BecauseAsync(() => ClassUnderTest.ExecuteAdminAsync(script));
             else if (versionUnderTest == PowerShellVersion.Windows)
@@ -153,6 +164,14 @@ if ($profile -eq $null -or $profile -eq '') {{
             GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
                 .ReturnsAsync(powerShellResult);
 
+            var installedVersionGuid = Guid.NewGuid().ToString();
+            GetMock<IRegistryRepository>().Setup(x => x.GetSubKeyNames(@"SOFTWARE\Microsoft\PowerShellCore\InstalledVersions"))
+                .Returns(new[] { installedVersionGuid });
+            GetMock<IRegistryRepository>().Setup(x => x.GetValue(
+                    $@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\{installedVersionGuid}",
+                    "InstallLocation"))
+                .Returns("");
+
             var exception = await BecauseThrowsAsync<Exception>(() => ClassUnderTest.ExecuteAsync(script));
 
             It("throws", () => exception.ShouldNotBeNull());
@@ -175,6 +194,14 @@ if ($profile -eq $null -or $profile -eq '') {{
 
             GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
                 .ReturnsAsync(powerShellResult);
+
+            var installedVersionGuid = Guid.NewGuid().ToString();
+            GetMock<IRegistryRepository>().Setup(x => x.GetSubKeyNames(@"SOFTWARE\Microsoft\PowerShellCore\InstalledVersions"))
+                .Returns(new[] { installedVersionGuid });
+            GetMock<IRegistryRepository>().Setup(x => x.GetValue(
+                    $@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\{installedVersionGuid}",
+                    "InstallLocation"))
+                .Returns("");
 
             var exception = await BecauseThrowsAsync<Exception>(() => ClassUnderTest.ExecuteAsync(script));
 
@@ -207,6 +234,14 @@ if ($profile -eq $null -or $profile -eq '') {{
                 .ReturnsAsync(powerShellResult);
 
             GetMock<IScriptToFileConverter>().Setup(x => x.ToPowerShellAsync(IsAny<string>())).ReturnsAsync(scriptFilePath);
+
+            var installedVersionGuid = Guid.NewGuid().ToString();
+            GetMock<IRegistryRepository>().Setup(x => x.GetSubKeyNames(@"SOFTWARE\Microsoft\PowerShellCore\InstalledVersions"))
+                .Returns(new[] { installedVersionGuid });
+            GetMock<IRegistryRepository>().Setup(x => x.GetValue(
+                    $@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\{installedVersionGuid}",
+                    "InstallLocation"))
+                .Returns("");
 
             var result = versionUnderTest switch
             {
@@ -247,6 +282,14 @@ if ($profile -eq $null -or $profile -eq '') {{
 
             GetMock<IProcessRunner>().Setup(x => x.ExecuteAsync(IsAny<ProcessInstructions>()))
                 .ReturnsAsync(powerShellResult);
+
+            var installedVersionGuid = Guid.NewGuid().ToString();
+            GetMock<IRegistryRepository>().Setup(x => x.GetSubKeyNames(@"SOFTWARE\Microsoft\PowerShellCore\InstalledVersions"))
+                .Returns(new[] { installedVersionGuid });
+            GetMock<IRegistryRepository>().Setup(x => x.GetValue(
+                    $@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShellCore\InstalledVersions\{installedVersionGuid}",
+                    "InstallLocation"))
+                .Returns("");
 
             var result = await BecauseAsync(() => ClassUnderTest.ExecuteAsync<bool>(script));
 
