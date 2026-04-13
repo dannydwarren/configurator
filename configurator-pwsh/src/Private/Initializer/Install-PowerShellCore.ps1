@@ -2,6 +2,12 @@ function Install-PowerShellCore {
     [CmdletBinding()]
     param()
 
-    # TODO: Implement - install Microsoft.PowerShell WingetApp via Install-App -ForceWindowsPowerShell
-    throw "Not implemented"
+    $ErrorActionPreference = 'Stop'
+
+    $app = New-WingetApp -RawApp ([PSCustomObject]@{
+        appId        = 'Microsoft.PowerShell'
+        environments = ''
+    })
+
+    Install-App -App $app -ForceWindowsPowerShell
 }

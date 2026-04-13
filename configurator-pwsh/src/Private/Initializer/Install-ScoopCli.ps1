@@ -2,6 +2,30 @@ function Install-ScoopCli {
     [CmdletBinding()]
     param()
 
-    # TODO: Implement - install Scoop via ScriptApp (iwr get.scoop.sh, verify via Get-Command scoop)
-    throw "Not implemented"
+    $ErrorActionPreference = 'Stop'
+
+    $app = New-ScriptApp -RawApp ([PSCustomObject]@{
+        appId              = 'ScoopCli'
+        environments       = ''
+        installScript      = @"
+iwr get.scoop.sh -OutFile `$env:tmp\scoop-install.ps1
+& `$env:tmp\scoop-install.ps1 -RunAsAdmin
+"@
+        verificationScript = @"
+function Test-CommandExists
+{
+    param (`$command)
+    `$oldPreference = `$ErrorActionPreference
+    `$ErrorActionPreference = 'stop'
+    try {if(Get-Command `$command){return `$true}}
+    catch {return `$false}
+    finally {`$ErrorActionPreference=`$oldPreference}
+}
+
+Test-CommandExists scoop
+"@
+        upgradeScript      = $null
+    })
+
+    Install-App -App $app
 }

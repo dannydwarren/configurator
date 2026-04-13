@@ -2,6 +2,22 @@ function Install-ManifestRepo {
     [CmdletBinding()]
     param()
 
-    # TODO: Implement - load settings, throw if manifest.repo is null, install as GitRepoApp
-    throw "Not implemented"
+    $ErrorActionPreference = 'Stop'
+
+    $settings = Import-Settings
+
+    $repoUri = $settings.manifest.repo
+    if ($null -eq $repoUri -or $repoUri -eq '') {
+        throw "Missing setting: Manifest.Repo"
+    }
+
+    $cloneDir = $settings.git.cloneDirectory
+
+    $app = New-GitRepoApp -RawApp ([PSCustomObject]@{
+        appId        = 'git.manifest-repo'
+        environments = ''
+        installArgs  = $repoUri.ToString()
+    }) -CloneRootDirectory $cloneDir.ToString()
+
+    Install-App -App $app
 }

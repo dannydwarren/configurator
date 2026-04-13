@@ -2,6 +2,12 @@ function Install-Git {
     [CmdletBinding()]
     param()
 
-    # TODO: Implement - install Git.Git via Winget using Install-App
-    throw "Not implemented"
+    $ErrorActionPreference = 'Stop'
+
+    $app = New-WingetApp -RawApp ([PSCustomObject]@{
+        appId        = 'Git.Git'
+        environments = ''
+    })
+
+    Install-App -App $app
 }
