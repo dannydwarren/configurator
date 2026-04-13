@@ -1,0 +1,5 @@
+{
+    "appType": "gitRepo",
+    "appId": "git-repo-app-id-missing-install-args",
+    "environments": "Test"
+}

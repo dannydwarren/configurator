@@ -1,0 +1,14 @@
+{
+    "appType": "winget",
+    "appId": "winget-app-id-with-configuration",
+    "environments": "Test",
+    "configuration": {
+        "registrySettings": [
+            {
+                "keyName": "key-name-test",
+                "valueName": "value-name-test",
+                "valueData": "value-data-test"
+            }
+        ]
+    }
+}

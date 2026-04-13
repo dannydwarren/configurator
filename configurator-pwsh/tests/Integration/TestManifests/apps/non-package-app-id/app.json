@@ -1,0 +1,5 @@
+{
+    "appType": "nonPackageApp",
+    "appId": "non-package-app-id",
+    "environments": "Test"
+}

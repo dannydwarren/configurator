@@ -1,0 +1,8 @@
+{
+    "apps": [
+        "power-shell-module-app-id",
+        "power-shell-module-app-id-with-install-args",
+        "power-shell-module-app-id-with-prevent-upgrade",
+        "power-shell-module-app-id-with-configuration"
+    ]
+}
