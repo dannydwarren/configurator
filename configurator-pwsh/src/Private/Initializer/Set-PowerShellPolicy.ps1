@@ -8,8 +8,8 @@ function Set-PowerShellPolicy {
 
     $ErrorActionPreference = 'Stop'
 
-    $setPolicyScript = 'Set-ExecutionPolicy RemoteSigned -Force'
-    $getPolicyScript = 'Get-ExecutionPolicy'
+    $setPolicyScript = 'Import-Module Microsoft.PowerShell.Security -ErrorAction SilentlyContinue; Set-ExecutionPolicy RemoteSigned -Force'
+    $getPolicyScript = 'Import-Module Microsoft.PowerShell.Security -ErrorAction SilentlyContinue; Get-ExecutionPolicy'
     $getVersionScript = '$PSVersionTable.PSVersion.ToString()'
 
     if ($Edition -eq 'Core') {

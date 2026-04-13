@@ -67,7 +67,9 @@ $Script
     $process.Dispose()
 
     foreach ($err in $errors) {
-        Write-ConfiguratorLog -Message $err -Level Error
+        if (-not [string]::IsNullOrWhiteSpace($err)) {
+            Write-ConfiguratorLog -Message $err -Level Error
+        }
     }
 
     if ($exitCode -ne 0) {
