@@ -5,10 +5,33 @@ function New-VisualStudioExtensionApp {
         [PSCustomObject]$RawApp
     )
 
-    # TODO: Implement - build PSCustomObject with VSIXInstaller commands, implements download app pattern
-    # Downloader: VisualStudioMarketplaceDownloader (hardcoded)
-    # Install script uses vswhere.exe to find VSIXInstaller.exe (FIX: $vsixInstaller not $vsi0xInstaller)
-    # Verify: $null
-    # Upgrade: same as Install
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = $RawApp.environments
+
+    $preventUpgrade = $false
+    if ($null -ne $RawApp.preventUpgrade) {
+        $preventUpgrade = [bool]$RawApp.preventUpgrade
+    }
+
+    $installScript = @'
+$vsixInstaller = . "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -property productPath | Split-Path | % { "$_\VSIXInstaller.exe" }
+$installArgs = "/quiet", "/admin", "$DownloadedFilePath"
+Start-Process $vsixInstaller $installArgs -Wait
+'@
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'visualStudioExtension'
+        Environments       = $environments
+        InstallScript      = $installScript
+        VerificationScript = $null
+        UpgradeScript      = $installScript
+        InstallArgs        = $null
+        PreventUpgrade     = $preventUpgrade
+        Configuration      = $null
+        IsDownloadApp      = $true
+        Downloader         = 'VisualStudioMarketplaceDownloader'
+        DownloaderArgs     = $RawApp.downloaderArgs
+        DownloadedFilePath = $null
+    }
 }

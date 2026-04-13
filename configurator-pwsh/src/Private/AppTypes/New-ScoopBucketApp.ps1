@@ -5,9 +5,22 @@ function New-ScoopBucketApp {
         [PSCustomObject]$RawApp
     )
 
-    # TODO: Implement - build PSCustomObject with scoop bucket commands
-    # Install: scoop bucket add {AppId}
-    # Verify:  (scoop bucket list | Select-String {AppId}) -ne $null  (FIX: properly interpolate AppId)
-    # Upgrade: $null
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = $RawApp.environments
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'scoopBucket'
+        Environments       = $environments
+        InstallScript      = "scoop bucket add $appId"
+        VerificationScript = "(scoop bucket list | Select-String '$appId') -ne `$null"
+        UpgradeScript      = $null
+        InstallArgs        = $null
+        PreventUpgrade     = $false
+        Configuration      = $null
+        IsDownloadApp      = $false
+        Downloader         = $null
+        DownloaderArgs     = $null
+        DownloadedFilePath = $null
+    }
 }

@@ -8,6 +8,18 @@ function ConvertTo-AppObject {
         [PSCustomObject]$Settings
     )
 
-    # TODO: Implement - switch on appType, route to New-*App function, return standardized PSCustomObject (or $null for unknown)
-    throw "Not implemented"
+    switch ($RawApp.appType) {
+        'winget' { return New-WingetApp -RawApp $RawApp }
+        'scoop' { return New-ScoopApp -RawApp $RawApp }
+        'scoopBucket' { return New-ScoopBucketApp -RawApp $RawApp }
+        'powerShell' { return New-PowerShellApp -RawApp $RawApp -ManifestDirectory $Settings.manifest.directory }
+        'powerShellModule' { return New-PowerShellModuleApp -RawApp $RawApp }
+        'powerShellAppPackage' { return New-PowerShellAppPackageApp -RawApp $RawApp }
+        'script' { return New-ScriptApp -RawApp $RawApp }
+        'gitRepo' { return New-GitRepoApp -RawApp $RawApp -CloneRootDirectory $Settings.git.cloneDirectory }
+        'gitconfig' { return New-GitconfigApp -RawApp $RawApp }
+        'nonPackageApp' { return New-NonPackageApp -RawApp $RawApp }
+        'visualStudioExtension' { return New-VisualStudioExtensionApp -RawApp $RawApp }
+        default { return $null }
+    }
 }

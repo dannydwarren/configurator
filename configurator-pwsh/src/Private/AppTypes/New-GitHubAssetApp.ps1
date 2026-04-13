@@ -5,11 +5,22 @@ function New-GitHubAssetApp {
         [PSCustomObject]$RawApp
     )
 
-    # TODO: Implement - internal-only download app type (not exposed via manifest AppType)
-    # InstallScript: empty string (no-op)
-    # VerificationScript: $null
-    # UpgradeScript: $null
-    # PreventUpgrade: $true
-    # Downloader: GitHubAssetDownloader
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = if ($null -ne $RawApp.environments) { $RawApp.environments } else { '' }
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'gitHubAsset'
+        Environments       = $environments
+        InstallScript      = ''
+        VerificationScript = $null
+        UpgradeScript      = $null
+        InstallArgs        = $null
+        PreventUpgrade     = $true
+        Configuration      = $null
+        IsDownloadApp      = $true
+        Downloader         = 'GitHubAssetDownloader'
+        DownloaderArgs     = $RawApp.downloaderArgs
+        DownloadedFilePath = $null
+    }
 }

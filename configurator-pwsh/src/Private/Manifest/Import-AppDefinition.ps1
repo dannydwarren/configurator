@@ -8,6 +8,10 @@ function Import-AppDefinition {
         [string]$ManifestDirectory
     )
 
-    # TODO: Implement - read apps/<appId>/app.json, return raw PSCustomObject with AppData
-    throw "Not implemented"
+    $appDir = Join-Path $ManifestDirectory 'apps' $AppId
+    $appFilePath = Join-Path $appDir 'app.json'
+    $json = Get-Content -Path $appFilePath -Raw
+    $raw = $json | ConvertFrom-Json
+
+    $raw
 }

@@ -5,9 +5,24 @@ function New-GitconfigApp {
         [PSCustomObject]$RawApp
     )
 
-    # TODO: Implement - build PSCustomObject with git config include.path commands
-    # Install: git config --global --add include.path {AppId}
-    # Verify:  (git config --get-all --global include.path) -match "{AppId}"  (backslashes escaped/doubled)
-    # Upgrade: $null
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = $RawApp.environments
+
+    $escapedAppId = $appId.Replace('\', '\\')
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'gitconfig'
+        Environments       = $environments
+        InstallScript      = "git config --global --add include.path $appId"
+        VerificationScript = "(git config --get-all --global include.path) -match `"$escapedAppId`""
+        UpgradeScript      = $null
+        InstallArgs        = $null
+        PreventUpgrade     = $false
+        Configuration      = $null
+        IsDownloadApp      = $false
+        Downloader         = $null
+        DownloaderArgs     = $null
+        DownloadedFilePath = $null
+    }
 }

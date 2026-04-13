@@ -5,7 +5,27 @@ function New-ScriptApp {
         [PSCustomObject]$RawApp
     )
 
-    # TODO: Implement - build PSCustomObject with inline scripts from app.json fields
-    # installScript, verificationScript, upgradeScript taken directly from JSON
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = $RawApp.environments
+
+    $configuration = $null
+    if ($null -ne $RawApp.configuration) {
+        $configuration = $RawApp.configuration
+    }
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'script'
+        Environments       = $environments
+        InstallScript      = $RawApp.installScript
+        VerificationScript = $RawApp.verificationScript
+        UpgradeScript      = $RawApp.upgradeScript
+        InstallArgs        = $null
+        PreventUpgrade     = $false
+        Configuration      = $configuration
+        IsDownloadApp      = $false
+        Downloader         = $null
+        DownloaderArgs     = $null
+        DownloadedFilePath = $null
+    }
 }

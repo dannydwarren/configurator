@@ -5,9 +5,22 @@ function New-NonPackageApp {
         [PSCustomObject]$RawApp
     )
 
-    # TODO: Implement - build PSCustomObject with convention-based install script
-    # Install: ./{AppId}_install.ps1
-    # Verify:  $null
-    # Upgrade: $null
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = $RawApp.environments
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'nonPackageApp'
+        Environments       = $environments
+        InstallScript      = "./$($appId)_install.ps1"
+        VerificationScript = $null
+        UpgradeScript      = $null
+        InstallArgs        = $null
+        PreventUpgrade     = $false
+        Configuration      = $null
+        IsDownloadApp      = $false
+        Downloader         = $null
+        DownloaderArgs     = $null
+        DownloadedFilePath = $null
+    }
 }

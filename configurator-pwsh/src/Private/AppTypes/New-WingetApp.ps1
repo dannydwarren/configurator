@@ -5,10 +5,37 @@ function New-WingetApp {
         [PSCustomObject]$RawApp
     )
 
-    # TODO: Implement - build PSCustomObject with Install/Verify/Upgrade scripts using winget commands
-    # InstallArgs: if non-empty, prepend " --override "
-    # Install: winget install --id {AppId} --accept-package-agreements -h -e{InstallArgs}
-    # Verify:  (winget list --id {AppId} -e | Select-String {AppId}) -ne $null
-    # Upgrade: winget upgrade --id {AppId} --accept-package-agreements -h -e{InstallArgs}
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = $RawApp.environments
+
+    $installArgs = ''
+    if (-not [string]::IsNullOrWhiteSpace($RawApp.installArgs)) {
+        $installArgs = " --override $($RawApp.installArgs)"
+    }
+
+    $preventUpgrade = $false
+    if ($null -ne $RawApp.preventUpgrade) {
+        $preventUpgrade = [bool]$RawApp.preventUpgrade
+    }
+
+    $configuration = $null
+    if ($null -ne $RawApp.configuration) {
+        $configuration = $RawApp.configuration
+    }
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'winget'
+        Environments       = $environments
+        InstallScript      = "winget install --id $appId --accept-package-agreements -h -e$installArgs"
+        VerificationScript = "(winget list --id $appId -e | Select-String $appId) -ne `$null"
+        UpgradeScript      = "winget upgrade --id $appId --accept-package-agreements -h -e$installArgs"
+        InstallArgs        = $installArgs
+        PreventUpgrade     = $preventUpgrade
+        Configuration      = $configuration
+        IsDownloadApp      = $false
+        Downloader         = $null
+        DownloaderArgs     = $null
+        DownloadedFilePath = $null
+    }
 }

@@ -8,9 +8,35 @@ function New-PowerShellApp {
         [string]$ManifestDirectory
     )
 
-    # TODO: Implement - load scripts from files in apps/<appId>/ directory
-    # Install:      . "<manifest>/apps/<appId>/install.ps1"   (required - return $null if missing)
-    # Upgrade:      . "<manifest>/apps/<appId>/upgrade.ps1"   (optional)
-    # Verification: . "<manifest>/apps/<appId>/verification.ps1" (optional)
-    throw "Not implemented"
+    $appId = $RawApp.appId
+    $environments = $RawApp.environments
+
+    $appDir = Join-Path $ManifestDirectory 'apps' $appId
+    $installPath = Join-Path $appDir 'install.ps1'
+    $upgradePath = Join-Path $appDir 'upgrade.ps1'
+    $verificationPath = Join-Path $appDir 'verification.ps1'
+
+    if (-not (Test-Path $installPath)) {
+        return $null
+    }
+
+    $installScript = ". `"$installPath`""
+    $upgradeScript = if (Test-Path $upgradePath) { ". `"$upgradePath`"" } else { $null }
+    $verificationScript = if (Test-Path $verificationPath) { ". `"$verificationPath`"" } else { $null }
+
+    [PSCustomObject]@{
+        AppId              = $appId
+        AppType            = 'powerShell'
+        Environments       = $environments
+        InstallScript      = $installScript
+        VerificationScript = $verificationScript
+        UpgradeScript      = $upgradeScript
+        InstallArgs        = $null
+        PreventUpgrade     = $false
+        Configuration      = $null
+        IsDownloadApp      = $false
+        Downloader         = $null
+        DownloaderArgs     = $null
+        DownloadedFilePath = $null
+    }
 }
