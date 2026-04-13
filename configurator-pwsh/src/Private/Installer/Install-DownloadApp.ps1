@@ -25,6 +25,13 @@ function Install-DownloadApp {
 
     $App.DownloadedFilePath = $filePath
 
+    if ($App.InstallScript -match '\{\{DownloadedFilePath\}\}') {
+        $App.InstallScript = $App.InstallScript -replace '\{\{DownloadedFilePath\}\}', $filePath
+    }
+    if ($App.UpgradeScript -match '\{\{DownloadedFilePath\}\}') {
+        $App.UpgradeScript = $App.UpgradeScript -replace '\{\{DownloadedFilePath\}\}', $filePath
+    }
+
     Write-ConfiguratorLog -Message "Downloaded '$($App.AppId)'" -Level Result
 
     Install-App -App $App

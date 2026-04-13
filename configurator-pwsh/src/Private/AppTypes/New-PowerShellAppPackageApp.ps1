@@ -13,7 +13,7 @@ function New-PowerShellAppPackageApp {
         $preventUpgrade = [bool]$RawApp.preventUpgrade
     }
 
-    $installScript = "Import-Module appx -UseWindowsPowerShell`nAdd-AppPackage `$DownloadedFilePath"
+    $installScript = "Import-Module appx -UseWindowsPowerShell`nAdd-AppPackage {{DownloadedFilePath}}"
     $verificationScript = "Import-Module appx -UseWindowsPowerShell`n(Get-AppPackage -Name $appId) -ne `$null"
 
     [PSCustomObject]@{

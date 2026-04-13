@@ -17,7 +17,11 @@ function Invoke-AppConfigurator {
         }
 
         foreach ($setting in $App.Configuration.registrySettings) {
-            Set-RegistryValue -KeyName $setting.keyName -ValueName $setting.valueName -ValueData $setting.valueData
+            $valueData = $setting.valueData
+            if ($valueData -is [string]) {
+                $valueData = Resolve-Token -Value $valueData
+            }
+            Set-RegistryValue -KeyName $setting.keyName -ValueName $setting.valueName -ValueData $valueData
         }
     }
 
