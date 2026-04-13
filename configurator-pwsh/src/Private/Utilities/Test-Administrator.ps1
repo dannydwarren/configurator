@@ -2,6 +2,7 @@ function Test-Administrator {
     [CmdletBinding()]
     param()
 
-    # TODO: Implement - check if current user is running as Administrator via WindowsPrincipal
-    throw "Not implemented"
+    ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+        [Security.Principal.WindowsBuiltInRole]::Administrator
+    )
 }

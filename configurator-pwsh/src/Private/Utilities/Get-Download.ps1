@@ -11,6 +11,13 @@ function Get-Download {
         [string]$DownloadsDirectory
     )
 
-    # TODO: Implement - HTTP GET url, check status 200, write to downloads dir, return full path
-    throw "Not implemented"
+    $filePath = Join-Path $DownloadsDirectory $FileName
+
+    $response = Invoke-WebRequest -Uri $Url -OutFile $filePath -PassThru
+
+    if ($response.StatusCode -ne 200) {
+        throw "Failed with status code $($response.StatusCode) to download $FileName"
+    }
+
+    $filePath
 }

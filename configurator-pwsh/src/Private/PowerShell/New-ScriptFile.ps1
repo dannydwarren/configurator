@@ -5,6 +5,14 @@ function New-ScriptFile {
         [string]$Script
     )
 
-    # TODO: Implement - write script to $env:LOCALAPPDATA\Configurator\temp\<timestamp>.ps1, return path
-    throw "Not implemented"
+    $tempDir = Join-Path $env:LOCALAPPDATA 'Configurator' 'temp'
+    New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+
+    $timestamp = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss-fffff'
+    $fileName = "$timestamp.ps1"
+    $filePath = Join-Path $tempDir $fileName
+
+    Set-Content -Path $filePath -Value $Script -Encoding UTF8
+
+    $filePath
 }

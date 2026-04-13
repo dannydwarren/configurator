@@ -8,6 +8,15 @@ function Get-RegistryValue {
         [string]$ValueName
     )
 
-    # TODO: Implement - read registry value, convert int to uint / long to ulong, return as string
-    throw "Not implemented"
+    $value = [Microsoft.Win32.Registry]::GetValue($KeyName, $ValueName, '')
+
+    if ($value -is [int]) {
+        $value = [System.BitConverter]::ToUInt32([System.BitConverter]::GetBytes($value), 0)
+    }
+
+    if ($value -is [long]) {
+        $value = [System.BitConverter]::ToUInt64([System.BitConverter]::GetBytes($value), 0)
+    }
+
+    $value.ToString()
 }

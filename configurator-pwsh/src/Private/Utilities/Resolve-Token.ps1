@@ -5,6 +5,26 @@ function Resolve-Token {
         [string]$Value
     )
 
-    # TODO: Implement - replace {{source:name}} patterns (e.g. {{env:ProgramFiles}}) with resolved values
-    throw "Not implemented"
+    $pattern = '(\{\{(.*?)\}\})+'
+    $result = $Value
+
+    [regex]::Matches($Value, $pattern) | ForEach-Object {
+        $raw = $_.Value
+        $inner = $raw.TrimStart('{').TrimEnd('}')
+        $parts = $inner.Split(':', [System.StringSplitOptions]::RemoveEmptyEntries)
+        $source = $parts[0]
+        $name = $parts[1]
+
+        $replacement = ''
+        if ($source -eq 'env') {
+            $envValue = [System.Environment]::GetEnvironmentVariable($name)
+            if ($null -ne $envValue) {
+                $replacement = $envValue
+            }
+        }
+
+        $result = $result.Replace($raw, $replacement)
+    }
+
+    $result
 }
