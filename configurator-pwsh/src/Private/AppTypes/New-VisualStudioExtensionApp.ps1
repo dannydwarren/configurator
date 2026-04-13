@@ -15,7 +15,7 @@ function New-VisualStudioExtensionApp {
 
     $installScript = @'
 $vsixInstaller = . "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -property productPath | Split-Path | % { "$_\VSIXInstaller.exe" }
-$installArgs = "/quiet", "/admin", "$DownloadedFilePath"
+$installArgs = "/quiet", "/admin", "{{DownloadedFilePath}}"
 Start-Process $vsixInstaller $installArgs -Wait
 '@
 
