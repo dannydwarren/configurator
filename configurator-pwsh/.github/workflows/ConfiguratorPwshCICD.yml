@@ -1,45 +1,88 @@
 name: Configurator PowerShell CICD
 
-on:
-  push:
-    tags: ['v*']
+on: workflow_dispatch
+
+env:
+  APP_VERSION: 0.0.${{ github.run_number }}
 
 jobs:
-  test:
+  release:
     runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Pester
         shell: pwsh
-        run: |
-          Install-Module -Name Pester -MinimumVersion 5.0 -Force -SkipPublisherCheck
+        run: Install-Module Pester -Force -SkipPublisherCheck
 
       - name: Run Pester Tests
         shell: pwsh
-        working-directory: configurator-pwsh
-        run: |
-          $config = New-PesterConfiguration
-          $config.Run.Path = './tests'
-          $config.Run.Exit = $true
-          Invoke-Pester -Configuration $config
+        run: Invoke-Pester -Path './configurator-pwsh/tests' -CI -Output Detailed
 
-  package:
-    needs: test
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pester-test-results
+          path: testResults.xml
 
       - name: Package Module
         shell: pwsh
         run: |
-          $version = "${{ github.ref_name }}".TrimStart('v')
-          $stagingDir = New-Item -Path './staging/Configurator' -ItemType Directory -Force
-          Copy-Item -Path './configurator-pwsh/src/*' -Destination $stagingDir -Recurse
-          Compress-Archive -Path $stagingDir -DestinationPath "./Configurator-$version.zip"
+          $releaseDir = New-Item -Path './release/Configurator' -ItemType Directory -Force
+          Copy-Item -Path './configurator-pwsh/src/*' -Destination $releaseDir -Recurse
+          Compress-Archive -Path './release/Configurator' -DestinationPath "./Configurator-v${{ env.APP_VERSION }}.zip"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: Configurator-*.zip
-          generate_release_notes: true
+          tag_name: pwsh-v${{ env.APP_VERSION }}
+          release_name: Configurator PowerShell v${{ env.APP_VERSION }}
+          draft: false
+          prerelease: false
+          body: |
+            Configurator PowerShell module v${{ env.APP_VERSION }}
+
+      - name: Upload Release Zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Configurator-v${{ env.APP_VERSION }}.zip
+          asset_name: Configurator-v${{ env.APP_VERSION }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload Configurator.ps1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./configurator-pwsh/src/Configurator.ps1
+          asset_name: Configurator.ps1
+          asset_content_type: text/plain
+
+      - name: Upload Configurator.psd1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./configurator-pwsh/src/Configurator.psd1
+          asset_name: Configurator.psd1
+          asset_content_type: text/plain
+
+      - name: Upload Configurator.psm1
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./configurator-pwsh/src/Configurator.psm1
+          asset_name: Configurator.psm1
+          asset_content_type: text/plain
