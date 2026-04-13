@@ -17,6 +17,7 @@ Describe 'Configurator Module' {
             'Set-ConfiguratorSetting'
             'Add-ConfiguratorApp'
             'Invoke-Backup'
+            'Start-Configurator'
         )
 
         $module = Get-Module -Name 'Configurator'

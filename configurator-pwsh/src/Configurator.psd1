@@ -14,6 +14,7 @@
         'Set-ConfiguratorSetting'
         'Add-ConfiguratorApp'
         'Invoke-Backup'
+        'Start-Configurator'
     )
 
     CmdletsToExport   = @()
