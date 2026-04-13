@@ -5,34 +5,42 @@ BeforeAll {
 
 Describe 'Add-ConfiguratorApp' {
     BeforeEach {
-        Mock Save-AppDefinition {}
+        InModuleScope Configurator {
+            Mock Save-AppDefinition {}
+        }
     }
 
     It 'joins environments with pipe and calls Save-AppDefinition for winget app' {
         Add-ConfiguratorApp -AppId 'Some.WingetApp' -AppType 'winget' -Environments @('Work', 'Personal')
 
-        Should -Invoke Save-AppDefinition -Times 1 -ParameterFilter {
-            $AppId -eq 'Some.WingetApp' -and
-            $AppType -eq 'winget' -and
-            $Environments -eq 'Work|Personal'
+        InModuleScope Configurator {
+            Should -Invoke Save-AppDefinition -Times 1 -ParameterFilter {
+                $AppId -eq 'Some.WingetApp' -and
+                $AppType -eq 'winget' -and
+                $Environments -eq 'Work|Personal'
+            }
         }
     }
 
     It 'joins environments with pipe and calls Save-AppDefinition for scoop app' {
         Add-ConfiguratorApp -AppId 'some-scoop-app' -AppType 'scoop' -Environments @('Dev', 'Test')
 
-        Should -Invoke Save-AppDefinition -Times 1 -ParameterFilter {
-            $AppId -eq 'some-scoop-app' -and
-            $AppType -eq 'scoop' -and
-            $Environments -eq 'Dev|Test'
+        InModuleScope Configurator {
+            Should -Invoke Save-AppDefinition -Times 1 -ParameterFilter {
+                $AppId -eq 'some-scoop-app' -and
+                $AppType -eq 'scoop' -and
+                $Environments -eq 'Dev|Test'
+            }
         }
     }
 
     It 'handles single environment' {
         Add-ConfiguratorApp -AppId 'single-env-app' -AppType 'gitconfig' -Environments @('Work')
 
-        Should -Invoke Save-AppDefinition -Times 1 -ParameterFilter {
-            $Environments -eq 'Work'
+        InModuleScope Configurator {
+            Should -Invoke Save-AppDefinition -Times 1 -ParameterFilter {
+                $Environments -eq 'Work'
+            }
         }
     }
 

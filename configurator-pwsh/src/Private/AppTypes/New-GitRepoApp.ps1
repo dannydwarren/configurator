@@ -26,7 +26,7 @@ function New-GitRepoApp {
         $CloneRootDirectory += '\'
     }
 
-    $repoName = $installArgs.Replace('.git', '').Split('\', '/') | Select-Object -Last 1
+    $repoName = $installArgs.Replace('.git', '').Split([char[]]@('\', '/')) | Select-Object -Last 1
 
     [PSCustomObject]@{
         AppId              = $appId
