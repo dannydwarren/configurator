@@ -2,6 +2,7 @@ function Get-SettingsPath {
     [CmdletBinding()]
     param()
 
-    # TODO: Implement - return "$env:LOCALAPPDATA\Configurator\settings.json"
-    throw "Not implemented"
+    $ErrorActionPreference = 'Stop'
+
+    Join-Path $env:LOCALAPPDATA 'Configurator' 'settings.json'
 }

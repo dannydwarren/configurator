@@ -5,6 +5,11 @@ function Export-Settings {
         [PSCustomObject]$Settings
     )
 
-    # TODO: Implement - serialize settings to JSON, write to settings file, ensure downloads dir exists
-    throw "Not implemented"
+    $ErrorActionPreference = 'Stop'
+
+    $settingsPath = Get-SettingsPath
+    $json = $Settings | ConvertTo-Json -Depth 10
+    Set-Content -Path $settingsPath -Value $json -Encoding UTF8
+
+    New-Item -Path $Settings.downloadsDirectory -ItemType Directory -Force | Out-Null
 }
