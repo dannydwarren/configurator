@@ -1,0 +1,40 @@
+name: Configurator PowerShell CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['configurator-pwsh/**']
+  pull_request:
+    branches: [main]
+    paths: ['configurator-pwsh/**']
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -MinimumVersion 5.0 -Force -SkipPublisherCheck
+
+      - name: Run Pester Tests
+        shell: pwsh
+        working-directory: configurator-pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests'
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = 'Detailed'
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = './test-results.xml'
+          $config.TestResult.OutputFormat = 'NUnitXml'
+          Invoke-Pester -Configuration $config
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: configurator-pwsh/test-results.xml

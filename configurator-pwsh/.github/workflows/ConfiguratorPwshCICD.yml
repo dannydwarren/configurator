@@ -1,0 +1,45 @@
+name: Configurator PowerShell CICD
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -MinimumVersion 5.0 -Force -SkipPublisherCheck
+
+      - name: Run Pester Tests
+        shell: pwsh
+        working-directory: configurator-pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = './tests'
+          $config.Run.Exit = $true
+          Invoke-Pester -Configuration $config
+
+  package:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package Module
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $stagingDir = New-Item -Path './staging/Configurator' -ItemType Directory -Force
+          Copy-Item -Path './configurator-pwsh/src/*' -Destination $stagingDir -Recurse
+          Compress-Archive -Path $stagingDir -DestinationPath "./Configurator-$version.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Configurator-*.zip
+          generate_release_notes: true
