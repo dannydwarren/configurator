@@ -1,0 +1,24 @@
+{
+    "appType": "winget",
+    "appId": "registry-settings-app-id",
+    "environments": "Test",
+    "configuration": {
+        "registrySettings": [
+            {
+                "keyName": "key-1",
+                "valueName": "string",
+                "valueData": "string-data"
+            },
+            {
+                "keyName": "key-2",
+                "valueName": "string",
+                "valueData": "{{env:ProgramFiles}}\\string-data"
+            },
+            {
+                "keyName": "key-3",
+                "valueName": "uint",
+                "valueData": 42
+            }
+        ]
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "appType": "script",
+    "appId": "script-app-id",
+    "environments": "Test",
+    "installScript": "install-script",
+    "verificationScript": "verification-script",
+    "upgradeScript": "upgrade-script"
+}

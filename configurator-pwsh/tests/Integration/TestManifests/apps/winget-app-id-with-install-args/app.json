@@ -1,0 +1,6 @@
+{
+    "appType": "winget",
+    "appId": "winget-app-id-with-install-args",
+    "environments": "Test",
+    "installArgs": "install-args"
+}

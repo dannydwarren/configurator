@@ -1,0 +1,9 @@
+{
+    "appType": "visualStudioExtension",
+    "appId": "visual-studio-extension-app-id",
+    "environments": "Test",
+    "downloaderArgs": {
+        "publisher": "publisher-1",
+        "extensionName": "extension-name-1"
+    }
+}

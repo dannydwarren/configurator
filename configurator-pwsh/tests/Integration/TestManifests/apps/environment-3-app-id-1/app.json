@@ -1,0 +1,5 @@
+{
+    "appType": "winget",
+    "appId": "environment-3-app-id-1",
+    "environments": "Environment3"
+}

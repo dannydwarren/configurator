@@ -1,0 +1,12 @@
+{
+    "appType": "powerShellAppPackage",
+    "appId": "power-shell-app-package-app-id-with-prevent-upgrade",
+    "environments": "Test",
+    "downloader": "some-downloader",
+    "downloaderArgs": {
+        "prop1": "prop-1",
+        "prop2": "prop-2",
+        "prop3": "prop-3"
+    },
+    "preventUpgrade": true
+}

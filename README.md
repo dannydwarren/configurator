@@ -1,48 +1,81 @@
-﻿# configurator
+# Configurator
+
+A Windows machine configuration tool. PowerShell 7.0+ module, must be run as Administrator.
 
 ```powershell
-$bootstrapStopwatch = [Diagnostics.Stopwatch]::StartNew()
 Set-ExecutionPolicy RemoteSigned -Force
 
-Invoke-Command {
-    $asset = (iwr -useb https://api.github.com/repos/dannydwarren/configurator/releases/latest | ConvertFrom-Json).assets | ? { $_.name -like "*.exe" }
-    $downloadUrl = $asset | select -exp browser_download_url
-    Start-BitsTransfer -Source $downloadUrl -Destination "$HOME\Downloads\Configurator.exe"
-}
-$downloadDuration = $bootstrapStopwatch.Elapsed
-Write-Output "Download duration: $($downloadDuration)"
+# Download and install the Configurator module
+irm https://raw.githubusercontent.com/dannydwarren/configurator/main/configurator-pwsh/Install-Configurator.ps1 | iex
 
-$bootstrapStopwatch.Restart()
-."$HOME\Downloads\Configurator.exe" settings set manifest.repo "https://github.com/dannydwarren/machine-configs.git"
-."$HOME\Downloads\Configurator.exe" initialize
-."$HOME\Downloads\Configurator.exe" configure --environments "All"
-Write-Output "Download duration: $($downloadDuration)"
-$bootstrapDuration = $bootstrapStopwatch.Elapsed
-Write-Output "Configurator duration: $($bootstrapDuration)"
-$totalDuration = $downloadDuration + $bootstrapDuration
-Write-Output "Total duration: $($totalDuration)"
-$bootstrapStopwatch.Stop()
+# Restart PATH so the module is available
+$env:Path = [System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')
+$env:PSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('PSModulePath', 'User')
+
+# Configure and run
+Configurator.ps1 settings set manifest.repo "https://github.com/dannydwarren/machine-configs.git"
+Configurator.ps1 initialize
+Configurator.ps1 configure --environments "All"
 ```
 
-# Local Development
-Run `.\Scripts\00_setup.ps1` to add supporting commands to your $profile.
-- Configures a fixed path for local deployment
-- Adds fixed path for deployment to the running window's PATH
+## CLI Commands
 
-Calling the function `configurator-publish` publishes to the fixed path.
+```
+Configurator.ps1 <command> [options]
+```
 
-You can now run `Configurator.exe` from any path.
+| Command | Description |
+|---------|-------------|
+| `initialize` | Run system initialization (execution policies, winget, PS Core, scoop, git) and clone manifest repo |
+| `configure-machine` | Install/upgrade/configure apps from manifest. Alias: `configure` |
+| `settings list` | Display all settings |
+| `settings set <name> <value>` | Update a setting (e.g. `manifest.repo`, `git.clonedirectory`) |
+| `add-app` | Add a new app to the manifest. Alias: `add` |
+| `backup` | Run backup scripts for all installed apps |
 
-# Non-NuGet Dependencies
+### configure-machine options
 
-## Emmersion.Http
-Source: https://github.com/emmersion/Emmersion.Http
+| Option | Alias | Description |
+|--------|-------|-------------|
+| `--environments` | `-e` | Pipe-separated environment list (e.g. `"Work\|Personal"`) |
+| `--single-app-id` | `-app` | Install a single app by ID (ignores environments) |
 
-Justification: The package put out by Emmersion as of July 20, 2021 targets `netcoreapp3.1`. I want to consume a `netstandard2.1` version for flexibility.
+### add-app options
 
-# Debugging Notes
+| Option | Description |
+|--------|-------------|
+| `--app-id` | App identifier |
+| `--app-type` | Installer type: `winget`, `scoop`, `scoopBucket`, `powerShell`, `powerShellModule`, `powerShellAppPackage`, `script`, `gitRepo`, `gitconfig`, `nonPackageApp`, `visualStudioExtension` |
+| `--environments` | Pipe-separated environment list |
 
-## xunit Console Logging
-One of the things that makes testing difficult is that xunit does automatically write `Console.WriteLine()` statements to the test output. It also does not write to the debug console when debugging tests. I have found that when using JetBrains Rider in my setup on Windows it writes the test output to this directory `~\AppData\Local\JetBrains\Rider2021.3\log\UnitTestLogs\Sessions`. Obviously that will change based on the version of Rider.
+### Exit codes
 
-One of my goals is to build a way for xunit to output to a `List<string>` so it can be analyzed at test assertion time. For a CLI tool this seems like an important thing to be able to test. If you know how to do this please feel free to reach out or submit a PR. 😁 Cheers!
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Generic failure |
+| 2 | Not running as Administrator |
+
+## Manifest Format
+
+```
+manifest.json          # List of app IDs
+apps/
+  <app-id>/
+    app.json           # App definition (type, environments, config)
+    install.ps1        # Install script (PowerShell app type)
+    upgrade.ps1        # Upgrade script (optional)
+    verification.ps1   # Verification script (optional)
+    backup.ps1         # Backup script (optional)
+```
+
+## Development
+
+```powershell
+cd configurator-pwsh
+Invoke-Pester -Path tests/ -Output Detailed
+```
+
+## Previous C# Version
+
+For the previous C# implementation, see [archive/README-csharp.md](archive/README-csharp.md).
